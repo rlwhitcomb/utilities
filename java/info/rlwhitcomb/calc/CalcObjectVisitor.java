@@ -939,6 +939,8 @@
  *	    #782: Evaluation code for "in-between" operators and case selectors.
  *	20-Nov-2025 (rlwhitcomb)
  *	    #643: Beginnings of continued fraction support.
+ *	05-Dec-2025 (rlwhitcomb)
+ *	    #787: Add "UNLESS" support for IF, WHILE, and LOOP.
  */
 package info.rlwhitcomb.calc;
 
@@ -3733,7 +3735,7 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 	    }
 	    catch (LeaveException lex) {
 		// This "leave" is prematurely terminating the loop, no matter whether meant for this block or not
-		// so it definitely qualifies for the "else" treatment either way
+		// so it definitely qualifies for the "else" or "unless" treatment either way
 		left = true;
 		if (compareLabels(loopLabel, lex.getLabel())) {
 		    if (lex.hasValue()) {
@@ -3745,27 +3747,25 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 		}
 	    }
 	    finally {
-		if (!left) {
-		    if (ctx.K_ELSE() != null) {
-			CalcParser.StmtBlockContext elseBlock = ctx.stmtBlock(1);
-			// This will put the loop symbol table back into scope
-			visitor.start();
-			try {
-			    lastValue = evaluate(elseBlock);
-			}
-			catch (LeaveException lex) {
-			    if (compareLabels(loopLabel, lex.getLabel())) {
-				if (lex.hasValue()) {
-				    lastValue = lex.getValue();
-				}
-			    }
-			    else {
-				throw lex;
+		if ((!left && ctx.K_ELSE() != null) || (left && ctx.K_UNLESS() != null)) {
+		    CalcParser.StmtBlockContext elseUnlessBlock = ctx.stmtBlock(1);
+		    // This will put the loop symbol table back into scope
+		    visitor.start();
+		    try {
+			lastValue = evaluate(elseUnlessBlock);
+		    }
+		    catch (LeaveException lex) {
+			if (compareLabels(loopLabel, lex.getLabel())) {
+			    if (lex.hasValue()) {
+				lastValue = lex.getValue();
 			    }
 			}
-			finally {
-			    visitor.finish();
+			else {
+			    throw lex;
 			}
+		    }
+		    finally {
+			visitor.finish();
 		    }
 		}
 	    }
@@ -3813,26 +3813,24 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 	    }
 	    finally {
 		boolean didPop = false;
-		if (!left) {
-		    if (ctx.K_ELSE() != null) {
-			CalcParser.StmtBlockContext elseBlock = ctx.stmtBlock(1);
-			try {
-			    lastValue = evaluate(elseBlock);
-			}
-			catch (LeaveException lex) {
-			    if (compareLabels(loopLabel, lex.getLabel())) {
-				if (lex.hasValue()) {
-				    lastValue = lex.getValue();
-				}
-			    }
-			    else {
-				throw lex;
+		if ((!left && ctx.K_ELSE() != null) || (left && ctx.K_UNLESS() != null)) {
+		    CalcParser.StmtBlockContext elseUnlessBlock = ctx.stmtBlock(1);
+		    try {
+			lastValue = evaluate(elseUnlessBlock);
+		    }
+		    catch (LeaveException lex) {
+			if (compareLabels(loopLabel, lex.getLabel())) {
+			    if (lex.hasValue()) {
+				lastValue = lex.getValue();
 			    }
 			}
-			finally {
-			    popScope();
-			    didPop = true;
+			else {
+			    throw lex;
 			}
+		    }
+		    finally {
+			popScope();
+			didPop = true;
 		    }
 		}
 		if (!didPop) {
@@ -3848,9 +3846,12 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 	    CalcParser.ExprContext exprCtx        = ctx.expr();
 	    CalcParser.StmtBlockContext thenBlock = ctx.stmtBlock(0);
 	    CalcParser.StmtBlockContext elseBlock = ctx.stmtBlock(1);
+	    boolean reversed   = ctx.K_UNLESS() != null;
 	    Object resultValue = null;
 
 	    boolean controlValue = getBooleanValue(exprCtx);
+	    if (reversed)
+		controlValue = !controlValue;
 
 	    pushScope(new IfScope());
 	    try {

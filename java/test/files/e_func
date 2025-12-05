@@ -264,7 +264,19 @@ while a<5 {
 else {
    a = -1
 }
-print `a = $a`
+`count: a = $a`
+}
+
+define countBack = {
+a=0
+while a<5 {
+   a++
+   if debug && a > 3 leave a
+}
+unless {
+   a = -1
+}
+`countBack: a = $a`
 }
 
 define come = {
@@ -278,10 +290,25 @@ else {
 }
 }
 
+define comeBack = {
+var latest = 0
+loop over 5 {
+   if debug && __ mod 4 == 3 leave latest
+   latest = __²
+}
+unless {
+  -1
+}
+}
+
 count
+countBack
 come
+comeBack
 
 debug = !debug
 
 count
+countBack
 come
+comeBack

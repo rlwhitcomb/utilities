@@ -589,6 +589,8 @@
  *	    #782: Introduce weird "in-between" operators, as well as the new case selector based on it.
  *	15-Nov-2025 (rlwhitcomb)
  *	    #643: New continued fraction notation.
+ *	02-Dec-2025 (rlwhitcomb)
+ *	    #787: First pass at "UNLESS" support in statements.
  */
 
 grammar Calc;
@@ -651,15 +653,15 @@ loopLabel
    ;
 
 loopStmt
-   : loopLabel ? K_LOOP ( id ? ( K_OVER | K_IN | K_WITHIN | SET_IN ) ) ? loopCtl stmtBlock ( EOL* K_ELSE stmtBlock ) ?
+   : loopLabel ? K_LOOP ( id ? ( K_OVER | K_IN | K_WITHIN | SET_IN ) ) ? loopCtl stmtBlock ( EOL* ( K_ELSE | K_UNLESS ) stmtBlock ) ?
    ;
 
 whileStmt
-   : loopLabel ? K_WHILE expr ? stmtBlock ( EOL* K_ELSE stmtBlock ) ?
+   : loopLabel ? K_WHILE expr ? stmtBlock ( EOL* ( K_ELSE | K_UNLESS ) stmtBlock ) ?
    ;
 
 ifStmt
-   : K_IF expr stmtBlock ( EOL* K_ELSE stmtBlock ) ?
+   : ( K_IF | K_UNLESS ) expr stmtBlock ( EOL* K_ELSE stmtBlock ) ?
    ;
 
 caseStmt
@@ -1510,6 +1512,8 @@ K_WITHIN   : 'within' | 'WITHIN' | 'Within' ;
 K_IF       : 'if' | 'IF' | 'If' ;
 
 K_ELSE     : 'else' | 'ELSE' | 'Else' ;
+
+K_UNLESS   : 'unless' | 'UNLESS' | 'Unless' ;
 
 K_DEFINE   : 'define' | 'DEFINE' | 'Define'
            | 'def' | 'DEF' | 'Def' ;

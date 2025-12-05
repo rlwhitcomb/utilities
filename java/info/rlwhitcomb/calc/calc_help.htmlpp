@@ -1461,18 +1461,18 @@ whether it has previously been used/defined.
 <div class="cols">
   In addition to the functions and operators listed above, Calc has eight different statements which can be used to do
      iterative or repeated calculations, to select between actions based on the value of an expression, and to display text or values.
-     These are the: <code>LOOP</code>, <code>WHILE</code>, <code>IF</code>, <code>CASE</code>, <code>LEAVE</code>, <code>NEXT</code>,
+     These are the: <code>LOOP</code>, <code>WHILE</code>, <code>IF</code> or <code>UNLESS</code>, <code>CASE</code>, <code>LEAVE</code>, <code>NEXT</code>,
      <code>TIMETHIS</code>, and the <code>PRINT</code> or <code>DISPLAY</code> statements.
      All keywords in these statements have three differently-cased forms: all lower case, all UPPER case, and MixedCase.  For example: <code>loop</code>, <code>LOOP</code>, and <code>Loop</code>.
   <p>The syntax for each is as follows:
   <p class="indent">
-     [ <i>id</i> <code>:</code> ] <code>LOOP</code>&nbsp;[ [ <i>loopvar</i> ] ( <code>IN</code> | <code>WITHIN</code> | <code>OVER</code> | <code>&#x2208;</code> | <code>&#x220A;</code>) ] <i>expr</i> [ <code>...</code>,&nbsp;<code>..</code>,&nbsp;or&nbsp;<code>&#x2026;</code>&nbsp;<i>expr</i> ] [ <code>,</code> <i>expr</i> ] <code>{</code> <i>statements or expressions</i> <code>}</code> [ <code>ELSE</code>&nbsp; <code>{</code> <i>statements or expressions</i> <code>}</code> ]
+     [ <i>id</i> <code>:</code> ] <code>LOOP</code>&nbsp;[ [ <i>loopvar</i> ] ( <code>IN</code> | <code>WITHIN</code> | <code>OVER</code> | <code>&#x2208;</code> | <code>&#x220A;</code>) ] <i>expr</i> [ <code>...</code>,&nbsp;<code>..</code>,&nbsp;or&nbsp;<code>&#x2026;</code>&nbsp;<i>expr</i> ] [ <code>,</code> <i>expr</i> ] <code>{</code> <i>statements or expressions</i> <code>}</code> [ <code>ELSE</code> or <code>UNLESS</code>&nbsp; <code>{</code> <i>statements or expressions</i> <code>}</code> ]
   </p>
   <p class="indent">
-     [ <i>id</i> <code>:</code> ] <code>WHILE</code>&nbsp;<i>expr</i> <code>{</code> <i>statements or expressions</i> <code>}</code> [ <code>ELSE</code>&nbsp; <code>{</code> <i>statements or expressions</i> <code>}</code> ]
+     [ <i>id</i> <code>:</code> ] <code>WHILE</code>&nbsp;<i>expr</i> <code>{</code> <i>statements or expressions</i> <code>}</code> [ <code>ELSE</code> or <code>UNLESS</code>&nbsp; <code>{</code> <i>statements or expressions</i> <code>}</code> ]
   </p>
   <p class="indent">
-     <code>IF</code>&nbsp;<i>expr</i>&nbsp;<code>{</code> <i>statements or expressions</i> <code>}</code> [ <code>ELSE {</code> <i>statements or expressions</i> <code>}</code> ]
+     <code>IF</code> or <code>UNLESS</code>&nbsp;<i>expr</i>&nbsp;<code>{</code> <i>statements or expressions</i> <code>}</code> [ <code>ELSE {</code> <i>statements or expressions</i> <code>}</code> ]
   </p>
   <p class="indent">
      <code>CASE</code>&nbsp;<i>expr</i> (&nbsp;<code>OF</code> | <code>IN</code> | <code>&#x2208;</code> | <code>&#x220A;</code>&nbsp;) <i>selector</i> <code>: {</code> <i>statements or expressions</i> <code>}</code> ( <code>,</code> ) ? ) *
@@ -1534,10 +1534,12 @@ whether it has previously been used/defined.
      the enclosing function early by referencing the function name as the label. For Java aficionados, this means <code>LEAVE</code>
      can function either as a labeled "break" statement, or as a "return", depending on the context and the label name, but also with
      the option to return the expression value, if given.
-  <p>As in Python, if the <code>ELSE</code> clause is added to either <code>WHILE</code> or <code>LOOP</code> and the loop terminates normally (without a <code>LEAVE</code> being executed) the <code>else</code> block will execute. The <code>ELSE</code> will be skipped if the loop terminates abnormally (via <code>LEAVE</code>).
+  <p>As in Python, if the <code>ELSE</code> clause is added to either <code>WHILE</code> or <code>LOOP</code> and the loop terminates normally (without a <code>LEAVE</code> being executed) the <code>else</code> block will execute. The <code>ELSE</code> will be skipped if the loop terminates early (via <code>LEAVE</code>).
+     If, however, the <code>UNLESS</code> clause is used instead, the optional block will be executed only if the loop exits early via the <code>LEAVE</code> statement, and will be skipped if the loop exits normally (that is, the opposite of <code>ELSE</code>).
   <p>The <code>IF</code> statement evaluates the expression and executes the code block only if the expression evaluates to a
      boolean <code>true</code> value. If the optional <code>ELSE</code> block is given and the expression evaluates to
-     <code>false</code> that block will be executed instead.
+     <code>false</code> that block will be executed instead. The <code>UNLESS</code> statement is the same semantics, except that the code block is
+     executed only if the condition is <code>false</code>, so the <code>ELSE</code> block executes if the expression is <code>true</code>.
   <p>The <code>CASE</code> statement evaluates the expression (only once), then proceeds to obtain a match against the values or expressions in the order they are declared.
      The first time a match is made, the corresponding statement block is executed and the value of the whole <code>case</code> statement is the last value of that statement block.
      Note that the only selector expressions that are evaluated are those up until the point that a match is made, hence none after that point are evaluated. If the <code>default</code> block is executed, all the other expressions will have been evaluated prior to that point.

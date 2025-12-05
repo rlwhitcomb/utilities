@@ -247,7 +247,18 @@
 >   else {
 >      a = -1
 >   }
->   print `a = $a`
+>   `count: a = $a`
+>}
+>Defining function “countBack” = {
+>   a = 0
+>   while a < 5 {
+>      a ++
+>      if debug && a > 3 leave a
+>   }
+>   unless {
+>      a = -1
+>   }
+>   `countBack: a = $a`
 >}
 >Defining function “come” = {
 >   var latest = 0
@@ -259,10 +270,22 @@
 >      -1
 >   }
 >}
->a = -1
->count -> "a = -1"
+>Defining function “comeBack” = {
+>   var latest = 0
+>   loop over 5 {
+>      if debug && __ mod 4 == 3 leave latest
+>      latest = __ ²
+>   }
+>   unless {
+>      -1
+>   }
+>}
+>count -> "count: a = -1"
+>countBack -> "countBack: a = 5"
 >come -> -1
+>comeBack -> 25
 >debug = ! debug -> true
->a = 4
->count -> "a = 4"
+>count -> "count: a = 4"
+>countBack -> "countBack: a = -1"
 >come -> 4
+>comeBack -> -1

@@ -633,7 +633,8 @@ define cp_to_low_surr(cp) = (cp - 0x10000) % 0x400 + 0xDC00
  * constructing a path with a file name.
  *
  * @param path The path to regularize.
- * @return     Input path guaranteed to end with the system file separator.
+ * @return     Input path guaranteed to end with the system file separator,
+ *             and to have all path separators changed to the O/S default.
  */
 define fixpath(path) = {
     var newpath = path
