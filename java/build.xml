@@ -398,6 +398,10 @@
 		Rename "all-install" to "all" and eliminate the old definition.
 	    24-Oct-2025 (rlwhitcomb)
 		#779: Add file to the install directory (in preparation for release packaging).
+	    05-Dec-2025 (rlwhitcomb)
+		Weird problems sometimes with "makeScripts" not working with "outdir" being null,
+		so switch to using "test/files/library" always, in case the file copy to the
+		utilities directory isn't caught by Ant somehow.
 
      ========================================================================== -->
 
@@ -890,7 +894,7 @@ Test ending on ${end.of.test.date} at ${end.of.test.time}
 			<arg value="-nolibs"/>
 			<arg value="-utf8"/>
 			<arg value="-library"/>
-			<arg value="${env.UTILITIES_HOME}/library"/>
+			<arg value="test/files/library"/>
 			<arg value="-clear"/>
 			<arg value="makeScripts"/>
 			<arg value="--"/>
@@ -970,7 +974,7 @@ Test ending on ${end.of.test.date} at ${end.of.test.time}
 			<arg value="-nolibs"/>
 			<arg value="-utf8"/>
 			<arg value="-library"/>
-			<arg value="${env.UTILITIES_HOME}/library"/>
+			<arg value="test/files/library"/>
 			<arg value="-clear"/>
 			<arg value="makeScripts"/>
 			<arg value="--"/>
