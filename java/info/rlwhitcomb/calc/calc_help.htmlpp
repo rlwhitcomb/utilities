@@ -1411,13 +1411,14 @@ or<br>
      Named parameters will override any positional parameters that might have otherwise been assigned by the call.
      Perhaps some examples are in order:
   <p class="indent">
-    <code>define call(m, n=0, r=1, p=-1, ...) = { ... ; _* }</code><br>
+    <code>define call(m, n=0, r=1, p=-1, ...) = { _* }</code><br>
     <code style="color:blue;">call(2, 3, 4, 5, 6, 7) </code><code style="color:grey;"> &#x21E8; </code><code style="color:green;"> [ 2, 3, 4, 5, 6, 7 ]</code><br>
     <code style="color:blue;">call(m = 23) </code><code style="color:grey;"> &#x21E8; </code><code style="color:green;"> [ 23, 0, 1, -1 ]</code><br>
     <code style="color:blue;">call(p = 14) </code><code style="color:grey;"> &#x21E8; </code><code style="color:green;"> [ &lt;null&gt;, 0, 1, 14 ]</code><br>
     <code style="color:blue;">call(r = 87, n = 6) </code><code style="color:grey;"> &#x21E8; </code><code style="color:green;"> [ &lt;null&gt;, 6, 87, -1 ]</code><br>
     <code style="color:blue;">call(n = 3, 17, 9, 8, 10) </code><code style="color:grey;"> &#x21E8; </code><code style="color:green;"> [ 17, 3, 8, 10 ]</code><br>
-    <code style="color:blue;">call(n = 3, 17, , 42, 99) </code><code style="color:grey;"> &#x21E8; </code><code style="color:green;"> [ 17, 3, 42, 99 ]</code>
+    <code style="color:blue;">call(n = 3, 17, , 42, 99) </code><code style="color:grey;"> &#x21E8; </code><code style="color:green;"> [ 17, 3, 42, 99 ]</code><br>
+    <code style="color:blue;">call(82) </code><code style="color:grey;"> &#x21E8; </code><code style="color:green;"> [ 82, 0, 1, -1 ]</code>
   <p>So, parameter values are assigned first by a named value assignment if present, second by a value in the same position in the parameter list
      (lacking an explicit named assignment), and third (lacking the others) by an expression given as part of the formal parameter declaration.
      Incidentally, variables referenced in the formal parameter expressions will first be resolved within the formal parameter list, and then by outer
