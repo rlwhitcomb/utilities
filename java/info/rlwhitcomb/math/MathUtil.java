@@ -79,6 +79,7 @@
  *  08-Oct-25 rlw ----	A little change in the primality testing.
  *  04-Dec-25 rlw ----	Change default rounding mode to HALF_EVEN, as is the Java default; add "toMC"
  *			for getting precision for use with any BigDecimal value.
+ *  16-Dec-25 rlw ----	Change rounding modes back to what they were; tests were failing.
  */
 package info.rlwhitcomb.math;
 
@@ -307,14 +308,14 @@ public final class MathUtil
 	 */
 	public static BigDecimal round(final BigDecimal value, final int fPlaces) {
 	    if (fPlaces <= 0)
-		return value.setScale(fPlaces, DEFAULT_MODE);
+		return value.setScale(fPlaces, RoundingMode.HALF_UP);
 
 	    int prec   = value.precision();
 	    int scale  = value.scale();
 	    int places = (prec - scale) + fPlaces;
 
 	    if (places <= 0)
-		return value.setScale(places, DEFAULT_MODE);
+		return value.setScale(places, RoundingMode.HALF_UP);
 
 	    return value.round(new MathContext(places));
 	}
@@ -1335,13 +1336,13 @@ public final class MathUtil
 	    BigDecimal factorial = BigDecimal.ONE;
 	    // loops is a little extra to make sure the last digit we want is accurate
 	    int loops = digits + 10;
-	    MathContext roundingContext = new MathContext(digits + 1, DEFAULT_MODE);
+	    MathContext roundingContext = new MathContext(digits + 1, RoundingMode.DOWN);
 
 	    for (int i = 2; i < loops; i++) {
 		factorial = factorial.multiply(BigDecimal.valueOf(i));
 		// compute 1/i!, note divide is overloaded, this version is used to
 		//    ensure a limit to the iterations when division is limitless like 1/3
-		BigDecimal term = BigDecimal.ONE.divide(factorial, loops, DEFAULT_MODE);
+		BigDecimal term = BigDecimal.ONE.divide(factorial, loops, RoundingMode.HALF_UP);
 		e = e.add(term);
 	    }
 	    return e.round(roundingContext);
@@ -1402,7 +1403,7 @@ public final class MathUtil
 		    // compute x**i/i!, note divide is overloaded, this version is used to
 		    //    ensure a limit to the iterations when division is limitless like 1/3
 		    numer = numer.multiply(fracExp);
-		    BigDecimal term = numer.divide(factorial, loops, DEFAULT_MODE);
+		    BigDecimal term = numer.divide(factorial, loops, RoundingMode.HALF_UP);
 		    result = result.add(term);
 
 		    if (result.equals(lastResult))
@@ -1513,7 +1514,7 @@ public final class MathUtil
 	 */
 	public static BigDecimal pi(final int digits) {
 	    // Use +1 for precision because of the "3." integer portion
-	    MathContext mc = new MathContext(digits + 1, DEFAULT_MODE);
+	    MathContext mc = new MathContext(digits + 1, RoundingMode.DOWN);
 
 	    // For very small values, use the rational approximation
 	    if (digits < 25) {
