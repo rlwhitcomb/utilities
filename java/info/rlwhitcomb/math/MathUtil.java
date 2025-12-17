@@ -77,6 +77,8 @@
  *		  #748	Add "twoPower" method.
  *		  #745	Some changes for exponentiation.
  *  08-Oct-25 rlw ----	A little change in the primality testing.
+ *  04-Dec-25 rlw ----	Change default rounding mode to HALF_EVEN, as is the Java default; add "toMC"
+ *			for getting precision for use with any BigDecimal value.
  */
 package info.rlwhitcomb.math;
 
@@ -110,6 +112,10 @@ public final class MathUtil
 {
 	private static final Logging logger = new Logging(MathUtil.class);
 
+	/** Default rounding mode, consistent with {@link MathContext} values. */
+	private static final RoundingMode DEFAULT_MODE = MathContext.DECIMAL64.getRoundingMode();
+	/** Default rounding precision. */
+	private static final int DEFAULT_PRECISION = MathContext.DECIMAL64.getPrecision();
 
 	/**
 	 * A rational approximation of PI good to ~25 decimal digits.
@@ -147,6 +153,19 @@ public final class MathUtil
 	 * can instantiate it.
 	 */
 	private MathUtil() {
+	}
+
+
+	/**
+	 * Return a {@link MathContext} with the default rounding mode and the precision
+	 * equal to the number of significant digits in the given decimal number.
+	 *
+	 * @param bd Any old decimal value.
+	 * @return   Default rounding mode and precision equal to the decimal value.
+	 */
+	public static MathContext toMC(final BigDecimal bd) {
+	    int prec = Math.max(bd.precision(), DEFAULT_PRECISION);
+	    return new MathContext(prec, DEFAULT_MODE);
 	}
 
 
@@ -260,6 +279,8 @@ public final class MathUtil
 		return ((ComplexNumber) num).intValueExact();
 	    if (cls == Quaternion.class)
 		return ((Quaternion) num).intValueExact();
+	    if (cls == ContinuedFraction.class)
+		return ((ContinuedFraction) num).intValueExact();
 
 	    throw new Intl.ArithmeticException("math#math.unsupportedType", num.toString());
 	}
@@ -286,14 +307,14 @@ public final class MathUtil
 	 */
 	public static BigDecimal round(final BigDecimal value, final int fPlaces) {
 	    if (fPlaces <= 0)
-		return value.setScale(fPlaces, RoundingMode.HALF_UP);
+		return value.setScale(fPlaces, DEFAULT_MODE);
 
 	    int prec   = value.precision();
 	    int scale  = value.scale();
 	    int places = (prec - scale) + fPlaces;
 
 	    if (places <= 0)
-		return value.setScale(places, RoundingMode.HALF_UP);
+		return value.setScale(places, DEFAULT_MODE);
 
 	    return value.round(new MathContext(places));
 	}
@@ -1314,13 +1335,13 @@ public final class MathUtil
 	    BigDecimal factorial = BigDecimal.ONE;
 	    // loops is a little extra to make sure the last digit we want is accurate
 	    int loops = digits + 10;
-	    MathContext roundingContext = new MathContext(digits + 1, RoundingMode.DOWN);
+	    MathContext roundingContext = new MathContext(digits + 1, DEFAULT_MODE);
 
 	    for (int i = 2; i < loops; i++) {
 		factorial = factorial.multiply(BigDecimal.valueOf(i));
 		// compute 1/i!, note divide is overloaded, this version is used to
 		//    ensure a limit to the iterations when division is limitless like 1/3
-		BigDecimal term = BigDecimal.ONE.divide(factorial, loops, RoundingMode.HALF_UP);
+		BigDecimal term = BigDecimal.ONE.divide(factorial, loops, DEFAULT_MODE);
 		e = e.add(term);
 	    }
 	    return e.round(roundingContext);
@@ -1381,7 +1402,7 @@ public final class MathUtil
 		    // compute x**i/i!, note divide is overloaded, this version is used to
 		    //    ensure a limit to the iterations when division is limitless like 1/3
 		    numer = numer.multiply(fracExp);
-		    BigDecimal term = numer.divide(factorial, loops, RoundingMode.HALF_UP);
+		    BigDecimal term = numer.divide(factorial, loops, DEFAULT_MODE);
 		    result = result.add(term);
 
 		    if (result.equals(lastResult))
@@ -1492,7 +1513,7 @@ public final class MathUtil
 	 */
 	public static BigDecimal pi(final int digits) {
 	    // Use +1 for precision because of the "3." integer portion
-	    MathContext mc = new MathContext(digits + 1, RoundingMode.DOWN);
+	    MathContext mc = new MathContext(digits + 1, DEFAULT_MODE);
 
 	    // For very small values, use the rational approximation
 	    if (digits < 25) {

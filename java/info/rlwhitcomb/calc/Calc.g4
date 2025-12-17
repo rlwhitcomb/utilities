@@ -591,6 +591,8 @@
  *	    #643: New continued fraction notation.
  *	02-Dec-2025 (rlwhitcomb)
  *	    #787: First pass at "UNLESS" support in statements.
+ *	05-Dec-2025 (rlwhitcomb)
+ *	    #643: CFrac function, CFRACTION type.
  */
 
 grammar Calc;
@@ -783,6 +785,7 @@ builtinFunction
    | K_TOBASE expr2                      # toBaseExpr
    | K_FROMBASE expr2                    # fromBaseExpr
    | K_FRAC ( expr3 | expr2 | expr1 )    # fracExpr
+   | K_CFRAC exprN                       # cFracExpr
    | K_COMPLEX ( expr2 | expr1 )         # complexFuncExpr
    | K_QUAT ( expr4 | expr3 | expr2 | expr1 ) # quaternionFuncExpr
    | K_ROMAN expr1                       # romanExpr
@@ -1417,6 +1420,8 @@ K_FROMBASE : 'frombase' | 'FROMBASE' | 'FromBase' | 'Frombase' | 'fromBase' ;
 
 K_FRAC     : 'frac' | 'FRAC' | 'Frac' ;
 
+K_CFRAC    : 'cfrac' | 'CFRAC' | 'CFrac' | 'cFrac' ;
+
 K_COMPLEX  : 'complex' | 'COMPLEX' | 'Complex' ;
 
 K_QUAT     : 'quaternion' | 'QUATERNION' | 'Quaternion' ;
@@ -1555,6 +1560,7 @@ TYPES    : 'null'       | 'NULL'       | 'Null'
          | 'integer'    | 'INTEGER'    | 'Integer'
          | 'float'      | 'FLOAT'      | 'Float'
          | 'fraction'   | 'FRACTION'   | 'Fraction'
+         | 'cfraction'  | 'CFRACTION'  | 'CFraction' | 'cFraction'
          | K_COMPLEX
          | K_QUAT
          | 'boolean'    | 'BOOLEAN'    | 'Boolean'

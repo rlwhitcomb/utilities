@@ -34,10 +34,11 @@ $quiet on
 $separators off
 $decimal 100
 
-e_frac = [2,1,2,1,1,4,1,1,6,1,1,8,1,1,10,1,1,12]
-e_cf   = [2;1,2,1,1,4,1,1,6,1,1,8,1,1,10,1,1,12]
+e_frac = [2,1,2,1,1,4,1,1,6,1,1,8,1,1,10,1,1,12,1,1,14,1,1,16,1,1,18]
+e_cf   = cfrac(e_frac)
+// Taken from: https://oeis.org/A001203
 pi_frac = [3,7,15,1,292,1,1,1,2,1,3,1,14,2,1,1,2,2,2,2,1,84,2,1,1,15,3,13,1,4,2,6,6,99,1,2,2,6,3,5,1,1,6,8,1,7,1,2,3,7,1,2,1,1,12,1,1,1,3,1,1,8,1,1,2,1,6,1,1,5,2,2,3,1,2,4,4,16,1,161,45,1,22,1,2,2,1,4,1,2,24,1,2,1,3,1,2,1]
-pi_cf   = [3;7,15,1,292,1,1,1,2,1,3,1,14,2,1,1,2,2,2,2,1,84,2,1,1,15,3,13,1,4,2,6,6,99,1,2,2,6,3,5,1,1,6,8,1,7,1,2,3,7,1,2,1,1,12,1,1,1,3,1,1,8,1,1,2,1,6,1,1,5,2,2,3,1,2,4,4,16,1,161,45,1,22,1,2,2,1,4,1,2,24,1,2,1,3,1,2,1]
+pi_cf   = cfrac(pi_frac)
 
 def result(n, d, exact) = {
    print n, '/', d, '=', n/d, ', diff =', ((n/d) - exact)
@@ -83,18 +84,42 @@ define cf(num, den) = {
    }
 }
 
+$quiet pop
+
 /*
  * Now try for a decimal value.
  */
-define cf2(x) = {
-   if typeof(x) === "fraction" {
-      cf(x[0], x[1])
-   } else {
-      const x1 = ~~x
-      const s = scale(x1)
-      cf(s * x1, s)
+Define cf2(x) = {
+   const eps = tenpow(-(settings.precision-9))
+   const MAX_LEN = settings.precision*5/2
+   var cf = [0;]
+   var a = x
+   a0 = floor(a)
+   cf[0] = a0
+   a -= a0
+   while a > eps && length(cf) < MAX_LEN {
+      a = 1 / a
+      a0 = floor(a)
+      cf[length(cf)] = a0
+      a -= a0
    }
+   cf
 }
+
+d=cf2(3.14159)
+d@d
+d=cf2(3.14159265358979)
+d@d
+d=cf2(pi)
+d@d
+pi
+d=cf2(1/7)
+d@f
+d=cf2(phi)
+d@d
+phi
+
+$quiet on
 
 approx(e_frac, e)
 print `$e_cf -> ${e_cf@d}`
@@ -115,17 +140,36 @@ print [1; 2, 3, 4, 5]@f
 $quiet pop
 
 cf(1, 3)
+cfrac(frac(1,3))
 cf(31, 8)
+cfrac(frac(31,8))
 cf(43, 19)
+cfrac(frac(43,19))
 cf(19, 43)
+cfrac(frac(19, 43))
 cf(3, 7)
+cfrac(frac(3,7))
 cf(7, 3)
+cfrac(frac(7,3))
 cf(225, 157)
+cfrac(frac(225, 157))
 cf(7, 38)
+cfrac(f'7/38')
 cf(5, 27)
+cfrac(f'5/27')
 cf(17, 12)
+cfrac(f'17/12')
 cf(21, 8)
+cfrac(f'21/8')
 cf(2875, 1000)
+cfrac(2.875)
+
+display "Euler's constant ɣ as a continued fraction..."
+// Sequence from: https://oeis.org/A002852
+gamma = [0; 1, 1, 2, 1, 2, 1, 4, 3, 13, 5, 1, 1, 8, 1, 2, 4, 1, 1, 40, 1, 11, 3, 7, 1, 7, 1, 1, 5, 1, 49, 4, 1, 65, 1, 4, 7, 11, 1, 399, 2, 1, 3, 2, 1, 2, 1, 5, 3, 2, 1, 10, 1, 1, 1, 1, 2, 1, 1, 3, 1, 4, 1, 1, 2, 5, 1, 3, 6, 2, 1, 2, 1, 1, 1, 2, 1, 3, 16, 8, 1, 1, 2, 16, 6, 1, 2, 2, 1, 7, 2, 1, 1, 1, 3, 1, 2, 1, 2]
+gamma@d
+display "Decimal expansion from https://oeis.org/A001620"
+display "0.577215664901532860606512090082402431042159335939923598805767234884867726777664670936947063291746749"
 
 const C1 = 3.875
 const C2 = frac(1, 3)

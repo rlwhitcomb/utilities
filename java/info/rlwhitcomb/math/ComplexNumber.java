@@ -71,6 +71,7 @@
  *  22-Jul-25 rlw #677	New "divideAndRemainder" function; fix "add", "subtract", "multiply" for non-rational;
  *			add "toDecimalComplex()" for these fixes.
  *  10-Aug-25 rlw #745	Change exponent for "pow" to BigDecimal.
+ *  29-Nov-25 rlw #643	New method to return the list of component parts; add "decrement()".
  */
 package info.rlwhitcomb.math;
 
@@ -979,6 +980,14 @@ public abstract class ComplexNumber extends Number implements Serializable, Comp
 	public abstract ComplexNumber increment();
 
 	/**
+	 * Return a complex number which is one smaller than the current one.
+	 *
+	 * @param mc Precision and rounding settings.
+	 * @return   One smaller.
+	 */
+	public abstract ComplexNumber decrement(final MathContext mc);
+
+	/**
 	 * Calculate the complex number to the given integer power, using the "squaring"
 	 * technique for efficiency and precision.
 	 *
@@ -1334,6 +1343,19 @@ public abstract class ComplexNumber extends Number implements Serializable, Comp
 		default:
 		    throw new Intl.IllegalArgumentException("math#complex.badIndex", index);
 	    }
+	}
+
+	/**
+	 * Return a list of the component values.
+	 *
+	 * @return New list of the two components.
+	 */
+	public List<Object> parts() {
+	    List<Object> results = new ArrayList<>(2);
+	    results.add(isRational() ? rFrac() : r());
+	    results.add(isRational() ? iFrac() : i());
+
+	    return results;
 	}
 
 
@@ -1718,6 +1740,11 @@ class RationalComplexNumber extends ComplexNumber
 	}
 
 	@Override
+	public ComplexNumber decrement(final MathContext mc) {
+	    return subtract(CR_ONE);
+	}
+
+	@Override
 	public int hashCode() {
 	    if (realFrac == null)
 		return imaginaryFrac.hashCode();
@@ -2065,6 +2092,11 @@ class DecimalComplexNumber extends ComplexNumber
 	@Override
 	public ComplexNumber increment() {
 	    return add(C_ONE);
+	}
+
+	@Override
+	public ComplexNumber decrement(final MathContext mc) {
+	    return subtract(C_ONE, mc);
 	}
 
 	@Override

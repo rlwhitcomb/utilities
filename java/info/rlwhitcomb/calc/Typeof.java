@@ -1,7 +1,7 @@
 /*
  * The MIT License (MIT)
  *
- * Copyright (c) 2022 Roger L. Whitcomb.
+ * Copyright (c) 2022,2025 Roger L. Whitcomb.
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -24,11 +24,12 @@
  *      Enumeration of the Calc data types (for "typeof" and "cast").
  *
  * History:
- *  19-Jan-22 rlw  ---	Initial coding.
- *  24-Jan-22 rlw #103:	Add COMPLEX type.
- *  31-Jan-22 rlw #212:	Add FUNCTION.
- *  21-Jun-22 rlw #314:	Add SET.
- *  31-Dec-22 rlw #558:	Add QUATERNION.
+ *  19-Jan-22 rlw ----	Initial coding.
+ *  24-Jan-22 rlw #103	Add COMPLEX type.
+ *  31-Jan-22 rlw #212	Add FUNCTION.
+ *  21-Jun-22 rlw #314	Add SET.
+ *  31-Dec-22 rlw #558	Add QUATERNION.
+ *  24-Nov-25 rlw #643	Now CFRACTION.
  */
 package info.rlwhitcomb.calc;
 
@@ -64,6 +65,11 @@ enum Typeof
 	 * A true rational fraction.
 	 */
 	FRACTION,
+
+	/**
+	 * A continued fraction.
+	 */
+	CFRACTION,
 
 	/**
 	 * Complex number value ({@code a+bi}).

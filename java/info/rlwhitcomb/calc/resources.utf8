@@ -204,6 +204,8 @@
 #	    Update "unknownOp" message to be clearer.
 #	13-Jul-2025 (rlwhitcomb)
 #	    #740: New error message for dot product.
+#	16-Dec-2025 (rlwhitcomb)
+#	    Tweaks to ".." character representation.
 #
 
 #
@@ -306,7 +308,7 @@ decimal		= DECIMAL(%1$s)
 unlimited	= UNLIMITED
 
 precNotInteger		= Decimal precision of <u>%1$s<.> must be a 32-bit integer value
-charOutOfRange		= Integer value of <u>0x%1$08X<.> out of range of Unicode characters (0..0x10FFFF)
+charOutOfRange		= Integer value of <u>0x%1$08X<.> out of range of Unicode characters (0 \u2026 0x10FFFF)
 ioError			= I/O Error: %1$s
 noConvertInteger	= Unable to convert value of <y>%1$s<.> to an integer
 noConvertObjArr		= Cannot convert object or array to <y>%1$c<.> format
@@ -329,7 +331,7 @@ oneCharInt		= %1$s value for a string must be one character or an integer \u2264
 undefinedFunction	= Cannot call undefined function <y>%1$s(...)<.>
 withinNotAllowed	= Specifying <y>within<.> is only allowed with an end value with implied start
 illegalArgument		= <u>%1$s<.> value is not suitable for <y>%2$s<.> function
-radixOutOfRange		= Radix value of <u>%1$d<.> is out of range of <y>%2$d..%3$d<.>
+radixOutOfRange		= Radix value of <u>%1$d<.> is out of range of <y>%2$d \u2026 %3$d<.>
 illegalFlagValues	= One or more flag values in <u>0x%1$04X<.> (<u>%1$d<.>) is not valid.
 assertFailure		= Assertion failed: <f>%1$s<.>
 notImplemented		= %1$s operation is not implemented
@@ -387,7 +389,7 @@ unknownOp		= Unknown operator <y>%1$s<.> for these data types
 #
 # From ArrayScope
 #
-indexOutOfBounds	= Index value of <u>%1$d<.> is out of bounds of <y>0..%2$d<.>
+indexOutOfBounds	= Index value of <u>%1$d<.> is out of bounds of <y>0 \u2026 %2$d<.>
 immutableArray		= Cannot change values in a constant array.
 
 #

@@ -84,6 +84,7 @@
  *  13-Apr-25 rlw #702	Fix "remainder".
  *  28-Jun-25 rlw #695	New "toIntExact()" method.
  *  22-Jul-25 rlw #677	"divideAndRemainder" and "toIntegerFraction" methods.
+ *  10-Dec-25 rlw #643	More continued fraction support.
  */
 package info.rlwhitcomb.math;
 
@@ -415,6 +416,9 @@ public class BigFraction extends Number
 	    else if (num instanceof BigInteger) {
 		return new BigFraction((BigInteger) num);
 	    }
+	    else if (num instanceof ContinuedFraction) {
+		return ((ContinuedFraction) num).toFraction();
+	    }
 	    else if (num instanceof Double || num instanceof Float) {
 		return new BigFraction(new BigDecimal(num.doubleValue(), MathContext.DECIMAL128));
 	    }
@@ -675,6 +679,9 @@ public class BigFraction extends Number
 
 	    if (obj instanceof Quaternion)
 		return ((Quaternion) obj).toBigIntegerExact();
+
+	    if (obj instanceof ContinuedFraction)
+		return ((ContinuedFraction) obj).toIntegerExact();
 
 	    if (obj instanceof Number)
 		return new BigDecimal(((Number) obj).toString()).toBigIntegerExact();

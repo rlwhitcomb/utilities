@@ -30,10 +30,12 @@
  *  08-Apr-23 rlw #601	Add INTEGER for "gcd" and "lcm".
  *  11-Feb-24 rlw #65	New param for "fromValue"; reorder the enum values.
  *  26-Mar-25 rlw ----	Move "isInteger" from ClassUtil to MathUtil.
+ *  24-Nov-25 rlw #643	Add CFRACTION.
  */
 package info.rlwhitcomb.calc;
 
 import info.rlwhitcomb.math.BigFraction;
+import info.rlwhitcomb.math.ContinuedFraction;
 import info.rlwhitcomb.math.ComplexNumber;
 import info.rlwhitcomb.math.MathUtil;
 import info.rlwhitcomb.math.Quaternion;
@@ -54,6 +56,8 @@ public enum Conversion
 	INTEGER,
 	/** Convert to fractions (rational mode). */
 	FRACTION,
+	/** Convert to continued fractions. */
+	CFRACTION,
 	/** Convert to complex numbers. */
 	COMPLEX,
 	/** Convert to quaternions. */
@@ -75,6 +79,8 @@ public enum Conversion
 		return COMPLEX;
 	    if (rational || (obj instanceof BigFraction))
 		return FRACTION;
+	    if (obj instanceof ContinuedFraction)
+		return CFRACTION;
 
 	    if (MathUtil.isInteger(obj))
 		return INTEGER;

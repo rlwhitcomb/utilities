@@ -34,12 +34,13 @@
 #			Update some color codes.
 #  07-Mar-25 rlw #710	New errors from MathUtil.
 #  13-Oct-25 rlw #777	Update message for allowed KMG prefixes.
+#  28-Nov-25 rlw #643	Bad index message for ContinuedFraction.
 #
 
 #
 # From DateUtil
 #
-date.monthOutOfRange	= Month value <y>%1$d<.> is out of range of <u>1..12<.>
+date.monthOutOfRange	= Month value <y>%1$d<.> is out of range of <u>1 \u2026 12<.>
 date.dayOutOfRange	= Day value <y>%1$d<.> is out of range
 date.yearOutOfRange	= Year value <y>%1$d<.> is illegal or out of range
 date.badFormatString	= Bad form for the date format string: <y>%1$s<.>
@@ -87,13 +88,18 @@ fraction.unknownFracChar	= Unsupported fraction character <y>%1$s<.>.
 complex.notRecognized	= Unable to convert <y>%1$s<.> to complex number.
 complex.noEmptyListMap	= Unable to create a complex number from an empty list or map.
 complex.tooManyValues	= Complex number only needs one or two values to define.
-complex.badIndex	= Index <y>%1$d<.> is out of range of <u>0 .. 1<.>.
+complex.badIndex	= Index <y>%1$d<.> is out of range of <u>0 \u2026 1<.>.
 complex.imaginaryInt	= Number with imaginary part(s) cannot be converted to integer.
+
+#
+# From ContinuedFraction.java
+#
+cfrac.badIndex		= Index <y>%1$d<.> is out of range of <u>0 \u2026 %2$d<.>.
 
 #
 # From Quaternion.java
 #
 quaternion.lossOfValue	= Conversion from quaternion to complex loses the "c" and "d" axes.
-quaternion.badIndex	= Index <y>%1$d<.> is out of range of <u>0 .. 3<.>.
+quaternion.badIndex	= Index <y>%1$d<.> is out of range of <u>0 \u2026 3<.>.
 
 

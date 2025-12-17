@@ -49,6 +49,8 @@
  *  24-May-25 rlw #721	Add R_ONE constant and "increment()" methods.
  *  12-Jul-25 rlw #740	Add "dot" (product) method.
  *  22-Jul-25 rlw #677	"divideAndRemainder" method.
+ *  29-Nov-25 rlw #643	New abstract method to return list of component parts.
+ *  11-Dec-25 rlw #643	Convert from ContinuedFraction.
  */
 package info.rlwhitcomb.math;
 
@@ -57,6 +59,8 @@ import info.rlwhitcomb.util.Intl;
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.math.MathContext;
+import java.util.ArrayList;
+import java.util.List;
 
 
 /**
@@ -205,6 +209,8 @@ public abstract class Quaternion extends Number implements Comparable<Quaternion
 		return Quaternion.real((BigInteger) value);
 	    if (value instanceof BigFraction)
 		return Quaternion.rational((BigFraction) value);
+	    if (value instanceof ContinuedFraction)
+		return Quaternion.rational(((ContinuedFraction) value).toFraction());
 	    if (value instanceof ComplexNumber) {
 		ComplexNumber cn = (ComplexNumber) value;
 		if (cn.isRational())
@@ -522,6 +528,13 @@ public abstract class Quaternion extends Number implements Comparable<Quaternion
 	public abstract Quaternion increment();
 
 	/**
+	 * Decrement the value of this quaternion.
+	 *
+	 * @return One smaller.
+	 */
+	public abstract Quaternion decrement();
+
+	/**
 	 * Take this quaternion to an integer power.
 	 *
 	 * @param n  The integer power to raise this quaternion to.
@@ -571,6 +584,12 @@ public abstract class Quaternion extends Number implements Comparable<Quaternion
 	 */
 	public abstract Quaternion setPart(final int index, final Object value);
 
+	/**
+	 * Return a list of all the parts of this quaternion.
+	 *
+	 * @return New list of the values.
+	 */
+	public abstract List<Object> parts();
 
 	/**
 	 * Convert to an exact integer representation, if possible.
@@ -861,6 +880,11 @@ class RationalQuaternion extends Quaternion
 	}
 
 	@Override
+	public Quaternion decrement() {
+	    return subtract(R_ONE);
+	}
+
+	@Override
 	public Quaternion ceil() {
 	    return new RationalQuaternion(
 		aFrac().ceil(),
@@ -915,6 +939,17 @@ class RationalQuaternion extends Quaternion
 		default:
 		    throw new Intl.IllegalArgumentException("math#quaternion.badIndex", index);
 	    }
+	}
+
+	@Override
+	public List<Object> parts() {
+	    List<Object> result = new ArrayList<>(4);
+	    result.add(aFrac());
+	    result.add(bFrac());
+	    result.add(cFrac());
+	    result.add(dFrac());
+
+	    return result;
 	}
 
 	@Override
@@ -1221,6 +1256,11 @@ class DecimalQuaternion extends Quaternion
 	}
 
 	@Override
+	public Quaternion decrement() {
+	    return subtract(ONE);
+	}
+
+	@Override
 	public Quaternion ceil() {
 	    return new DecimalQuaternion(
 		MathUtil.ceil(a()),
@@ -1275,6 +1315,17 @@ class DecimalQuaternion extends Quaternion
 		default:
 		    throw new Intl.IllegalArgumentException("math#quaternion.badIndex", index);
 	    }
+	}
+
+	@Override
+	public List<Object> parts() {
+	    List<Object> result = new ArrayList<>(4);
+	    result.add(a());
+	    result.add(b());
+	    result.add(c());
+	    result.add(d());
+
+	    return result;
 	}
 
 	@Override

@@ -25,9 +25,11 @@
  *
  * History:
  *  21-Nov-25 rlw #643	Initial coding.
+ *  09-Dec-25 rlw #643	More coding.
  */
 package info.rlwhitcomb.math;
 
+import info.rlwhitcomb.util.Constants;
 import info.rlwhitcomb.util.Intl;
 
 import java.math.BigDecimal;
@@ -40,11 +42,20 @@ import java.util.List;
 
 /**
  * Implementation of a continued fraction.
+ * <p> Note: much of the work in here relies on the operations in {@link BigFraction}
+ * for several reasons: a) the conversion from this to a regular fraction is exact (well, it is
+ * until we implement repeating values), and b) there are often alternate arrangements here that
+ * correspond with the same real valuei (such as {@code [0;]} and {@code [1;-1]}, and
+ * c) negative values really are tricky here. So, for these reasons the most accurate way to
+ * do arithmetic is just to convert to a fraction, do the math, and then convert back.
  */
 public class ContinuedFraction extends Number implements Comparable<ContinuedFraction>
 {
 	/** A value of a real zero, as a continued fraction. */
 	public static final ContinuedFraction ZERO = ContinuedFraction.zero();
+
+	/** A value of a real one, as a continued fraction. */
+	public static final ContinuedFraction ONE = new ContinuedFraction(1L);
 
 	/** The integer part of the value. */
 	private BigInteger intPart;
@@ -208,6 +219,44 @@ public class ContinuedFraction extends Number implements Comparable<ContinuedFra
 	    return new ContinuedFraction(parts);
 	}
 
+	/**
+	 * Convert from a decimal value to a continued fraction, for instance
+	 * {@code 3.14159 -> [ 3 ; 7, 15, 1, 25, 1, 7, 4 ]}.
+	 * <p> Note: this algorithm was first tested in the file "test/files/cf2.calc".
+	 *
+	 * @param d  The decimal value to convert.
+	 * @param mc Precision setting to use for limits during division.
+	 * @return   Continued fraction equivalent.
+	 */
+	public static ContinuedFraction fromDecimal(final BigDecimal d, final MathContext mc) {
+	    int prec = mc.getPrecision();
+	    BigDecimal eps = Constants.D_TEN.pow(-(prec - 9), mc);
+	    int MAX_LEN = prec * 5 / 2;
+	    List<BigInteger> parts = new ArrayList<>();
+	    BigDecimal a = d;
+
+	    BigInteger a0 = MathUtil.floor(a);
+	    parts.add(a0);
+	    a = a.subtract(new BigDecimal(a0));
+
+	    while (a.compareTo(eps) > 0 && parts.size() < MAX_LEN) {
+		a = BigDecimal.ONE.divide(a, mc);
+		a0 = MathUtil.floor(a);
+		parts.add(a0);
+		a = a.subtract(new BigDecimal(a0));
+	    }
+
+	    // Adjustment if the last term is 1
+	    // since [3;1,6,1] is the same as [3;1,7]
+	    int length = parts.size() - 1;
+	    if (parts.get(length).equals(BigInteger.ONE)) {
+		parts.remove(length--);
+		parts.set(length, parts.get(length).add(BigInteger.ONE));
+	    }
+
+	    return new ContinuedFraction(parts);
+	}
+
 	@Override
 	public boolean equals(final Object o) {
 	    if (!(o instanceof ContinuedFraction))
@@ -234,9 +283,7 @@ public class ContinuedFraction extends Number implements Comparable<ContinuedFra
 	 * @return  The new continued fraction of the sum.
 	 */
 	public ContinuedFraction add(final ContinuedFraction o) {
-	    BigFraction f = toFraction().add(o.toFraction());
-
-	    return fromFraction(f);
+	    return fromFraction(toFraction().add(o.toFraction()));
 	}
 
 	/**
@@ -247,9 +294,7 @@ public class ContinuedFraction extends Number implements Comparable<ContinuedFra
 	 * @return  New fraction of the difference.
 	 */
 	public ContinuedFraction subtract(final ContinuedFraction o) {
-	    BigFraction f = toFraction().subtract(o.toFraction());
-
-	    return fromFraction(f);
+	    return fromFraction(toFraction().subtract(o.toFraction()));
 	}
 
 	/**
@@ -260,9 +305,7 @@ public class ContinuedFraction extends Number implements Comparable<ContinuedFra
 	 * @return  New fraction of the product.
 	 */
 	public ContinuedFraction multiply(final ContinuedFraction o) {
-	    BigFraction f = toFraction().multiply(o.toFraction());
-
-	    return fromFraction(f);
+	    return fromFraction(toFraction().multiply(o.toFraction()));
 	}
 
 	/**
@@ -274,9 +317,127 @@ public class ContinuedFraction extends Number implements Comparable<ContinuedFra
 	 * @throws  ArithmeticException if the other value is identically zero.
 	 */
 	public ContinuedFraction divide(final ContinuedFraction o) {
-	    BigFraction f = toFraction().divide(o.toFraction());
+	    return fromFraction(toFraction().divide(o.toFraction()));
+	}
 
-	    return fromFraction(f);
+	/**
+	 * Return a whole number which is the result of this divided by the other.
+	 *
+	 * @param o Fraction to divide this one by.
+	 * @return  Integer part of the quotient of the division.
+	 */
+	public ContinuedFraction idivide(final ContinuedFraction o) {
+	    return fromFraction(toFraction().idivide(o.toFraction()));
+	}
+
+	/**
+	 * Return the fractional remainder after division by the other fraction.
+	 *
+	 * @param o Fraction to divide this one by.
+	 * @return  The remainder after the division.
+	 */
+	public ContinuedFraction remainder(final ContinuedFraction o) {
+	    return fromFraction(toFraction().remainder(o.toFraction()));
+	}
+
+	/**
+	 * Compute the modulus of two fractions, which is {@code this mod y := this - y * floor(this / y)}.
+	 *
+	 * @param y  Fraction of the modulus value.
+	 * @return   Result of {@code this mod y}.
+	 */
+	public ContinuedFraction modulus(final ContinuedFraction y) {
+	    return fromFraction(toFraction().modulus(y.toFraction()));
+	}
+
+	/**
+	 * Compute both the integer quotient and the remainder in one operation.
+	 *
+	 * @param other The other fraction to divide by.
+	 * @return      Quotient in [0] and remainder in [1].
+	 */
+	public ContinuedFraction[] divideAndRemainder(final ContinuedFraction other) {
+	    ContinuedFraction[] results = new ContinuedFraction[2];
+	    results[0] = idivide(other);
+	    results[1] = subtract(results[0].multiply(other));
+	    return results;
+	}
+
+	/**
+	 * Compute the integer power value of this continued fraction.
+	 *
+	 * @param iPower An integer power.
+	 * @return       New fraction that is the result.
+	 */
+	public ContinuedFraction power(final int iPower) {
+	    return fromFraction(toFraction().pow(iPower));
+	}
+
+	/**
+	 * Return a new value incremented by one.
+	 *
+	 * @return A new value which is this value incremented by one.
+	 */
+	public ContinuedFraction increment() {
+	    return add(ONE);
+	}
+
+	/**
+	 * Return a new value decremented by one.
+	 *
+	 * @return A new value, which is this value minus one.
+	 */
+	public ContinuedFraction decrement() {
+	    return subtract(ONE);
+	}
+
+	/**
+	 * Return this value with a reversed sign in the integer part.
+	 *
+	 * @return New negated value.
+	 */
+	public ContinuedFraction negate() {
+	    return fromFraction(toFraction().negate());
+	}
+
+	/**
+	 * Return a new value which is the absolute value (that is, positive)
+	 * of this fraction.
+	 *
+	 * @return New absolute value.
+	 */
+	public ContinuedFraction abs() {
+	    return fromFraction(toFraction().abs());
+	}
+
+	/**
+	 * Return the sign value of this continued fraction. This is not strictly
+	 * due to the sign / value of the integer part, if some of the denominator
+	 * values are negative.
+	 *
+	 * @return {@code -1} if this value is negate, {@code 0} if exactly zero,
+	 *         and {@code +1} if the value is positive.
+	 */
+	public int signum() {
+	    return toFraction().signum();
+	}
+
+	/**
+	 * Return the ceiling value of this fraction.
+	 *
+	 * @return Smallest integer value which is greater or equal to this value.
+	 */
+	public BigInteger ceil() {
+	    return toFraction().ceil().toIntegerExact();
+	}
+
+	/**
+	 * Return the floor value of this fraction.
+	 *
+	 * @return Largest integer value less or equal to this value.
+	 */
+	public BigInteger floor() {
+	    return toFraction().floor().toIntegerExact();
 	}
 
 	/**
@@ -295,10 +456,85 @@ public class ContinuedFraction extends Number implements Comparable<ContinuedFra
 		return fromFraction((BigFraction) obj);
 	    if (obj instanceof BigInteger)
 		return new ContinuedFraction((BigInteger) obj);
-	    if (obj instanceof Number)
-		return new ContinuedFraction(((Number) obj).longValue());	// this could be a double instead??
-// decimals
+	    if (obj instanceof BigDecimal)
+		return fromDecimal((BigDecimal) obj, MathUtil.toMC((BigDecimal) obj));
+	    if (obj instanceof Number) {
+		BigDecimal bd = new BigDecimal(((Number) obj).doubleValue());
+		return fromDecimal(bd, MathUtil.toMC(bd));
+	    }
+	    if (obj instanceof List) {
+		@SuppressWarnings("unchecked")
+		List<BigInteger> list = (List<BigInteger>) obj;
+		return new ContinuedFraction(list);
+	    }
 	    return null;
+	}
+
+	/**
+	 * Access one value in the list.
+	 *
+	 * @param index Zero-based index into the list of values.
+	 * @return      The integer value at that index (0 is the integer part),
+	 *              returns {@code null} if the index is beyond the current list size.
+	 */
+	public BigInteger part(final int index) {
+	    if (index == 0)
+		return intPart;
+	    else if (index >= 1) {
+		if (index <= denomValues.size())
+		    return denomValues.get(index - 1);
+		else
+		    return null;
+	    }
+	    else
+		throw new Intl.IndexOutOfBoundsException("math#cfrac.badIndex", index, denomValues.size() + 1);
+	}
+
+	/**
+	 * Set a single value into position within the list of values. Index 0 corresponds
+	 * to the integer part.
+	 *
+	 * @param index Zero-based index into the list of values.
+	 * @param value New value to set in that posiiton.
+	 * @return      The updated value.
+	 */
+	public ContinuedFraction setPart(final int index, final Object value) {
+	    BigInteger iValue = BigFraction.getInteger(value);
+	    if (index == 0)
+		intPart = iValue;
+	    else if (index >= 1) {
+		if (index <= denomValues.size())
+		    denomValues.set(index - 1, iValue);
+		else
+		    denomValues.add(index - 1, iValue);
+	    }
+	    else
+		throw new Intl.IndexOutOfBoundsException("math#cfrac.badIndex", index, denomValues.size() + 1);
+
+	    return this;
+	}
+
+	/**
+	 * Return the number of elements in this continued fraction, which
+	 * will be the number of denominator values plus one.
+	 *
+	 * @return Number of elements
+	 */
+	public int size() {
+	    return denomValues.size() + 1;
+	}
+
+	/**
+	 * Return the list of all the values.
+	 *
+	 * @return List of values as objects.
+	 */
+	public List<Object> values() {
+	    List<Object> list = new ArrayList<>(denomValues.size() + 1);
+	    list.add(intPart);
+	    list.addAll(denomValues);
+
+	    return list;
 	}
 
 	@Override

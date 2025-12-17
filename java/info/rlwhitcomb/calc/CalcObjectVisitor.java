@@ -941,6 +941,8 @@
  *	    #643: Beginnings of continued fraction support.
  *	05-Dec-2025 (rlwhitcomb)
  *	    #787: Add "UNLESS" support for IF, WHILE, and LOOP.
+ *	05-Dec-2025 (rlwhitcomb)
+ *	    #643: More continued fraction work; allow iteration through the complex values.
  */
 package info.rlwhitcomb.calc;
 
@@ -1119,12 +1121,12 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 
 			return (iStop - iStart) / iStep + 1;
 		    }
-		    else if (start instanceof BigFraction) {
-			BigFraction fStart = (BigFraction) start;
-			BigFraction fStop  = (BigFraction) stop;
-			BigFraction fStep  = (BigFraction) step;
+		    else if (start instanceof BigFraction || start instanceof ContinuedFraction) {
+			BigFraction fStart = BigFraction.valueOf(start);
+			BigFraction fStop  = BigFraction.valueOf(stop);
+			BigFraction fStep  = BigFraction.valueOf(step);
 
-			return fStop.subtract(fStart).divide(fStep).add(BigFraction.ONE);
+			return fStop.subtract(fStart).divide(fStep).increment();
 		    }
 		    else {
 			BigDecimal dStart = (BigDecimal) start;
@@ -1161,11 +1163,11 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 			    return (iValue >= iStart && iValue <= iStop) && ((iValue - iStart) % iStep == 0);
 			}
 		    }
-		    else if (start instanceof BigFraction) {
+		    else if (start instanceof BigFraction || start instanceof ContinuedFraction) {
 			BigFraction fValue = convertToFraction(value, ctx);
-			BigFraction fStart = (BigFraction) start;
-			BigFraction fStop  = (BigFraction) stop;
-			BigFraction fStep  = (BigFraction) step;
+			BigFraction fStart = BigFraction.valueOf(start);
+			BigFraction fStop  = BigFraction.valueOf(stop);
+			BigFraction fStep  = BigFraction.valueOf(step);
 
 			if (fStep.signum() < 0) {
 			    return (fValue.compareTo(fStop) >= 0 && fValue.compareTo(fStart) <= 0) &&
@@ -3073,6 +3075,13 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 			valueBuf.append(convertToFraction(result, ctx).toProperString(separators, (signChar == '+')));
 			break;
 
+		    case 'G':
+			valueBuf.append(ContinuedFraction.valueOf(result).toFormatString(separators, (signChar != '-')));
+			break;
+		    case 'g':
+			valueBuf.append(ContinuedFraction.valueOf(result).toFormatString(separators, (signChar == '+')));
+			break;
+
 		    case 'J':
 		    case 'j':
 			if (signChar != '-')
@@ -3396,7 +3405,7 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 
 		    // number of times, starting from 1
 		    if (allowSingle) {
-			// or it could be an array, object, or string to iterate over
+			// or it could be an array, object, composite number, or string to iterate over
 			if (obj instanceof ObjectScope) {
 			    stepWise = false;
 			    @SuppressWarnings("unchecked")
@@ -3415,12 +3424,27 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 			    SetScope<Object> set = (SetScope<Object>) obj;
 			    iter = set.set().iterator();
 			}
+			else if (obj instanceof ComplexNumber) {
+			    stepWise = false;
+			    ComplexNumber cmplx = (ComplexNumber) obj;
+			    iter = cmplx.parts().iterator();
+			}
+			else if (obj instanceof Quaternion) {
+			    stepWise = false;
+			    Quaternion quat = (Quaternion) obj;
+			    iter = quat.parts().iterator();
+			}
+			else if (obj instanceof ContinuedFraction) {
+			    stepWise = false;
+			    ContinuedFraction cfrac = (ContinuedFraction) obj;
+			    iter = cfrac.values().iterator();
+			}
 			else if (obj instanceof String) {
 			    stepWise = false;
 			    codePoints = ((String) obj).codePoints();
 			}
-			else if (settings.rationalMode && obj instanceof BigFraction) {
-			    fStop = (BigFraction) obj;
+			else if (settings.rationalMode && (obj instanceof BigFraction || obj instanceof ContinuedFraction)) {
+			    fStop = BigFraction.valueOf(obj);
 			    doingFractions = true;
 			    allowWithin = true;
 			}
@@ -3429,8 +3453,8 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 			    allowWithin = true;
 			}
 		    }
-		    else if (settings.rationalMode && obj instanceof BigFraction) {
-			fStop = (BigFraction) obj;
+		    else if (settings.rationalMode && (obj instanceof BigFraction || obj instanceof ContinuedFraction)) {
+			fStop = BigFraction.valueOf(obj);
 			doingFractions = true;
 			allowWithin = true;
 		    }
@@ -3447,8 +3471,8 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 
 		    if (hasDots) {
 			// start .. stop
-			if (settings.rationalMode && obj0 instanceof BigFraction) {
-			    fStart = (BigFraction) obj0;
+			if (settings.rationalMode && (obj0 instanceof BigFraction || obj0 instanceof ContinuedFraction)) {
+			    fStart = BigFraction.valueOf(obj0);
 			    fStop  = toFractionValue(this, obj1, expr1);
 			    doingFractions = true;
 			}
@@ -3461,8 +3485,8 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 			// stop, step
 			stepExpr = expr1;
 
-			if (settings.rationalMode && obj0 instanceof BigFraction) {
-			    fStop = (BigFraction) obj0;
+			if (settings.rationalMode && (obj0 instanceof BigFraction || obj0 instanceof ContinuedFraction)) {
+			    fStop = BigFraction.valueOf(obj0);
 			    fStep = toFractionValue(this, obj1, stepExpr);
 			    doingFractions = true;
 			}
@@ -3481,8 +3505,8 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 		    Object obj0 = evaluate(zeroExpr);
 		    Object obj1 = evaluate(expr1);
 
-		    if (settings.rationalMode && obj0 instanceof BigFraction) {
-			fStart = (BigFraction) obj0;
+		    if (settings.rationalMode && (obj0 instanceof BigFraction || obj0 instanceof ContinuedFraction)) {
+			fStart = BigFraction.valueOf(obj0);
 			fStop  = toFractionValue(this, obj1, expr1);
 			fStep  = getFractionValue(stepExpr);
 			doingFractions = true;
@@ -4378,6 +4402,7 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 		    }
 		    else if (objValue instanceof Quaternion ||
 			     objValue instanceof ComplexNumber ||
+			     objValue instanceof ContinuedFraction ||
 			     (settings.rationalMode && objValue instanceof BigFraction)) {
 			value = objValue;
 		    }
@@ -4399,6 +4424,9 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 		}
 		else if (value instanceof BigFraction) {
 		    value = ((BigFraction) value).increment();
+		}
+		else if (value instanceof ContinuedFraction) {
+		    value = ((ContinuedFraction) value).increment();
 		}
 		else if (MathUtil.isInteger(value)) {
 		    BigInteger iValue = convertToInteger(value, settings.mc, expr);
@@ -4490,6 +4518,12 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 
 		return ComplexNumber.rational(rFrac, iFrac);
 	    }
+	    else if (o1 instanceof ContinuedFraction || o2 instanceof ContinuedFraction) {
+		BigFraction rFrac = ContinuedFraction.valueOf(o1).toFraction();
+		BigFraction iFrac = ContinuedFraction.valueOf(o2).toFraction();
+
+		return ComplexNumber.rational(rFrac, iFrac);
+	    }
 	    else {
 		BigDecimal r = convertToDecimal(o1, settings.mc, expr1);
 		BigDecimal i = convertToDecimal(o2, settings.mc, expr2);
@@ -4516,6 +4550,14 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 		BigFraction bFrac = convertToFraction(o2, expr2);
 		BigFraction cFrac = convertToFraction(o3, expr3);
 		BigFraction dFrac = convertToFraction(o4, expr4);
+
+		return Quaternion.rational(aFrac, bFrac, cFrac, dFrac);
+	    }
+	    else if (o1 instanceof ContinuedFraction || o2 instanceof ContinuedFraction || o3 instanceof ContinuedFraction || o4 instanceof ContinuedFraction) {
+		BigFraction aFrac = ContinuedFraction.valueOf(o1).toFraction();
+		BigFraction bFrac = ContinuedFraction.valueOf(o2).toFraction();
+		BigFraction cFrac = ContinuedFraction.valueOf(o3).toFraction();
+		BigFraction dFrac = ContinuedFraction.valueOf(o4).toFraction();
 
 		return Quaternion.rational(aFrac, bFrac, cFrac, dFrac);
 	    }
@@ -4659,43 +4701,36 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 		beforeValue = fValue;
 
 		if (incr)
-		    afterValue = fValue.add(BigFraction.ONE);
+		    afterValue = fValue.increment();
 		else
-		    afterValue = fValue.subtract(BigFraction.ONE);
+		    afterValue = fValue.decrement();
+	    }
+	    else if (value instanceof ContinuedFraction) {
+		ContinuedFraction cfValue = (ContinuedFraction) value;
+		beforeValue = cfValue;
+
+		if (incr)
+		    afterValue = cfValue.increment();
+		else
+		    afterValue = cfValue.decrement();
 	    }
 	    else if (value instanceof Quaternion) {
 		Quaternion qValue = (Quaternion) value;
 		beforeValue = qValue;
 
-		if (qValue.isRational()) {
-		    if (incr)
-			afterValue = qValue.add(QR_ONE);
-		    else
-			afterValue = qValue.subtract(QR_ONE);
-		}
-		else {
-		    if (incr)
-			afterValue = qValue.add(Quaternion.ONE);
-		    else
-			afterValue = qValue.subtract(Quaternion.ONE);
-		}
+		if (incr)
+		    afterValue = qValue.increment();
+		else
+		    afterValue = qValue.decrement();
 	    }
 	    else if (value instanceof ComplexNumber) {
 		ComplexNumber cValue = (ComplexNumber) value;
 		beforeValue = cValue;
 
-		if (cValue.isRational()) {
-		    if (incr)
-			afterValue = cValue.add(CR_ONE);
-		    else
-			afterValue = cValue.subtract(CR_ONE, settings.mc);
-		}
-		else {
-		    if (incr)
-			afterValue = cValue.add(C_ONE);
-		    else
-			afterValue = cValue.subtract(C_ONE, settings.mc);
-		}
+		if (incr)
+		    afterValue = cValue.increment();
+		else
+		    afterValue = cValue.decrement(settings.mc);
 	    }
 	    else {
 		BigDecimal dValue = convertToDecimal(value, settings.mc, var);
@@ -4781,41 +4816,33 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 		BigFraction fValue = convertToFraction(value, var);
 
 		if (incr)
-		    afterValue = fValue.add(BigFraction.ONE);
+		    afterValue = fValue.increment();
 		else
-		    afterValue = fValue.subtract(BigFraction.ONE);
+		    afterValue = fValue.decrement();
+	    }
+	    else if (value instanceof ContinuedFraction) {
+		ContinuedFraction cfValue = (ContinuedFraction) value;
+
+		if (incr)
+		    afterValue = cfValue.increment();
+		else
+		    afterValue = cfValue.decrement();
 	    }
 	    else if (value instanceof Quaternion) {
 		Quaternion qValue = (Quaternion) value;
 
-		if (qValue.isRational()) {
-		    if (incr)
-			afterValue = qValue.add(QR_ONE);
-		    else
-			afterValue = qValue.subtract(QR_ONE);
-		}
-		else {
-		    if (incr)
-			afterValue = qValue.add(Quaternion.ONE);
-		    else
-			afterValue = qValue.subtract(Quaternion.ONE);
-		}
+		if (incr)
+		    afterValue = qValue.increment();
+		else
+		    afterValue = qValue.decrement();
 	    }
 	    else if (value instanceof ComplexNumber) {
 		ComplexNumber cValue = (ComplexNumber) value;
 
-		if (cValue.isRational()) {
-		    if (incr)
-			afterValue = cValue.add(CR_ONE);
-		    else
-			afterValue = cValue.subtract(CR_ONE, settings.mc);
-		}
-		else {
-		    if (incr)
-			afterValue = cValue.add(C_ONE);
-		    else
-			afterValue = cValue.subtract(C_ONE, settings.mc);
-		}
+		if (incr)
+		    afterValue = cValue.increment();
+		else
+		    afterValue = cValue.decrement(settings.mc);
 	    }
 	    else {
 		BigDecimal dValue = convertToDecimal(value, settings.mc, var);
@@ -4965,6 +4992,9 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 	    }
 	    else if (value instanceof ComplexNumber) {
 		return ((ComplexNumber) value).pow(new BigDecimal(intExp), settings.mc);
+	    }
+	    else if (value instanceof ContinuedFraction) {
+		return ((ContinuedFraction) value).power(intExp);
 	    }
 	    else if (MathUtil.isInteger(value)) {
 		BigInteger iBase = convertToInteger(value, settings.mc, expr);
@@ -5122,7 +5152,14 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 			    return cf1.multiply(cf2);
 			case "/":
 			    return cf1.divide(cf2);
-			// more to implement here
+			case "\\":
+			    return cf1.idivide(cf2);
+			case "%":
+			    return cf1.remainder(cf2);
+			case "mod":
+			    return cf1.modulus(cf2);
+			case "\\%":
+			    return new ArrayScope<Object>((Object[]) cf1.divideAndRemainder(cf2));
 			default:
 			    throw new UnknownOpException(oper, ctx);
 		    }
@@ -5279,6 +5316,10 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 	    else if (value instanceof ComplexNumber) {
 		ComplexNumber c = (ComplexNumber) value;
 		return c.abs(settings.mcDivide);
+	    }
+	    else if (value instanceof ContinuedFraction) {
+		ContinuedFraction cf = (ContinuedFraction) value;
+		return cf.abs();
 	    }
 	    else if (MathUtil.isInteger(value)) {
 		BigInteger i = convertToInteger(value, settings.mc, expr);
@@ -5486,6 +5527,10 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 		ComplexNumber c = (ComplexNumber) value;
 		return c.signum(MathUtil.divideContext(c, settings.mcDivide));
 	    }
+	    else if (value instanceof ContinuedFraction) {
+		ContinuedFraction cf = (ContinuedFraction) value;
+		return cf.signum();
+	    }
 	    else if (MathUtil.isInteger(value)) {
 		BigInteger i = convertToInteger(value, settings.mc, expr);
 		signum = i.signum();
@@ -5573,12 +5618,12 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 
 			return (iStop - iStart) / iStep + 1;
 		    }
-		    else if (start instanceof BigFraction) {
-			BigFraction fStart = (BigFraction) start;
-			BigFraction fStop  = (BigFraction) stop;
-			BigFraction fStep  = (BigFraction) step;
+		    else if (start instanceof BigFraction || start instanceof ContinuedFraction) {
+			BigFraction fStart = BigFraction.valueOf(start);
+			BigFraction fStop  = BigFraction.valueOf(stop);
+			BigFraction fStep  = BigFraction.valueOf(step);
 
-			return fStop.subtract(fStart).divide(fStep).add(BigFraction.ONE);
+			return fStop.subtract(fStart).divide(fStep).increment();
 		    }
 		    else {
 			BigDecimal dStart = (BigDecimal) start;
@@ -5643,6 +5688,10 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 		ComplexNumber c = (ComplexNumber) value;
 		return c.ceil();
 	    }
+	    else if (value instanceof ContinuedFraction) {
+		ContinuedFraction cf = (ContinuedFraction) value;
+		return cf.ceil();
+	    }
 	    else {
 		BigDecimal e = toDecimalValue(this, value, settings.mc, expr);
 		return MathUtil.ceil(e);
@@ -5665,6 +5714,10 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 	    else if (value instanceof ComplexNumber) {
 		ComplexNumber c = (ComplexNumber) value;
 		return c.floor();
+	    }
+	    else if (value instanceof ContinuedFraction) {
+		ContinuedFraction cf = (ContinuedFraction) value;
+		return cf.floor();
 	    }
 	    else {
 		BigDecimal e = toDecimalValue(this, value, settings.mc, expr);
@@ -5870,6 +5923,9 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 	    }
 	    else if (settings.rationalMode || conv == Conversion.FRACTION) {
 		objectList.add(convertToFraction(value, ctx));
+	    }
+	    else if (conv == Conversion.CFRACTION) {
+		objectList.add(ContinuedFraction.valueOf(value));
 	    }
 	    else if (conv == Conversion.QUATERNION) {
 		objectList.add(Quaternion.valueOf(value));
@@ -6467,6 +6523,9 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 	    else if (value instanceof SetScope) {
 		arrayLen = ((SetScope) value).size();
 	    }
+	    else if (value instanceof ContinuedFraction) {
+		arrayLen = ((ContinuedFraction) value).size();
+	    }
 	    else {
 		// Any simple object behaves the same way as "substr"
 		return substring(value, valueCtx, beginCtx, endCtx, true);
@@ -6511,12 +6570,16 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 		    result.add(val);
 		}
 	    }
-	    else {
+	    else if (value instanceof SetScope) {
 		Object[] valueArray = ((SetScope) value).set().toArray();
 		for (int index = beginIndex; index < endIndex; index++) {
 		    Object val = valueArray[index];
 		    result.add(val);
 		}
+	    }
+	    else {
+		List<Object> list = ((ContinuedFraction) value).values();
+		result.addAll(list);
 	    }
 
 	    return result;
@@ -7171,6 +7234,22 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 	}
 
 	@Override
+	public Object visitCFracExpr(CalcParser.CFracExprContext ctx) {
+	    List<CalcParser.ExprContext> exprs = ctx.exprN().exprList().expr();
+	    if (exprs.size() == 1) {
+		return ContinuedFraction.valueOf(evaluate(exprs.get(0)));
+	    }
+	    else {
+		List<Object> objects = buildValueList(this, exprs, Conversion.INTEGER);
+		List<BigInteger> ints = new ArrayList<>(objects.size());
+		for (Object o : objects) {
+		    ints.add((BigInteger) o);
+		}
+		return new ContinuedFraction(ints);
+	    }
+	}
+
+	@Override
 	public Object visitComplexFuncExpr(CalcParser.ComplexFuncExprContext ctx) {
 	    try {
 		CalcParser.Expr1Context e1ctx = ctx.expr1();
@@ -7206,6 +7285,12 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 		    Object o2 = evaluate(expr2);
 
 		    if (settings.rationalMode || o1 instanceof BigFraction || o2 instanceof BigFraction) {
+			BigFraction rFrac = convertToFraction(o1, expr1);
+			BigFraction iFrac = convertToFraction(o2, expr2);
+
+			return ComplexNumber.rational(rFrac, iFrac);
+		    }
+		    else if (o1 instanceof ContinuedFraction || o2 instanceof ContinuedFraction) {
 			BigFraction rFrac = convertToFraction(o1, expr1);
 			BigFraction iFrac = convertToFraction(o2, expr2);
 
@@ -7259,6 +7344,12 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 			f3 = convertToFraction(o3, expr3);
 			f4 = convertToFraction(o4, expr4);
 		    }
+		    else if (o1 instanceof ContinuedFraction || o2 instanceof ContinuedFraction || o3 instanceof ContinuedFraction || o4 instanceof ContinuedFraction) {
+			f1 = convertToFraction(o1, expr1);
+			f2 = convertToFraction(o2, expr2);
+			f3 = convertToFraction(o3, expr3);
+			f4 = convertToFraction(o4, expr4);
+		    }
 		    else {
 			d1 = convertToDecimal(o1, settings.mc, expr1);
 			d2 = convertToDecimal(o2, settings.mc, expr2);
@@ -7282,6 +7373,11 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 			    f2 = convertToFraction(o2, expr2);
 			    f3 = convertToFraction(o3, expr3);
 			}
+			else if (o1 instanceof ContinuedFraction || o2 instanceof ContinuedFraction || o3 instanceof ContinuedFraction) {
+			    f1 = convertToFraction(o1, expr1);
+			    f2 = convertToFraction(o2, expr2);
+			    f3 = convertToFraction(o3, expr3);
+			}
 			else {
 			    d1 = convertToDecimal(o1, settings.mc, expr1);
 			    d2 = convertToDecimal(o2, settings.mc, expr2);
@@ -7297,6 +7393,10 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 			    o2 = evaluate(expr2);
 
 			    if (settings.rationalMode && (o1 instanceof BigFraction || o2 instanceof BigFraction)) {
+				f1 = convertToFraction(o1, expr1);
+				f2 = convertToFraction(o2, expr2);
+			    }
+			    else if (o1 instanceof ContinuedFraction || o2 instanceof ContinuedFraction) {
 				f1 = convertToFraction(o1, expr1);
 				f2 = convertToFraction(o2, expr2);
 			    }
@@ -8050,6 +8150,7 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 	private class SumOfVisitor implements IterationVisitor
 	{
 		private BigFraction sumFrac = BigFraction.ZERO;
+		private ContinuedFraction sumCFrac = ContinuedFraction.ZERO;
 		private ComplexNumber sumCmplx = C_ZERO;
 		private Quaternion sumQuat = Quaternion.ZERO;
 		private BigDecimal sum = BigDecimal.ZERO;
@@ -8073,6 +8174,10 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 			    BigFraction frac = convertToFraction(value, ctx);
 			    sumFrac = sumFrac.add(frac);
 			    return sumFrac;
+			case CFRACTION:
+			    ContinuedFraction cFrac = ContinuedFraction.valueOf(value);
+			    sumCFrac = sumCFrac.add(cFrac);
+			    return sumCFrac;
 			case COMPLEX:
 			    ComplexNumber cmplx = ComplexNumber.valueOf(value, settings.rationalMode);
 			    sumCmplx = sumCmplx.add(cmplx);
@@ -8159,6 +8264,7 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 	private class ProductOfVisitor implements IterationVisitor
 	{
 		private BigFraction productFrac = BigFraction.ONE;
+		private ContinuedFraction productCFrac = ContinuedFraction.ONE;
 		private ComplexNumber productCmplx = C_ONE;
 		private Quaternion productQuat = Quaternion.ONE;
 		private BigDecimal product = BigDecimal.ONE;
@@ -8182,6 +8288,10 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 			    BigFraction frac = convertToFraction(value, ctx);
 			    productFrac = productFrac.multiply(frac);
 			    return productFrac;
+			case CFRACTION:
+			    ContinuedFraction cFrac = ContinuedFraction.valueOf(value);
+			    productCFrac = productCFrac.multiply(cFrac);
+			    return productCFrac;
 			case COMPLEX:
 			    ComplexNumber cmplx = ComplexNumber.valueOf(value, settings.rationalMode);
 			    productCmplx = productCmplx.multiply(cmplx, settings.mc);

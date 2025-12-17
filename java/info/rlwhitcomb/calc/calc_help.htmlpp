@@ -218,7 +218,9 @@ h4 {
         <li>Variables can be used for storage of values for later use.</li>
         <li>Object, array, and set structures for storage of multiple values.</li>
         <li>Therefore, JSON objects are a native part of the language.</li>
-        <li>Built-in support for real fractions, complex numbers, and
+        <li>Built-in support for real fractions,
+            <a href="https://en.wikipedia.org/wiki/Continued_fraction">continued fractions</a>,
+            complex numbers, and
             <a href="https://en.wikipedia.org/wiki/Quaternion">quaternions</a>, with matrix support planned.</li>
         <li>String functions for doing text manipulation, including <a href="https://en.wikipedia.org/wiki/String_interpolation">string interpolation</a>.</li>
         <li>Simple file reading and writing with powerful string matching functions make writing text transformation programs very easy.</li>
@@ -229,7 +231,7 @@ h4 {
         <li>Looping and conditional statements, including powerful pattern matching, to do pretty much any kind of calculation or programming task.</li>
         <li>Did I mention that this is an actual programming / scripting language?</li>
         <li>Therefore, this "calculator" is a <a href="https://en.wikipedia.org/wiki/Turing_completeness">&ldquo;Turing Complete&rdquo;</a> language.</li>
-        <li>Currently (as of mid-2025 at least), it is being actively developed and maintained, meaning features and fixes are constantly being added.</li>
+        <li>Currently (as of late-2025 at least), it is being actively developed and maintained, meaning features and fixes are constantly being added.</li>
         <li>This is <a href="https://opensource.com/resources/what-open-source">Open-Source Software</a> released under the very permissive
             <a href="https://opensource.org/license/mit">MIT</a> license, so the code can be freely examined, and modified (if desired) for your own use.</li>
       </ul>
@@ -254,7 +256,7 @@ h4 {
          <li>More powerful <code>case</code> statement selectors than I have seen</li>
          <li>The <code>case</code> statement is also an expression that can be used to assign one of any number of values, depending on these powerful selectors</li>
 	 <li>All the latest operators from many other programming languages</li>
-	 <li>Rational fractions, complex numbers, and quaternions as native data types, along with objects, arrays, and sets as standard data collections</li>
+	 <li>Rational fractions, continued fractions, complex numbers, and quaternions as native data types, along with objects, arrays, and sets as standard data collections</li>
 	 <li>Many Unicode symbols available for use as they were intended (that is, in the appropriate mathematical sense)</li>
 	 <li>All the latest multi-line, raw, interpolated, and standard string constant forms available</li>
 	 <li>Dynamic code generation and execution, via the <code>eval</code> function</li>
@@ -494,8 +496,35 @@ h4 {
   <p>Complex numbers are specified by a <i>real</i> <code>,</code> <i>imaginary</i> pair as in <code>(</code> <i>real</i> <code>,</code> <i>imaginary</i> <code>)</code>, the <code><i>i</i></code> constant, or the result of the <code>complex</code> function. All the simple and some more complicated arithmetic functions are supported for complex numbers.
   <p>Quaternions are specified by the four <code>a</code>, <code>b</code>, <code>c</code>, and <code>d</code> coefficient values, or by using the built-in <code>quaternion(</code>...<code>)</code> function. The value of <code><i>i</i></code> can be promoted to a
      quaternion automatically, and <code><i>j</i></code> or <code><i>k</i></code> are also available.
-     Support for basic arithmetic using quaternions and some basic conversions are available, and more is currently being developed.
+     Support for basic arithmetic using quaternions and some basic conversions are available, and more operations are currently being developed.
   <p>Just as an aside, Calc does not support <code>NaN</code> or <code>Infinity</code> values. Operations that might result in such values generally cause errors instead.
+  <p>Regular fraction mode is triggered by the <code>$rational on</code> directive (see the <a href="#Directives">Directives</a> section), which generally performs
+     all operations as fractions. Continued fractions, by contrast, are treated as a separate data type, and can be specified by: <code>[ a; b, c, d ]</code> which represents this continued fraction:
+<math xmlns="www.w3.org" display="block">
+  <mn>a</mn>
+  <mo>+</mo>
+  <mfrac>
+    <mn>1</mn>
+    <mrow>
+      <mn>b</mn>
+      <mo>+</mo>
+      <mfrac>
+        <mn>1</mn>
+        <mrow>
+          <mn>c</mn>
+          <mo>+</mo>
+          <mfrac>
+            <mn>1</mn>
+            <mrow>
+              <mn>d</mn>
+            </mrow>
+          </mfrac>
+        </mrow>
+      </mfrac>
+    </mrow>
+  </mfrac>
+</math>
+  <p>The <code>cfrac</code> and <code>cast</code> functions can also be used to convert other values to continued fractions, as can the <code>@g</code> format.
   <p>The boolean (or "logical") constants are <code>true</code> and <code>false</code>.
   <p>The special null constant, which signifies no value, or a value that hasn't been assigned or defined yet, is simply <code>null</code>.
      Any regular variables, or array or object elements that are not (yet) defined will have the <code>null</code> value. Most operations will result
@@ -791,6 +820,8 @@ or<br>
 <tr><td><code>@</code>[<code>-</code>]<code>E</code></td><td>Format an integer as a date (mm/dd/yyyy) (U.S. format)<br> as in <code style="color:blue;">-10252 @E</code><code style="color:grey;"> &#x21E8; </code><code style="color:green;">D'12/07/1941'</code><br><code>-</code> strips the decoration, as in <code style="color:green">"12/07/1941"</code></td></tr>
       <tr><td><code>@</code>[<code>-</code>]<code>f</code></td><td>For decimal mode, format the result as a rational fraction<br>as in <code style="color:blue;">5.125 @f</code><code style="color:grey;"> &#x21E8; </code><code style="color:green;">41 / 8</code><br>using <code>-</code> will not use spaces around the <code>/</code></td></tr>
       <tr><td><code>@</code>[<code>+</code>]<code>F</code></td><td>Format as a proper fraction (with possible integer portion)<br>as in <code style="color:blue;">3.75 @F</code><code style="color:grey;"> &#x21E8; </code><code style="color:green;">3 3/4</code><br>using <code>+</code> will add spaces around the <code>/</code></td></tr>
+      <tr><td><code>@</code>[<code>+</code>]<code>g</code></td><td>Format as a continued fraction without extra spaces (except with <code>+</code> modifier)<br>as in <code style="color:blue;">3.75 @g</code><code style="color;grey;"> &#x21E8; </code><code style="color:green;">[3;1,3]</code></td></tr>
+      <tr><td><code>@</code>[<code>-</code>]<code>G</code></td><td>Continued fraction with spaces (except with <code>-</code> modifier)<br>as in <code style="color:blue;">1.375 @G</code><code style="color;grey;"> &#x21E8; </code><code style="color:green;">[ 1 ; 2, 1, 2 ]</code></td></tr>
       <tr><td><code>@c</code></td><td>Format an integer (range of 0 .. 0x10FFFF) as a Unicode character<br>as in <code style="color:blue;">120529 @c</code><code style="color:grey;"> &#x21E8; </code><code style="color:green;">"&#x1D6D1;"</code></td></tr>
       <tr><td><code>@i</code></td><td>Format the result as a complex number, as in<br><code style="color:blue;">(1,1)**3 @i</code><code style="color:grey;"> &#x21E8; </code><code style="color:green;">-2 + 2&#x2148;</code></td></tr>
       <tr><td><code>@p</code></td><td>Format the result as a complex number<br>in polar form, as in<br><code style="color:blue;">(3,4) @p</code><code style="color:grey;"> &#x21E8; </code><code style="color:green;">{ r: 5, &#x03B8;: 0.9272952180016122 }</code></td></tr>
@@ -822,6 +853,7 @@ or<br>
      and treat the value as a simple quoted string. This simplifies using these values inside interpolated strings (for instance), as in:&nbsp;
   <code style="color:blue;">today@-e</code><code style="color:grey;"> &#x21E8; </code><code style="color:green;">"2022-10-17"</code> while
   <code style="color:blue;">today@e</code><code style="color:grey;"> &#x21E8; </code><code style="color:green;">d'2022-10-17'</code>
+  <p>If it is not obvious from the chart, the <code>@+g</code> and <code>@G</code> formats are identical, as well as the <code>@-G</code> and <code>@g</code> ones.
   <p>For strings that contain the standard color codes (such as <code style="color:blue;">BLUE_BOLD</code> from <code>library.calc</code>) the
      <code>@Q</code> format will expose those codes instead of using them to color the result.
 </div>
@@ -895,8 +927,8 @@ or<br>
     <tr><td>35</td><td><i>expr</i> <code>IS</code> ( <i>string</i> | <i>type_id</i> )</td><td>check if expression is the given type (same as <code>typeof</code>)</td><td>left to right</td></tr>
     <tr><td>34</td><td><i>expr</i> <code>[</code> <i>expr</i> ? <code>:</code> <i>expr</i> ? <code>]</code></td><td>produce a slice of an object or string</td><td>left to right</td></tr>
     <tr><td>33</td><td><code>( </code><i>expr</i><code> )</code></td><td>group an expression</td><td>N/A</td></tr>
-    <tr><td rowspan="101">32</td>
-            <td><code>ABS</code>&nbsp;<i>expr</i></td><td>absolute value</td><td rowspan="101">left to right</td></tr>
+    <tr><td rowspan="102">32</td>
+            <td><code>ABS</code>&nbsp;<i>expr</i></td><td>absolute value</td><td rowspan="102">left to right</td></tr>
             <tr><td><code>SIN</code>&nbsp;<i>expr</i></td><td>sine</td></tr>
             <tr><td><code>COS</code>&nbsp;<i>expr</i></td><td>cosine</td></tr>
             <tr><td><code>TAN</code>&nbsp;<i>expr</i></td><td>tangent</td></tr>
@@ -962,6 +994,7 @@ or<br>
             <tr><td><code>Hn</code>, <code>&#x1D43B;</code>, or <code>&#x210B;</code>&nbsp;<i>expr</i></td><td>Harmonic number</td></tr>
             <tr><td><code>DEC</code>&nbsp;<i>expr</i></td><td>convert string or fraction to decimal number</td></tr>
             <tr><td><code>FRAC</code>&nbsp;<i>num</i><code>,</code>&nbsp;<i>den</i><br>or <i>int</i><code>,</code><i>num</i><code>,</code><i>den</i><br>or <i>string</i></td><td>construct a rational fraction</td></tr>
+            <tr><td><code>CFRAC</code>&nbsp;<i>expr</i></td><td>convert value, list, set, or string<br>to a continued fraction</td></tr>
             <tr><td><code>COMPLEX</code>&nbsp;<i>r</i><code>,</code>&nbsp;<i>i</i><br>or <i>expr</i></td><td>construct a complex number</td></tr>
             <tr><td><code>QUATERNION</code>&nbsp;<i>a</i><code>,</code>&nbsp;<i>b</i><code>,</code>&nbsp;<i>c</i><code>,</code>&nbsp;<i>d</i></td><td>construct a quaternion value</td></tr>
             <tr><td><code>ROMAN</code>&nbsp;<i>expr</i></td><td>interpret <i>expr</i> as a Roman Numeral</td></tr>
@@ -1109,6 +1142,11 @@ or<br>
      operators will consider any two objects as equal if they have the same contents, regardless of order, as in <code>{1,2,3} == {3,2,1} &#x21E8; true</code>.
      However, the "exactly equal" operators (<code>===</code> and <code>!==</code>) require the same contents AND the same order for the values to be
      considered exactly equal (so <code>{1,2,3} === {3,2,1} &#x21E8; false</code>).
+  <p>Continued fractions can often have alternative representations which have the same value, such as <code>[ 2; 1, 6, 1 ]</code> and <code>[ 2; 1, 7 ]</code>
+     (both equal to <code>2.875</code>). As such, the <code>==</code> operator will consider these fractions equal, while <code>===</code> will not
+     because they do have different internal structure. And also note that list indexing applies, such that the <code>[0]</code> element of a
+     continued fraction is the integer portion, while <code>[1]</code>, etc. are the successive denominator values. Also note that the <code>length</code>
+     of a continued fraction is <i>NOT</i> the precision (as for a regular fraction), but the number of values (as if it were a list).
   <p>The multiple assignment operation assigns the values of the corresponding expressions to the respective variables. The normal
      case is one variable and one expression (normal assignment), as in <code>a = 7</code>. In addition, this construct can be used
      to swap the values of two variables as in: <code>a,b = b,a</code>. It is an error if the number of variables does not equal
@@ -1138,7 +1176,7 @@ or<br>
   <p>The <i>type</i> value returned from <code>typeof</code>, which can be the optional second parameter to <code>cast</code>, or the second value
      for the <code>IS</code> operator can be one of the following (string) values (or without quotes for <code>IS</code>):
   <p class="indent"><code>"null"</code>, <code>"string</code>, <code>"integer"</code>, <code>"float"</code>,
-     <code>"fraction"</code>, <code>"complex"</code>, <code>"quaternion"</code>, <code>"boolean"</code>, <code>"array"</code>, <code>"object"</code>,
+     <code>"fraction"</code>, <code>"cfraction"</code>, <code>"complex"</code>, <code>"quaternion"</code>, <code>"boolean"</code>, <code>"array"</code>, <code>"object"</code>,
      <code>"set"</code>, <code>"collection"</code>, <code>"function"</code>, or <code>"unknown"</code>.
   <p>The <code>round</code> function rounds to the number of places after the decimal, with a negative value rounding to the
      left of the decimal point.  For example: <code>round(1.335577,2) &#x21E8; 1.34</code>, and

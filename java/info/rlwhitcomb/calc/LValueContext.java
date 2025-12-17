@@ -1,7 +1,7 @@
 /*
  * The MIT License (MIT)
  *
- * Copyright (c) 2021-2024 Roger L. Whitcomb.
+ * Copyright (c) 2021-2025 Roger L. Whitcomb.
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -84,11 +84,13 @@
  *  23-Mar-24 rlw #664	Named parameter changes.
  *  14-May-24 rlw ----	Index into complex numbers and quaternions to get the parts.
  *  15-May-24 rlw ----	Also into fractions.
+ *  28-Nov-25 rlw #643	Now also into continued fractions.
  */
 package info.rlwhitcomb.calc;
 
 import info.rlwhitcomb.math.BigFraction;
 import info.rlwhitcomb.math.ComplexNumber;
+import info.rlwhitcomb.math.ContinuedFraction;
 import info.rlwhitcomb.math.Quaternion;
 import info.rlwhitcomb.util.Intl;
 import org.antlr.v4.runtime.ParserRuleContext;
@@ -269,6 +271,9 @@ class LValueContext
 		else if (contextObject instanceof BigFraction) {
 		    return ((BigFraction) contextObject).part(index);
 		}
+		else if (contextObject instanceof ContinuedFraction) {
+		    return ((ContinuedFraction) contextObject).part(index);
+		}
 		else if (contextObject instanceof String) {
 		    String str = (String) contextObject;
 		    if (index >= str.length()) {
@@ -385,6 +390,9 @@ class LValueContext
 		    }
 		    else if (context instanceof BigFraction) {
 			parent.putContextObject(visitor, ((BigFraction) context).setPart(index, value));
+		    }
+		    else if (context instanceof ContinuedFraction) {
+			parent.putContextObject(visitor, ((ContinuedFraction) context).setPart(index, value));
 		    }
 		    else if (context instanceof String) {
 			String str = (String) context;
@@ -564,7 +572,8 @@ class LValueContext
 		}
 		if (arrayObj instanceof ArrayScope || arrayObj instanceof SetScope ||
 		    arrayObj instanceof Quaternion || arrayObj instanceof ComplexNumber ||
-		    arrayObj instanceof BigFraction || arrayObj instanceof String) {
+		    arrayObj instanceof BigFraction || arrayObj instanceof ContinuedFraction ||
+		    arrayObj instanceof String) {
 		    return new LValueContext(arrLValue, arrVarCtx, arrayObj, index);
 		}
 		else if (arrayObj instanceof ObjectScope) {
