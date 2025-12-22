@@ -943,6 +943,8 @@
  *	    #787: Add "UNLESS" support for IF, WHILE, and LOOP.
  *	05-Dec-2025 (rlwhitcomb)
  *	    #643: More continued fraction work; allow iteration through the complex values.
+ *	16-Dec-2025 (rlwhitcomb)
+ *	    #792: Deal nicely with continued lines during "eval" (roughly the same way as REPL mode).
  */
 package info.rlwhitcomb.calc;
 
@@ -7652,7 +7654,7 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 
 	    processQuietMode.accept(true);
 	    try {
-		return Calc.processString(exprString);
+		return Calc.processString(CharUtil.unwrapText(exprString, false));
 	    }
 	    finally {
 		processQuietMode.accept(ModeOption.POP);

@@ -62,6 +62,8 @@
  *	    #496: Change comma settings.
  *	07-Apr-2025 (rlwhitcomb)
  *	    #711: Tweak expected results from zillion names.
+ *	19-Dec-2025 (rlwhitcomb)
+ *	    #792: Tiny test of "unwrapText".
  */
 package info.rlwhitcomb.test;
 
@@ -79,6 +81,7 @@ import java.nio.file.Files;
 import info.rlwhitcomb.math.BigFraction;
 import info.rlwhitcomb.math.MathUtil;
 import info.rlwhitcomb.math.NumericUtil;
+import info.rlwhitcomb.util.CharUtil;
 import info.rlwhitcomb.util.FileUtilities;
 
 
@@ -766,6 +769,15 @@ public class TestNumericUtil
 	    }
 
 	    System.out.println("Done with Roman numeral tests.");
+
+	    String testContinuation =
+		"0.5772156649015328606065120900824024310421593359399235988057672348848677267776\\\n" +
+		"646709369470632917467495146314472498070824809605040144865428362241739976449235\\\n" +
+		"362535003337429373377376739427925952582470949160087352039481656708532331517766\\\n" +
+		"115286211995015079847937450857057400299213547861466940296043254215190587755352\\\n";
+
+	    System.out.println(CharUtil.unwrapText(testContinuation, false));
+	    numberOfTests++;
 
 	    System.out.println("Total number of tests: " + numberOfTests +
 		", passed: " + (numberOfTests - numberOfFailures) + ", failed: " + numberOfFailures);

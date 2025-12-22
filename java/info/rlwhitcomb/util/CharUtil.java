@@ -358,6 +358,8 @@
  *	    #146: Better handling of "space" characters inside "quoteControl".
  *	28-Oct-2025 (rlwhitcomb)
  *	    #781: Traditional octal escape sequence inside strings.
+ *	12-Dec-2025 (rlwhitcomb)
+ *	    #792: New "unwrapText" method for dealing with line continuations.
  */
 package info.rlwhitcomb.util;
 
@@ -455,6 +457,9 @@ public final class CharUtil
 	public static final String SANITIZATION_PREFIX = "_";
 
 	public static final char STD_ESCAPE_CHAR = '\\';
+
+	private static final String CONTINUATION_PATTERN = "\\\\\\r?\\n";
+
 
 	/**
 	* The characters we will allow when attempting to construct a valid identifier from an arbitrary string.
@@ -3283,6 +3288,25 @@ public final class CharUtil
 		}
 	    }
 	    return buf.toString();
+	}
+
+
+	/**
+	 * "Unwrap" a string which has {@code \\n} between lines, removing the continuations, and changing
+	 * to either a single blank or nothing.
+	 * <p> Note: this will not deal correctly with lines having Windows line endings ({@code \r\n}).
+	 *
+	 * @param input A series of lines with (probable) continuation characters at line ends.
+	 * @param blank {@code true} to insert a blank at these line ends, or {@code false} to just delete them.
+	 * @return      The lines as a single string.
+	 */
+	public static String unwrapText(final String input, final boolean blank) {
+	    if (isNullOrEmpty(input))
+		return "";
+
+	    String replacement = blank ? " " : "";
+
+	    return input.replaceAll(CONTINUATION_PATTERN, replacement);
 	}
 
 

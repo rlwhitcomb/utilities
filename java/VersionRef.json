@@ -3,6 +3,10 @@
 /*======================*/
 
 [
+    { version: '3.2.9', date: d'2025-12-16',
+      issues: [ 792 ],
+      comment: 'Support continued lines during "eval".'
+    },
     { version: '3.2.8', date: d'2025-12-14',
       issues: [ 643 ],
       comment: 'Further support and documentation of continued fractions.'
