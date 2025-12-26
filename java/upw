@@ -13,4 +13,4 @@ else
    canon=$2
 fi
 # Note: these options must match the $defaultOptions in wordfindtest
-wf -nocolor -notimings -maxwords 0 -maxwidth 100 $test | mkcanon > test/canons/${canon//[\.]/}.canon
+wf -nocolor -notimings -maxwords 0 -maxwidth 100 -normal $test | mkcanon > test/canons/${canon//[\.]/}.canon

@@ -1,7 +1,7 @@
 :testClass info.rlwhitcomb.wordfind.WordFind
 
 :inputDir test/canons
-:defaultOptions -nocolor -notimings -maxwords 0 -maxwidth 100
+:defaultOptions -nocolor -notimings -maxwords 0 -maxwidth 100 -normal
 
 :echo Tests of WordFind functionality...
 :echo
@@ -30,6 +30,7 @@ abcdefghijklmnop: abcdefghijklmno..
 thorough: -reverse thorough
 
 mmeeins: mmeeins -normal -min 7
+xyzzy: xyzzy
 
 :echo
 :echo Done with WordFind tests.

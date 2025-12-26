@@ -131,10 +131,14 @@
  *          #771: Fix index errors with non-alphabetic input characters.
  *      15-Nov-2025 (rlwhitcomb)
  *          #786: Add "-reverse" and "-normal" options.
+ *      25-Dec-2025 (rlwhitcomb)
+ *          #796: Display total words and words shown at end of display.
  */
 package info.rlwhitcomb.wordfind;
 
 import info.rlwhitcomb.util.*;
+import org.apache.commons.lang3.tuple.ImmutablePair;
+import org.apache.commons.lang3.tuple.Pair;
 import org.apache.pivot.beans.BXML;
 import org.apache.pivot.beans.BXMLSerializer;
 import org.apache.pivot.collections.ArrayList;
@@ -856,8 +860,9 @@ public class WordFind implements Application
      * @param largest    Largest word length found.
      * @return           Total number of words.
      */
-    private static int reportResults(final Set<String>[] validWords, final int largest) {
+    private static Pair<Integer, Integer> reportResults(final Set<String>[] validWords, final int largest) {
         int numberOfWordsFound = 0;
+        int numberOfWordsShown = 0;
 
         for (int slot = largest - 1; slot >= 0; slot--) {
             int index = reverseResults ? largest - 1 - slot : slot;
@@ -879,11 +884,11 @@ public class WordFind implements Application
                 int wordsSoFarInSet = 0;
 
                 for (String word : wordSet) {
-                    wordsSoFarInSet++;
-                    if (maxNumberOfWords > 0 && wordsSoFarInSet > maxNumberOfWords) {
+                    if (maxNumberOfWords > 0 && wordsSoFarInSet >= maxNumberOfWords) {
                         output(DOTS);
                         break;
                     }
+                    wordsSoFarInSet++;
 
                     if (lineLength + columnWidth + 6 > maxLineLength) {
                         System.out.println();
@@ -901,13 +906,14 @@ public class WordFind implements Application
                     output(String.format(WORD_FORMAT, leftPadding, highlightWord(word), value));
                     lineLength += columnWidth + 6;
                 }
+                numberOfWordsShown += wordsSoFarInSet;
                 System.out.println();
             }
         }
         if (minWordSizeToReport > 1)
             System.out.println();
 
-        return numberOfWordsFound;
+        return ImmutablePair.of(numberOfWordsFound, numberOfWordsShown);
     }
 
     /**
@@ -1123,10 +1129,16 @@ public class WordFind implements Application
 
             long endTime = System.nanoTime();
 
-            int numberOfWordsFound = reportResults(validWords, largest);
+            Pair<Integer, Integer> found = reportResults(validWords, largest);
+            int numberOfWordsFound = found.getLeft();
+            int numberOfWordsShown = found.getRight();
 
             if (numberOfWordsFound == 0)
                 error("wordfind#errNoValidWords");
+            else if (numberOfWordsShown == numberOfWordsFound)
+                info("wordfind#infoTotalWords", numberOfWordsFound);
+            else
+                info("wordfind#infoTotalShownWords", numberOfWordsFound, numberOfWordsShown);
 
             if (timings) {
                 float secs = (float)(endTime - startTime) / 1.0e9f;

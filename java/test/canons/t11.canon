@@ -24,9 +24,10 @@
 >Test 'abcdefghijklmnop': Passed
 >Test 'thorough': Passed
 >Test 'mmeeins': Passed
+>Test 'xyzzy': Passed
 >
 >Done with WordFind tests.
 >------------------------------------
->Ran 21 tests: 21 passed, 0 failed.
+>Ran 22 tests: 22 passed, 0 failed.
 >====================================
 >

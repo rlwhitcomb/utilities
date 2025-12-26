@@ -50,6 +50,8 @@
 #	    #663: Title string for dictionary lookup; help for "-look" option.
 #	15-Nov-2025 (rlwhitcomb)
 #	    #786: New "-reverse" and "-normal" options.
+#	25-Dec-2025 (rlwhitcomb)
+#	    #796: Report total words found and number shown.
 #
 
 exception		= Error: %1$s from %2$s%n
@@ -82,6 +84,8 @@ infoOneLetterWord	= One letter word %1$s
 infoDictionary		= Dictionary %1$s has %2$,d basic and %3$,d additional words (%4$5.3f secs).
 infoLookup		= (Lookup time %1$,5.3f seconds; %2$,d valid words out of %3$,d tested)
 infoArgValid		= %1$s is valid (%2$d points).
+infoTotalWords		= Total words: %1$d.
+infoTotalShownWords	= Total words: %1$d, words shown: %2$d.
 
 intro.help1	= Usage: wf [ letters ] [ options ]
 intro.help2	= ""
