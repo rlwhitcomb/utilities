@@ -2465,7 +2465,7 @@ public final class CalcUtil
 
 
 	/**
-	 * Building on {@link typeof}, determine if the value is a scalar (e.g., not complex or quaternion, not map nor list).
+	 * Building on {@link #typeof}, determine if the value is a scalar (e.g., not complex or quaternion, not map nor list).
 	 *
 	 * @param obj	An object to inspect.
 	 * @return	Whether or not this object is a scalar value.
