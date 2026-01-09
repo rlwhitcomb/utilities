@@ -49,6 +49,20 @@ const MATCH_MULTILINE        = 0x0010
 const MATCH_UNIX_LINES       = 0x0020
 
 /*
+ * Trig modes for "settings.trigMode"
+ */
+const DEGREES_MODE = "degrees"
+const RADIANS_MODE = "radians"
+const GRADS_MODE   = "grads"
+
+/*
+ * Units values for "settings.units"
+ */
+const BINARY_UNITS  = "binary"
+const DECIMAL_UNITS = "decimal"
+const MIXED_UNITS   = "mixed"
+
+/*
  * Color tags
  */
 const RESET   = "<r>"

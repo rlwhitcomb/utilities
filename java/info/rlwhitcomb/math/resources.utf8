@@ -1,7 +1,7 @@
 #
 # The MIT License (MIT)
 #
-# Copyright (c) 2022,2024-2025 Roger L. Whitcomb.
+# Copyright (c) 2022,2024-2026 Roger L. Whitcomb.
 #
 # Permission is hereby granted, free of charge, to any person obtaining a copy
 # of this software and associated documentation files (the "Software"), to deal
@@ -35,6 +35,7 @@
 #  07-Mar-25 rlw #710	New errors from MathUtil.
 #  13-Oct-25 rlw #777	Update message for allowed KMG prefixes.
 #  28-Nov-25 rlw #643	Bad index message for ContinuedFraction.
+#  05-Jan-26 rlw #799	Null / empty and unknown value messages for units.
 #
 
 #
@@ -61,6 +62,8 @@ numeric.stringLengthTooBig	= String length of %1$,d exceds limit of %2$,d.
 numeric.badTimeValue		= Unable to interpret <y>%1$s<.> as a time value.
 numeric.badDuration		= Unable to interpret <y>%1$s<.> as a duration value.
 numeric.badNumberSymbol		= Unable to interpret <y>0x%1$06X<.> (<u>%2$s<.>) as a number symbol.
+numeric.unitsNullEmpty		= Units value cannot be <y>null<.> or empty.
+numeric.unitsUnknown		= Unknown value <y>%1$s<.> for units!
 
 #
 # From MathUtil.java

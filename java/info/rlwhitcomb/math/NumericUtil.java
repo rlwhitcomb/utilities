@@ -1,7 +1,7 @@
 /*
  * The MIT License (MIT)
  *
- * Copyright (c) 2011,2013-2014,2016-2018,2020-2023,2025 Roger L. Whitcomb.
+ * Copyright (c) 2011,2013-2014,2016-2018,2020-2023,2025-2026 Roger L. Whitcomb.
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -189,6 +189,9 @@
  *	13-Oct-2025 (rlwhitcomb)
  *	    #777: Update the range table with the new official prefixes: "ronna" and "quetta".
  *	    Allow decimals in KMG values; update "convertKMGValue" to use BigDecimal.
+ *	05-Jan-2026 (rlwhitcomb)
+ *	    #799: Fix NPE in RangeMode.getFrom() for null or empty values; use our own exception
+ *	    there instead of the default one for invalid values.
  */
 package info.rlwhitcomb.math;
 
@@ -440,12 +443,30 @@ public final class NumericUtil
 		MIXED;
 
 
+		/**
+		 * Return a value based on the input object (string).
+		 *
+		 * @param obj Input object to convert.
+		 * @return    The corresponding range value.
+		 * @throws    IllegalArgumentException if the input is {@code null}, an
+		 *            empty string, or its string representation is not a valid
+		 *            range value.
+		 * @see #valueOf
+		 */
 		public static RangeMode getFrom(Object obj) {
 		    if (obj instanceof RangeMode)
 			return (RangeMode) obj;
 
+		    if (CharUtil.isNullOrEmpty(obj))
+			throw new Intl.IllegalArgumentException("math#numeric.unitsNullEmpty");
+
 		    String name = obj.toString();
-		    return valueOf(name.toUpperCase());
+		    try {
+			return valueOf(name.toUpperCase());
+		    }
+		    catch (IllegalArgumentException iae) {
+			throw new Intl.IllegalArgumentException("math#numeric.unitsUnknown", name);
+		    }
 		}
 	}
 

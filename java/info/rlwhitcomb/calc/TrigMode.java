@@ -1,7 +1,7 @@
 /*
  * The MIT License (MIT)
  *
- * Copyright (c) 2022 Roger L. Whitcomb.
+ * Copyright (c) 2022,2026 Roger L. Whitcomb.
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -23,15 +23,18 @@
  *
  *	Enumeration of the modes for the trigonometric functions in Calc.
  *
- *  History:
- *	26-Jan-2022 (rlwhitcomb)
- *	    Moved out of CalcObjectVisitor.
- *	01-Feb-2022 (rlwhitcomb)
- *	    #115: Add "getFrom" method.
- *	24-Aug-2022 (rlwhitcomb)
- *	    #447: Add "GRADS" mode.
+ * History:
+ *  26-Jan-22 rlw ----	Moved out of CalcObjectVisitor.
+ *  01-Feb-22 rlw #115	Add "getFrom" method.
+ *  24-Aug-22 rlw #447	Add "GRADS" mode.
+ *  05-Jan-26 rlw #799	Fix NPE on null/empty inputs to "getFrom"; use our own
+ *			exception for invalid values.
  */
 package info.rlwhitcomb.calc;
+
+import info.rlwhitcomb.util.CharUtil;
+import info.rlwhitcomb.util.Intl;
+
 
 /**
  * The mode used for doing trigonometric calculations.
@@ -54,12 +57,30 @@ public enum TrigMode
 	GRADS;
 
 
+	/**
+	 * Convert from arbitrary object (basically its string representation)
+	 * into one of these mode objects.
+	 *
+	 * @param obj Input object to convert (cannot be {@code null} or an empty string).
+	 * @return    The corresponding trig mode, if possible.
+	 * @throws    IllegalArgumentException if the input is null or an empty string or
+	 *            its string representation is an invalid value.
+	 * @see       #valueOf
+	 */
 	public static TrigMode getFrom(final Object obj) {
 	    if (obj instanceof TrigMode)
 		return (TrigMode) obj;
 
+	    if (CharUtil.isNullOrEmpty(obj))
+		throw new Intl.IllegalArgumentException("calc#trigNullEmpty");
+
 	    String name = obj.toString();
-	    return valueOf(name.toUpperCase());
+	    try {
+		return valueOf(name.toUpperCase());
+	    }
+	    catch (IllegalArgumentException iae) {
+		throw new Intl.IllegalArgumentException("calc#trigUnknown", name);
+	    }
 	}
 
 }

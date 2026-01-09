@@ -408,3 +408,9 @@ noNamedParams		= Actual parameters named <u>%1$s<.> do not match any formal para
 #
 immutableObject		= Cannot add or update the <y>%1$s<.> member in this constant object.
 
+#
+# From TrigMode
+#
+trigNullEmpty		= Trig mode value cannot be <y>null<.> or empty.
+trigUnknown		= Trig mode value <y>%1$s<.> is invalid!
+

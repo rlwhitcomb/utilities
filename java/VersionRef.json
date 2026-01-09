@@ -3,6 +3,10 @@
 /*======================*/
 
 [
+    { version: '3.2.10', date: d'2026-01-05',
+      issues: [ 799 ],
+      comment: 'Fix crash when setting "trigMode" or "units" to null or empty values.'
+    },
     { version: '3.2.9', date: d'2025-12-16',
       issues: [ 792 ],
       comment: 'Support continued lines during "eval".'
