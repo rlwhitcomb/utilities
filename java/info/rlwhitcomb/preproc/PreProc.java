@@ -1,7 +1,7 @@
 /**
  * The MIT License (MIT)
  *
- * Copyright (c) 2010-2011,2014-2016,2019-2023,2025 Roger L. Whitcomb.
+ * Copyright (c) 2010-2011,2014-2016,2019-2023,2025-2026 Roger L. Whitcomb.
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -122,6 +122,7 @@
  *  14-Nov-25 rlw #785	Regularize exceptions thrown; rename preproc version variable name; change
  *			source of copyright notice; add Java data model variable; put title and
  *			version into the "version.properties" file.
+ *  08-Jan-26 rlw ----	Update copyright year.
  */
 package info.rlwhitcomb.preproc;
 
@@ -391,7 +392,7 @@ public class PreProc
 	private static final Pattern IDENT = Pattern.compile("^([_A-Za-z][\\w\\.]*)");
 
 	/** The current copyright year. */
-	private static final String COPYRIGHT_YEAR = "2010-2011,2014-2016,2019-2023,2025";
+	private static final String COPYRIGHT_YEAR = "2010-2011,2014-2016,2019-2023,2025-2026";
 
 
 	/**********************************************************/
