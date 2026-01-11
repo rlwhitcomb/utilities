@@ -8,6 +8,8 @@ f3=frac(3,4)
 f4=frac(4,5)
 (f1,f2,f3,f4)
 (1.2, 2.3, 4.5, 3.14)
+quaternion(f1)
+ℍ(f2)
 
 q1=(1,2,3,4)
 q2=(1,2,-1,-2)
@@ -67,9 +69,9 @@ q7=(1,2,3,4)
 q7[0];q7[1];q7[2];q7[3]
 q7[1]=9
 q7
-dec(q7)
+ℝ(q7)
 q7[2]=0;q7[3]=0
-complex(q7)
+ℂ(q7)
 
 // Tests from various internet examples
 // From: https://math.umd.edu/~immortal/MATH431/book/ch_quaternions.pdf

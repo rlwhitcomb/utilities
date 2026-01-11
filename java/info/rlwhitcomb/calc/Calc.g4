@@ -1,7 +1,7 @@
 /*
  * The MIT License (MIT)
  *
- * Copyright (c) 2020-2025 Roger L. Whitcomb.
+ * Copyright (c) 2020-2026 Roger L. Whitcomb.
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -593,6 +593,8 @@
  *	    #787: First pass at "UNLESS" support in statements.
  *	05-Dec-2025 (rlwhitcomb)
  *	    #643: CFrac function, CFRACTION type.
+ *	10-Jan-2026 (rlwhitcomb)
+ *	    Unicode symbols for "dec", "complex", and "quaternion".
  */
 
 grammar Calc;
@@ -1410,7 +1412,7 @@ K_HN       : 'hn' | 'HN' | 'Hn'
            | '\u210B'
            ;
 
-K_DEC      : 'dec' | 'DEC' | 'Dec' ;
+K_DEC      : 'dec' | 'DEC' | 'Dec' | '\u211D' ;
 
 K_TODATE   : 'todate' | 'TODATE' | 'ToDate' | 'Todate' | 'toDate' ;
 
@@ -1422,9 +1424,9 @@ K_FRAC     : 'frac' | 'FRAC' | 'Frac' ;
 
 K_CFRAC    : 'cfrac' | 'CFRAC' | 'CFrac' | 'cFrac' ;
 
-K_COMPLEX  : 'complex' | 'COMPLEX' | 'Complex' ;
+K_COMPLEX  : 'complex' | 'COMPLEX' | 'Complex' | '\u2102' ;
 
-K_QUAT     : 'quaternion' | 'QUATERNION' | 'Quaternion' ;
+K_QUAT     : 'quaternion' | 'QUATERNION' | 'Quaternion' | '\u210D' ;
 
 K_ROMAN    : 'roman' | 'ROMAN' | 'Roman' ;
 

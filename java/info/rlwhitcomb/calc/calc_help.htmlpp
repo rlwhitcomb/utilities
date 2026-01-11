@@ -989,14 +989,14 @@ or<br>
             <tr><td><code>SORT</code>&nbsp;<i>expr</i> (&nbsp;<code>,</code> <i>flags_expr</i>&nbsp;)</td><td>sort the object, array, or set, optionally ignoring case,<br>or sorting objects by key instead of value,<br>returning a new sorted object</td></tr>
             <tr><td><code>TRIM</code> or <code>LTRIM</code> or <code>RTRIM</code> <i>expr</i></td><td>trim all, leading, or trailing whitespace</td></tr>
             <tr><td><code>PAD</code> or <code>LPAD</code> or <code>RPAD</code>&nbsp;<i>var</i>&nbsp;<code>,</code> <i>expr</i>&nbsp;( <code>,</code><i>expr</i> )</td><td>pad an array or string to the given width<br>with 0 or space <i>(default)</i> or the given value/character</td></tr>
-            <tr><td><code>FIB</code>, <code>&#x1D439;</code>, or <code>&#x2131;</code>&nbsp;<i>expr</i></td><td>Fibonacci number</td></tr>
-            <tr><td><code>Bn</code>, <code>&#x1D435;</code>, or <code>&#x212C;</code>&nbsp;<i>expr</i></td><td>Bernoulli number</td></tr>
-            <tr><td><code>Hn</code>, <code>&#x1D43B;</code>, or <code>&#x210B;</code>&nbsp;<i>expr</i></td><td>Harmonic number</td></tr>
-            <tr><td><code>DEC</code>&nbsp;<i>expr</i></td><td>convert string or fraction to decimal number</td></tr>
+            <tr><td><code>FIB</code>, <code>&#x1D439;</code>, or <code>&#x2131;</code>&nbsp;<i>expr</i></td><td><i>n</i><sup>th</sup> Fibonacci number</td></tr>
+            <tr><td><code>Bn</code>, <code>&#x1D435;</code>, or <code>&#x212C;</code>&nbsp;<i>expr</i></td><td><i>n</i><sup>th</sup> Bernoulli number</td></tr>
+            <tr><td><code>Hn</code>, <code>&#x1D43B;</code>, or <code>&#x210B;</code>&nbsp;<i>expr</i></td><td><i>n</i><sup>th</sup> Harmonic number</td></tr>
+            <tr><td><code>DEC</code> or <code>&#x211D;</code>&nbsp;&nbsp;<i>expr</i></td><td>convert string, fraction, complex, etc. to decimal (real) number</td></tr>
             <tr><td><code>FRAC</code>&nbsp;<i>num</i><code>,</code>&nbsp;<i>den</i><br>or <i>int</i><code>,</code><i>num</i><code>,</code><i>den</i><br>or <i>string</i></td><td>construct a rational fraction</td></tr>
             <tr><td><code>CFRAC</code>&nbsp;<i>expr</i></td><td>convert value, list, set, or string<br>to a continued fraction</td></tr>
-            <tr><td><code>COMPLEX</code>&nbsp;<i>r</i><code>,</code>&nbsp;<i>i</i><br>or <i>expr</i></td><td>construct a complex number</td></tr>
-            <tr><td><code>QUATERNION</code>&nbsp;<i>a</i><code>,</code>&nbsp;<i>b</i><code>,</code>&nbsp;<i>c</i><code>,</code>&nbsp;<i>d</i></td><td>construct a quaternion value</td></tr>
+            <tr><td><code>COMPLEX</code> or <code>&#x2102;</code>&nbsp;&nbsp;<i>r</i><code>,</code>&nbsp;<i>i</i><br>or <i>expr</i></td><td>construct a complex number</td></tr>
+            <tr><td><code>QUATERNION</code> or <code>&#x210D;</code>&nbsp;&nbsp;<i>a</i><code>,</code>&nbsp;<i>b</i><code>,</code>&nbsp;<i>c</i><code>,</code>&nbsp;<i>d</i><br>or <i>expr</i></td><td>construct a quaternion value</td></tr>
             <tr><td><code>ROMAN</code>&nbsp;<i>expr</i></td><td>interpret <i>expr</i> as a Roman Numeral</td></tr>
             <tr><td><code>TODATE</code>&nbsp;<i>expr</i> (&nbsp;<code>,</code> <i>expr</i> (&nbsp;<code>,</code> <i>expr</i>&nbsp;)&nbsp;)</td><td>convert expression(s) to a date value</td></tr>
             <tr><td><code>TOBASE</code>&nbsp;<i>expr</i> <code>,</code> <i>base_expr</i></td><td>convert number to the given base (radix)</td></tr>

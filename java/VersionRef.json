@@ -3,6 +3,10 @@
 /*======================*/
 
 [
+    { version: '3.2.12', date: d'2026-01-10',
+      issues: [ ],
+      comment: 'Introduce Unicode symbols for "dec", "complex", and "quaternion" functions.'
+    },
     { version: '3.2.10', date: d'2026-01-05',
       issues: [ 799 ],
       comment: 'Fix crash when setting "trigMode" or "units" to null or empty values.'
