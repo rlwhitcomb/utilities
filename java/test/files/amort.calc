@@ -3,32 +3,38 @@
 //   $0 = principal amount
 //   $1 = yearly interest rate (percentage)
 //   $2 = number of years
+// [ $3 = extra principal ]
 //
 $assert defined(PMT,CLS), 'The "library.calc" file must be included.'
 $quiet on {
 $separators on
 
 if isnull($0) {
-    display 'Usage: amort <PRINCIPAL> <YEARLY RATE %> <YEARS>'
+    display 'Usage: amort <PRINCIPAL> <YEARLY RATE %> <YEARS> [ <EXTRA_PRINCIPAL> ]'
     leave 1
 }
 
 $include 'boxdraw'
 
-payment = PMT(P=$0, R=$1, N=$2)
+var payment = PMT(P=$0, R=$1, N=$2)
+const extra = $3 ? ~~$3 : 0
 
-principal = $0
-monthly_interest = $1 / 100 / 12
-months = $2 * 12
+var principal = $0
+const monthly_interest = $1 / 100 / 12
+const months = $2 * 12
 
-total_payments = 0
-total_interest = 0
+var total_payments = 0
+var total_interest = 0
+var total_months   = 0
 
 display CLS
-display `Monthly payment on $$$principal at ${$1}% interest for ${$2} years is $$$payment.`
+var summary = `Monthly payment on ${principal@2,$} at ${$1}% interest for ${$2} years is $$$payment`
+if extra { summary += ` (with ${extra@2,$} additional)` }
+display summary , '.'
 display
 
-const TITLES = [ "Year", "Month", "Balance", "Payment", "Interest", "Principal" ]
+var TITLES = [ "Year", "Month", "Balance", "Payment", "Interest", "Principal" ]
+if extra { TITLES += [ "Extra" ] }
 const WIDTHS = title_widths(TITLES, 4)
 const YEAR_LINE = dash_line(WIDTHS[0], HV_HZ)
 
@@ -40,21 +46,27 @@ display lt_cross_cols(WIDTHS)
 var year = 1
 loop m over months {
     var interest = round(monthly_interest * principal, 2)
+    var current_payment = payment + extra
 
-    if principal <= payment {
-        payment = principal + interest
+    if principal <= current_payment {
+        current_payment = principal + interest
+        payment = current_payment - extra
     }
-    var principal_decrease = payment - interest
+    var principal_decrease = current_payment - interest
 
-    total_payments += payment
+    total_payments += current_payment
     total_interest += interest
+    total_months   ++
 
     var line = lt_mid_cols(WIDTHS)
     const ys = (m mod 12 == 1) ? @@year : (m mod 12 == 0) ? YEAR_LINE : ''
-    const values = [ ys, @@m, `${principal@2,$}`, `${payment@2,$}`, `${interest@2,$}`, `${principal_decrease@2,$}` ]
+    var values = [ ys, @@m, `${principal@2,$}`, `${payment@2,$}`, `${interest@2,$}`, `${principal_decrease@2,$}` ]
+    if extra { values += [ `${extra@2,$}` ] }
     display insert_titles(line, values, WIDTHS, ALIGN_RIGHT)
 
     principal -= principal_decrease
+
+    if principal <= 0 leave
 
     if m mod 12 == 0 year++
 }
@@ -62,7 +74,10 @@ loop m over months {
 display lt_bot_cols(WIDTHS)
 
 display
-display `Total of $months monthly payments is ${total_payments@2,$}, Total interest is ${total_interest@2,$}`
+display `Total of $total_months monthly payments is ${total_payments@2,$}; Total interest is ${total_interest@2,$}`
+if extra {
+    display `Paying ${extra@2,$} extra monthly pays the loan off ${months - total_months@w} months early.`
+}
 
 }
 
