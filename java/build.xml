@@ -4,7 +4,7 @@
 
 	The MIT License (MIT)
 
-	Copyright (c) 2020-2025 Roger L. Whitcomb.
+	Copyright (c) 2020-2026 Roger L. Whitcomb.
 
 	Permission is hereby granted, free of charge, to any person obtaining a copy
 	of this software and associated documentation files (the "Software"), to deal
@@ -402,6 +402,8 @@
 		Weird problems sometimes with "makeScripts" not working with "outdir" being null,
 		so switch to using "test/files/library" always, in case the file copy to the
 		utilities directory isn't caught by Ant somehow.
+	    10-Jan-2026 (rlwhitcomb)
+		Include "mkcanon" in the install directory (to put it in the path).
 
      ========================================================================== -->
 
@@ -548,6 +550,8 @@
 		<include name="ppj"                     unless:true="${on.windows}"/>
 		<include name="ppj.bat"                     if:true="${on.windows}"/>
 		<include name="verifyhash.bat"              if:true="${on.windows}"/>
+		<include name="mkcanon"                 unless:true="${on.windows}"/>
+		<include name="mkcanon.bat"                 if:true="${on.windows}"/>
 	</patternset>
 
 	<property name="tester.class" value="info.rlwhitcomb.tester.Tester"/>
