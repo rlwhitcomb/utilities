@@ -14,3 +14,19 @@ loop p over START_P .. END_P, 2 {
   }
 }
 
+//
+// From https://www.quora.com/What-is-the-most-absurd-code-youve-ever-seen/answer/Shrangi-Soni?ch=17&oid=65676463&share=36f67735&srid=obNJ&target_type=answer
+// Transcribed by rlw into Calc language
+//
+_____=[]
+const _=true
+const __=_ * _
+const ___=__+__+__+__+__
+const ____=___*___+___*___+___+___+___
+
+loop ______ over __-__..___*___ {
+   _____[______] = chars(____+______)
+}
+_____[___*___+__] = chars(___*___+___+__+__)
+
+display _____[___*___-__-__-__]+_____[___-__]+_____[___+___+__]+_____[__+__]+_____[___+___+___-__]+_____[___+___+__+__]+_____[___-__],@@(__+__)+@@(__-__)+@@(__+__)+@@(___+__)
