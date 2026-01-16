@@ -1,7 +1,7 @@
 #
 # The MIT License (MIT)
 #
-# Copyright (c) 2012,2014,2016-2023,2025 Roger L. Whitcomb.
+# Copyright (c) 2012,2014,2016-2023,2025-2026 Roger L. Whitcomb.
 #
 # Permission is hereby granted, free of charge, to any person obtaining a copy
 # of this software and associated documentation files (the "Software"), to deal
@@ -92,6 +92,8 @@
 #	    #633: New help text for "-noopt" and "-opt" options.
 #	25-Jul-2025 (rlwhitcomb)
 #	    #736: New parsing exception error message.
+#	09-Jan-2026 (rlwhitcomb)
+#	    #736: Update help for expression check syntax.
 #
 
 mismatch		= Mismatch on test \"%1$s\":%n  Canon file: %2$s%n Output file: %3$s
@@ -180,17 +182,28 @@ help20		= "  it is a comment that is ignored."
 help21		= "Lines beginning with \"$\", \"!\", or \":\" contain directives"
 help22		= "  and options for the test process."
 help23		=
-help24		= Additionally, each test line can be prefixed with a version
-help25		= "  prefix in the form of \"{[platform],[begin][-end][+]}\" where:"
-help26		= "  \"platform\" is a platform identifier,"
-help27		= "  \"begin\" and \"end\" can be \"major.minor\" with"
-help28		= "  either part missing or given as \"*\" or \"x\" (meaning"
-help29		= "  don't care), and the trailing \"+\" means 'that version or"
-help30		= "  any later one'."
-help31		=
-help32		= Canon files have the following kinds of lines:
-help33		= "  <input"
-help34		= "  >output"
-help35		= "  >>error"
-help36		=
+help24		= Additionally, each test line can begin with a 'platform,version',
+help25		= "  'charset', or 'expression' prefix that enables or disables that"
+help26		= "  test line depending on the truth of the test. The prefixes are:"
+help27		= "  \"{{[platform],[begin][-end][+]}}\" where:"
+help28		= "    \"platform\" is a platform identifier (can be \"^platform\" to"
+help29		= "    accept any platform EXCEPT the listed one)"
+help30		= "    \"begin\" and \"end\" can be \"major.minor\" with"
+help31		= "    either part missing or given as \"*\" or \"x\" (meaning"
+help32		= "    don't care), and the trailing \"+\" means 'that version or"
+help33		= "    any later one';"
+help34		= "  \"[<charset>]\" or \"[<^charset>]\" to include for only that"
+help35		= "    charset or any charset EXCEPT that one;"
+help36		= "  \"{[expression]}\" where the expression is evaluated according"
+help37		= "    to the rules for our PreProcessor."
+help38		= "If multiple conditions are given (in any order), ALL conditions"
+help39		= "  must be satisfied to include the line. Also if there is a syntax"
+help40		= "  error in any prefix, the line will be included in the canon, in"
+help41		= "  the hope that the test will fail with a mismatch in the canon."
+help42		=
+help43		= Canon files have the following kinds of lines:
+help44		= "  <input"
+help45		= "  >output"
+help46		= "  >>error"
+help47		=
 
