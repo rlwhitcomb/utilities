@@ -1,7 +1,7 @@
 /*
  * The MIT License (MIT)
  *
- * Copyright (c) 2021-2023,2025 Roger L. Whitcomb.
+ * Copyright (c) 2021-2023,2025-2026 Roger L. Whitcomb.
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -40,6 +40,7 @@
  *		  #592	Move basic fields out of subclasses into this base class.
  *  06-Aug-23 rlw #621	Add "ENUM" type.
  *  01-Jun-25 rlw #724	Add scope name to "toString".
+ *  15-Jan-25 rlw #795	Add WITH type.
  */
 package info.rlwhitcomb.calc;
 
@@ -81,6 +82,9 @@ class Scope
 
 		/** A {@code CASE} statement block. */
 		CASE,
+
+		/** A {@code WITH} statement block. */
+		WITH,
 
 		/** A user-defined function, which includes a local symbol table. */
 		FUNCTION,

@@ -3,6 +3,10 @@
 /*======================*/
 
 [
+    { version: '3.3', date: d'2026-01-19',
+      issues: [ 795 ],
+      comment: 'New "WITH" statement to support parsing with regular expressions.'
+    },
     { version: '3.2.12', date: d'2026-01-10',
       issues: [ ],
       comment: 'Introduce Unicode symbols for "dec", "complex", and "quaternion" functions.'

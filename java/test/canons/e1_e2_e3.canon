@@ -1740,6 +1740,27 @@
 >vaar3 -> "abc"
 >vaar2[-2], vaar2[-1] = vaar2[-1], vaar2[-2] -> "ocean"
 >vaar2 -> [ 1492, "Columbus", "sails", "the", "blue", "ocean" ]
+>Defining function “parse(date)” = {
+>   const PAT = s'(\d+)[-/](\d+)[-/](\d+)'
+>   with date, PAT {
+>      display `month = $_0`
+>      display `day   = $_1`
+>      display `year  = $_2`
+>      _*
+>   }
+>   else {
+>      `Date '$date' was not recognized!`
+>   }
+>}
+>month = 12
+>day   = 7
+>year  = 1941
+>parse('12-7-1941') -> [ "12", "7", "1941" ]
+>parse('junk') -> "Date 'junk' was not recognized!"
+>month = 9
+>day   = 11
+>year  = 2001
+>parse('9-11-2001') -> [ "9", "11", "2001" ]
 >
 >End of expression tests (suite 1).
 >Tests of nested object / array variables.

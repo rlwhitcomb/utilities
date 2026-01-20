@@ -595,6 +595,8 @@
  *	    #643: CFrac function, CFRACTION type.
  *	10-Jan-2026 (rlwhitcomb)
  *	    Unicode symbols for "dec", "complex", and "quaternion".
+ *	15-Jan-2026 (rlwhitcomb)
+ *	    #795: Add "WITH" statement for parsing groups from a regex.
  */
 
 grammar Calc;
@@ -619,6 +621,7 @@ stmtOrExpr
    | ifStmt
    | leaveStmt
    | nextStmt
+   | withStmt
    | timeThisStmt
    | printStmt
    | emptyStmt
@@ -683,6 +686,10 @@ leaveStmt
 
 nextStmt
    : K_NEXT
+   ;
+
+withStmt
+   : K_WITH expr EOL* COMMA EOL* expr ( EOL* COMMA EOL* expr ) ? bracketBlock ( K_ELSE bracketBlock ) ?
    ;
 
 timeThisStmt
@@ -1542,6 +1549,8 @@ K_DEFAULT  : 'default' | 'DEFAULT' | 'Default' ;
 K_LEAVE    : 'leave' | 'LEAVE' | 'Leave' ;
 
 K_NEXT     : 'next' | 'NEXT' | 'Next' ;
+
+K_WITH     : 'with' | 'WITH' | 'With' ;
 
 K_TIMETHIS : 'timethis' | 'TIMETHIS' | 'TimeThis' | 'Timethis' | 'timeThis' ;
 

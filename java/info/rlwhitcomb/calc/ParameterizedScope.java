@@ -1,7 +1,7 @@
 /*
  * The MIT License (MIT)
  *
- * Copyright (c) 2022,2024,2025 Roger L. Whitcomb.
+ * Copyright (c) 2022,2024-2026 Roger L. Whitcomb.
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -31,6 +31,8 @@
  *  01-Jun-25 rlw #724	Changes to delay defining "_*" and "_#" until the
  *			end of parameter processing to avoid infinite
  *			recursion if "_*" is used in a nested call.
+ *  15-Jan-26 rlw #795	"With" scope is one of these now also. Save and make
+ *			accessor for the name prefix ("$" or "_").
  */
 package info.rlwhitcomb.calc;
 
@@ -42,6 +44,11 @@ import java.math.BigInteger;
  */
 class ParameterizedScope extends NestedScope
 {
+	/**
+	 * Name prefix for use with local variables defined by the declaration / invocation.
+	 */
+	private String namePrefix;
+
 	/**
 	 * Name of the array variable that accesses the complete array of parameters.
 	 */
@@ -68,11 +75,22 @@ class ParameterizedScope extends NestedScope
 	ParameterizedScope(final Type t, final String prefix) {
 	    super(t);
 
+	    this.namePrefix = prefix;
+
 	    arrayName = String.format("%1$s*", prefix);
 	    countName = String.format("%1$s#", prefix);
 
 	    parameters = new ArrayScope<>();
 	    parameters.setName(arrayName);
+	}
+
+	/**
+	 * Access the name prefix for use with names set automatically.
+	 *
+	 * @return Name prefix defined during construction.
+	 */
+	String getPrefix() {
+	    return namePrefix;
 	}
 
 	/**
@@ -109,6 +127,22 @@ class GlobalScope extends ParameterizedScope
 	GlobalScope() {
 	    super(Type.GLOBAL, GLOBAL_PREFIX);
 	    setName("globals");
+	}
+}
+
+/**
+ * Scope for a "WITH" statement, which will have "parameters" defined, which are the group
+ * strings returned from the regex group values.
+ */
+class WithScope extends ParameterizedScope
+{
+	/** Prefix for the group (parameter) values. */
+	static final String WITH_PREFIX = "_";
+
+
+	WithScope() {
+	    super(Type.WITH, WITH_PREFIX);
+	    setName("with");
 	}
 }
 

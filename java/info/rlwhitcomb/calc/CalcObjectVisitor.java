@@ -1,7 +1,7 @@
 /*
  * The MIT License (MIT)
  *
- * Copyright (c) 2020-2025 Roger L. Whitcomb.
+ * Copyright (c) 2020-2026 Roger L. Whitcomb.
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -945,6 +945,8 @@
  *	    #643: More continued fraction work; allow iteration through the complex values.
  *	16-Dec-2025 (rlwhitcomb)
  *	    #792: Deal nicely with continued lines during "eval" (roughly the same way as REPL mode).
+ *	15-Jan-2026 (rlwhitcomb)
+ *	    #795: Processing for "WITH" statement.
  */
 package info.rlwhitcomb.calc;
 
@@ -4212,6 +4214,41 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 	@Override
 	public Object visitNextStmt(CalcParser.NextStmtContext ctx) {
 	    throw NextException.instance();
+	}
+
+	@Override
+	public Object visitWithStmt(CalcParser.WithStmtContext ctx) {
+	    String source = getStringValue(ctx.expr(0), false, false, false);
+	    String regex  = getStringValue(ctx.expr(1), false, false, false);
+	    int flags     = 0x0000;
+	    Object result = null;
+
+	    CalcParser.ExprContext flagExpr = ctx.expr(2);
+	    if (flagExpr != null) {
+		flags = getIntValue(flagExpr);
+	    }
+
+	    WithScope scope = new WithScope();
+	    pushScope(scope);
+	    try {
+		Pattern pattern = Pattern.compile(regex, patternFlags(flags));
+		Matcher m = pattern.matcher(source);
+		if (m.matches()) {
+		    for (int i = 1; i <= m.groupCount(); i++) {
+			ParameterValue.define(scope, i - 1, m.group(i));
+		    }
+		    scope.finalizeParameters();
+		    result = evaluate(ctx.bracketBlock(0));
+		}
+		else if (ctx.K_ELSE() != null) {
+		    result = evaluate(ctx.bracketBlock(1));
+		}
+	    }
+	    finally {
+		popScope();
+	    }
+
+	    return result;
 	}
 
 	private Object executeTimeBlock(CalcParser.TimeThisStmtContext ctx) {

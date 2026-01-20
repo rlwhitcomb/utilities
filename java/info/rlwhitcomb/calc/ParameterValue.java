@@ -1,7 +1,7 @@
 /*
  * The MIT License (MIT)
  *
- * Copyright (c) 2022,2024 Roger L. Whitcomb.
+ * Copyright (c) 2022,2024,2026 Roger L. Whitcomb.
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -31,6 +31,7 @@
  *  25-May-22 rlw #348	Just call "setValue" which defaults to locally.
  *  04-Feb-24 rlw #645	Allow parameters to pass by reference (and thereby
  *			be modifiable).
+ *  15-Jan-25 rlw #795	Add "define" method with an index value for the name.
  */
 package info.rlwhitcomb.calc;
 
@@ -71,6 +72,17 @@ class ParameterValue extends ValueScope
 	@Override
 	Object getValue() {
 	    return paramValue;
+	}
+
+	/**
+	 * Define a constant one of these identified by number into the given scope.
+	 *
+	 * @param scope	The enclosing scope in which to define it.
+	 * @param index	Index value which is used for the name of this parameter.
+	 * @param value	The current value of it.
+	 */
+	static void define(final ParameterizedScope scope, final int index, final Object value) {
+	    define(scope, String.format("%1$s%2$d", scope.getPrefix(), index), value, true);
 	}
 
 	/**

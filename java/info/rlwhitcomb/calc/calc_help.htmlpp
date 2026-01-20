@@ -146,6 +146,10 @@ h4 {
 .indent {
    margin-left: 20px;
 }
+
+.indent2 {
+   margin-left: 30px;
+}
     </style>
 </head>
 
@@ -1500,7 +1504,7 @@ whether it has previously been used/defined.
 <div class="cols">
   In addition to the functions and operators listed above, Calc has eight different statements which can be used to do
      iterative or repeated calculations, to select between actions based on the value of an expression, and to display text or values.
-     These are the: <code>LOOP</code>, <code>WHILE</code>, <code>IF</code> or <code>UNLESS</code>, <code>CASE</code>, <code>LEAVE</code>, <code>NEXT</code>,
+     These are the: <code>LOOP</code>, <code>WHILE</code>, <code>IF</code> or <code>UNLESS</code>, <code>CASE</code>, <code>LEAVE</code>, <code>NEXT</code>, <code>WITH</code>,
      <code>TIMETHIS</code>, and the <code>PRINT</code> or <code>DISPLAY</code> statements.
      All keywords in these statements have three differently-cased forms: all lower case, all UPPER case, and MixedCase.  For example: <code>loop</code>, <code>LOOP</code>, and <code>Loop</code>.
   <p>The syntax for each is as follows:
@@ -1516,7 +1520,7 @@ whether it has previously been used/defined.
   <p class="indent">
      <code>CASE</code>&nbsp;<i>expr</i> (&nbsp;<code>OF</code> | <code>IN</code> | <code>&#x2208;</code> | <code>&#x220A;</code>&nbsp;) <i>selector</i> <code>: {</code> <i>statements or expressions</i> <code>}</code> ( <code>,</code> ) ? ) *
   </p>
-  <p>where <i>selector</i> can be any one of the following:
+  <p class="indent2">where <i>selector</i> can be any one of the following:
   <ul class="indent">
     <li><i>expr</i> ( <code>,</code> expr ) *</li>
     <li><i>expr</i> <code>...</code>,&nbsp;<code>..</code>,&nbsp;or&nbsp;<code>&#x2026;</code>&nbsp;<i>expr</i> [ <code>,</code> <i>expr</i> ]</li>
@@ -1532,6 +1536,8 @@ whether it has previously been used/defined.
   <p class="indent">
     <code>NEXT</code>
   </p>
+  <p class="indent">
+    <code>WITH</code> <i>expr</i> <code>,</code> <i>regex</i> [ <code>,</code> <i>flag_expr</i> ] <code>{</code> <i>statements or expressions</i> <code>}</code> [ <code>ELSE</code> <code>{</code> <i>statements or expressions</i> <code>}</code> ]
   <p class="indent">
     <code>TIMETHIS</code>&nbsp;[ <i>expr</i> ] <code>{</code> <i>statements or expressions</i> <code>}</code>
   </p>
@@ -1601,6 +1607,7 @@ whether it has previously been used/defined.
      iteration of the loop or while, or to the next block in the case statement (without regard to the selector). This will obviously affect the final value of the statement.
      Note that in the absence of a <code>next</code> statement, execution does NOT fall through from one code block to the next inside a <code>CASE</code> statement.
      Also note that if control is transferred via the <code>next</code> statement to the next loop/while iteration, any expressions placed after the <code>next</code> are not executed on that iteration of the loop or while.
+  <p>The <code>WITH</code> statement is a way to parse or deconstruct strings, based on regular expression patterns, and then to retrieve the individual groups of characters, signified by groups surrounded by <code>'('</code> and <code>')'</code> in the pattern. The possible values of the optional flags are the same as for the <code>MATCHES</code> function, or the <code>MATCHES</code> selector for the <code>CASE</code> statement. If the string result of the first expression completely matches the second expression interpreted as a regular expression (with any flags specified), then the groups of the matched string are extracted into local variables named <code>_0</code>, <code>_1</code>, etc. and the first set of statements are executed. Note: just like function parameters, the local variables <code>_#</code> and <code>_*</code> are also set with the results of all the groups found in the matched string. If the match fails, the statements inside the (optional) <code>ELSE</code> block are executed. The result of the <code>WITH</code> statement is the last result of whichever block is actually executed.
   <p>In the normal case, the value of any of these compound statements is the value of the last expression evaluated, inside whatever block is selected, and from the last iteration of that
      block inside a loop. But the only time this value can be used is for the return value of a function, or for
      <code>"case"</code> inside any other expression. For instance, consider the following code:

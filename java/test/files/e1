@@ -1558,6 +1558,26 @@ vaar1;vaar2;vaar3
 vaar2[-2], vaar2[-1] = vaar2[-1], vaar2[-2]
 vaar2
 
+#
+# "WITH" statement
+#
+define parse(date) = {
+   const PAT = s'(\d+)[-/](\d+)[-/](\d+)'
+   with date, PAT {
+      display `month = $_0`
+      display `day   = $_1`
+      display `year  = $_2`
+      _*
+   }
+   else {
+      `Date '$date' was not recognized!`
+   }
+}
+
+parse('12-7-1941')
+parse('junk')
+parse('9-11-2001')
+
 print
 print "End of expression tests (suite 1)."
 
