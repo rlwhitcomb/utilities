@@ -1,7 +1,7 @@
 #
 # The MIT License (MIT)
 #
-# Copyright (c) 2021-2025 Roger L. Whitcomb.
+# Copyright (c) 2021-2026 Roger L. Whitcomb.
 #
 # Permission is hereby granted, free of charge, to any person obtaining a copy
 # of this software and associated documentation files (the "Software"), to deal
@@ -206,6 +206,8 @@
 #	    #740: New error message for dot product.
 #	16-Dec-2025 (rlwhitcomb)
 #	    Tweaks to ".." character representation.
+#	23-Jan-2026 (rlwhitcomb)
+#	    Reduce precision of timing messages to just microseconds (from nanos).
 #
 
 #
@@ -244,7 +246,7 @@ argError	= Error: %1$s
 charsetError	= <e>Problem with character set <y>%1$s<.>: %2$s<r>
 declError	= <e>Improper syntax for variable declaration: <y>%1$s<.><r>
 noOuputGuiMode	= Redirecting output streams not available in GUI mode.
-timing		= Parse time %1$11.9f secs. Execution time %2$11.9f secs. Total elapsed time %3$11.9f seconds.
+timing		= Parse time %1$8.6f secs. Execution time %2$8.6f secs. Total elapsed time %3$8.6f seconds.
 syntaxError	= Syntax error at position %1$d: %2$s
 errorNoAlt	= Syntax error at position %1$d: no viable alternative at input <y>%2$s<.>
 nextError	= The <y>next<.> statement is only allowed inside <y>loop<.> or <y>while<.>.
