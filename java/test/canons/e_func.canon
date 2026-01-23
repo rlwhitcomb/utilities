@@ -145,16 +145,16 @@
 >[ n1(n), n1(n) ]
 >n1(n)
 >n1(3) -> 6
->Defining function “fun(a, b = a, c = b)” = { [a, b, c] }
->fun(1) -> [ 1, 1, 1 ]
->fun(1, 2) -> [ 1, 2, 2 ]
->fun(1, 2, 3) -> [ 1, 2, 3 ]
+>Defining function “func(a, b = a, c = b)” = { [a, b, c] }
+>func(1) -> [ 1, 1, 1 ]
+>func(1, 2) -> [ 1, 2, 2 ]
+>func(1, 2, 3) -> [ 1, 2, 3 ]
 >defined (ON_WINDOWS) -> true
 >defined 'junk' -> false
 >Defining constant “M1” = "MATCH"
 >Defining constant “M2” = "LITERAL"
 >defined `${M1}_${M2}` -> true
->defined (n1, fun, f1, f2) -> true
+>defined (n1, func, f1, f2) -> true
 >defined (mx, mn) -> false
 >Defining function “mx(a, b)” = {
 >   (a + b) / 2 + abs (a - b) / 2

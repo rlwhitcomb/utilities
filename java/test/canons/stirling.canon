@@ -1,11 +1,11 @@
 >Defining function “S1(n, k, signed = true)” = {
 >   $assert n >= 0 && k >= 0, 'n and k cannot be negative'
->   define impl (n, k) = {
+>   fun impl (n, k) = {
 >      if n == 0 && k == 0 leave 1
 >      if k == 0 || k > n leave 0
 >      impl(n - 1, k - 1) + ((n - 1) * impl(n - 1, k))
 >   }
->   const term = impl(n, k)
+>   val term = impl(n, k)
 >   signed ? (-1) ** (n - k) * term : term
 >}
 >Defining function “S2(n, k)” = {

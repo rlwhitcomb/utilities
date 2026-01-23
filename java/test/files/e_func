@@ -154,10 +154,10 @@ n1(3)
 #
 # Issue #554: allow default param exprs reference earlier params
 #
-define fun(a, b=a, c=b) = { [ a, b, c ] }
-fun(1)
-fun(1,2)
-fun(1,2,3)
+define func(a, b=a, c=b) = { [ a, b, c ] }
+func(1)
+func(1,2)
+func(1,2,3)
 
 #
 # "defined" function
@@ -167,7 +167,7 @@ defined 'junk'
 const M1="MATCH"
 const M2="LITERAL"
 defined `${M1}_${M2}`
-defined(n1, fun, f1, f2)
+defined(n1, func, f1, f2)
 defined(mx, mn)
 
 #

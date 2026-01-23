@@ -235,7 +235,7 @@ h4 {
         <li>Looping and conditional statements, including powerful pattern matching, to do pretty much any kind of calculation or programming task.</li>
         <li>Did I mention that this is an actual programming / scripting language?</li>
         <li>Therefore, this "calculator" is a <a href="https://en.wikipedia.org/wiki/Turing_completeness">&ldquo;Turing Complete&rdquo;</a> language.</li>
-        <li>Currently (as of late-2025 at least), it is being actively developed and maintained, meaning features and fixes are constantly being added.</li>
+        <li>Currently (as of early-2026 at least), it is being actively developed and maintained, meaning features and fixes are constantly being added.</li>
         <li>This is <a href="https://opensource.com/resources/what-open-source">Open-Source Software</a> released under the very permissive
             <a href="https://opensource.org/license/mit">MIT</a> license, so the code can be freely examined, and modified (if desired) for your own use.</li>
       </ul>
@@ -535,9 +535,9 @@ h4 {
      in an error if one or more of the operands are null. There are special <code>isnull</code> and <code>notnull</code> functions that can be used to test for this to avoid
      errors if desired, as can simply using the equality / inequality operators with the <code>null</code> constant. Null values inserted into interpolated strings
      (see below) will simply insert nothing.
-  <p>Values can be assigned names via the <code>const</code> declaration, and then the name used to refer to the value. Such values
-     are fixed to their value at the time of the <code>const</code> declaration being evaluated. The syntax is:
-  <p class="indent"><code>const</code>&nbsp;<i>id</i><code> = </code><i>expr</i>&nbsp;( <code>,</code> <i>id</i><code> = </code><i>expr</i> ) *
+  <p>Values can be assigned names via the <code>const</code> or <code>val</code> declaration, and then the name used to refer to the value. Such values
+     are fixed to their value at the time of the <code>const</code> or <code>val</code> declaration being evaluated. The syntax is:
+  <p class="indent"><code>const</code> or <code>val</code>&nbsp;<i>id</i><code> = </code><i>expr</i>&nbsp;( <code>,</code> <i>id</i><code> = </code><i>expr</i> ) *
   <p>Such constants are typically (per convention) given UPPER case names, but this is not required. One <code>const</code> statement may be
      used to define one or many constant values, simply by listing their equivalences.
   <p>Sometimes, especially within loops or other code blocks, local variables are needed for intermediate calculations. In order to
@@ -1437,7 +1437,7 @@ or<br>
   retype the same expression.
   <p>The syntax for a function definition is:
   <p class="indent">
-     <code>def</code> | <code>define</code>&nbsp;<i>name</i> <i>optional parameter list</i> <code>=</code> | <code>&#x21A6;</code>&nbsp;<code>{</code> <i>expressions or statements</i> <code>}</code>
+     <code>def</code> | <code>define</code> | <code>fun</code>&nbsp;<i>name</i> <i>optional parameter list</i> <code>=</code> | <code>&#x21A6;</code>&nbsp;<code>{</code> <i>expressions or statements</i> <code>}</code>
   </p>
   <p>The optional formal parameter list looks like:
   <p class="indent">

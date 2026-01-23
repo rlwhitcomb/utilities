@@ -597,6 +597,8 @@
  *	    Unicode symbols for "dec", "complex", and "quaternion".
  *	15-Jan-2026 (rlwhitcomb)
  *	    #795: Add "WITH" statement for parsing groups from a regex.
+ *	23-Jan-2026 (rlwhitcomb)
+ *	    #804: New Kotlin-like keywords; some other missing aliases.
  */
 
 grammar Calc;
@@ -1499,9 +1501,9 @@ K_SUMOF    : 'sumof' | 'SUMOF' | 'Sumof' | 'SumOf' | 'sumOf' | '\u2211' ;
 
 K_PRODUCTOF: 'productof' | 'PRODUCTOF' | 'Productof' | 'ProductOf' | 'productOf' | '\u220F' ;
 
-K_EXPMOD   : 'expmod' | 'EXPMOD' | 'Expmod' | 'ExpMod' ;
+K_EXPMOD   : 'expmod' | 'EXPMOD' | 'Expmod' | 'ExpMod' | 'expMod' ;
 
-K_POLYMOD  : 'polymod' | 'POLYMOD' | 'Polymod' | 'PolyMod' ;
+K_POLYMOD  : 'polymod' | 'POLYMOD' | 'Polymod' | 'PolyMod' | 'polyMod' ;
 
 K_HYPOT    : 'hypot' | 'HYPOT' | 'Hypot' ;
 
@@ -1521,7 +1523,7 @@ K_IN       : 'in' | 'IN' | 'In' ;
 
 K_OVER     : 'over' | 'OVER' | 'Over' ;
 
-K_WITHIN   : 'within' | 'WITHIN' | 'Within' ;
+K_WITHIN   : 'within' | 'WITHIN' | 'Within' | 'WithIn' | 'withIn' ;
 
 K_IF       : 'if' | 'IF' | 'If' ;
 
@@ -1530,10 +1532,12 @@ K_ELSE     : 'else' | 'ELSE' | 'Else' ;
 K_UNLESS   : 'unless' | 'UNLESS' | 'Unless' ;
 
 K_DEFINE   : 'define' | 'DEFINE' | 'Define'
-           | 'def' | 'DEF' | 'Def' ;
+           | 'def' | 'DEF' | 'Def'
+           | 'fun' | 'FUN' | 'Fun' ;
 
 K_CONST    : 'constant' | 'CONSTANT' | 'Constant'
-           | 'const' | 'CONST' | 'Const' ;
+           | 'const' | 'CONST' | 'Const'
+           | 'val' | 'VAL' | 'Val' ;
 
 K_VAR      : 'variable' | 'VARIABLE' | 'Variable'
            | 'var' | 'VAR' | 'Var' ;

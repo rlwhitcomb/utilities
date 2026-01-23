@@ -3,6 +3,10 @@
 /*======================*/
 
 [
+    { version: '3.3.5', date: d'2026-01-23',
+      issues: [ 804 ],
+      comment: 'New Kotlin-like keywords: "fun" and "val"; add some missing aliases.'
+    },
     { version: '3.3', date: d'2026-01-19',
       issues: [ 795 ],
       comment: 'New "WITH" statement to support parsing with regular expressions.'
