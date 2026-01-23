@@ -1577,6 +1577,7 @@ define parse(date) = {
 parse('12-7-1941')
 parse('junk')
 parse('9-11-2001')
+parse("12/1/2025")
 
 print
 print "End of expression tests (suite 1)."

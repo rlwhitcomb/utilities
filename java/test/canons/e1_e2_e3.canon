@@ -1761,6 +1761,10 @@
 >day   = 11
 >year  = 2001
 >parse('9-11-2001') -> [ "9", "11", "2001" ]
+>month = 12
+>day   = 1
+>year  = 2025
+>parse("12/1/2025") -> [ "12", "1", "2025" ]
 >
 >End of expression tests (suite 1).
 >Tests of nested object / array variables.
