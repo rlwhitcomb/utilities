@@ -41,14 +41,14 @@ var end = false
 while not end {
    const facts = pfacts(++value)
    if length(facts) == goal {
-      var val = value + 1
+      var valu = value + 1
 
 inner:loop over goal - 1 {
-         if length(pfacts(val)) != goal leave inner:
-         val++
+         if length(pfacts(valu)) != goal leave inner:
+         valu++
       }
 
-      if val == value + goal {
+      if valu == value + goal {
          print 'The first', goal@w, 'consecutive numbers to have', goal@w, `distinct prime factors is $value.`
          end = goal++ == FINAL_GOAL
       }

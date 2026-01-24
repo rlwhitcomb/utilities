@@ -59,13 +59,13 @@ define verify_files(list1, list2, ext1, ext2) = {
  * Only continue if the expected value is found,
  * otherwise quit with an "$assert" failure.
  *
- * @param name Name of the problem (as in 'p10').
- * @param val  Expected value (from the Project Euler archives).
+ * @param name  Name of the problem (as in 'p10').
+ * @param value Expected value (from the Project Euler archives).
  */
-define verify(name, val) = {
+define verify(name, value) = {
    print `Verifying solution for "$name" ...`
    var f = read(DIR + name + CANON)
-   $assert notnull(index(f, @@val)), `"${name + CANON} does not contain correct value of $val!`
+   $assert notnull(index(f, @@value)), `"${name + CANON} does not contain correct value of $value!`
    numberOfTests++
 }
 
