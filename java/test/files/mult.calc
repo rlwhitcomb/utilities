@@ -71,6 +71,11 @@ f1 \% f2
 f3 ∖% f4
 f1 mod f2
 f3 mod f4
+f1 ⊞ f2
+f3 ⊞ f4
+f4 ⊞ f3
+-f1 ⊞ -f2
+-f4 ⊞ -f3
 
 $quiet on { fx1 = f1 }; fx1 *= f2
 $quiet on { fx1 = f3 }; fx1 *= f4

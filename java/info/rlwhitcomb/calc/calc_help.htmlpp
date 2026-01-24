@@ -1054,11 +1054,12 @@ or<br>
         <i>expr</i>&nbsp;&nbsp;<code>\%</code> or <code>&#x2216;%</code>&nbsp;&nbsp;<i>expr</i><br>
         <i>expr</i>&nbsp;&nbsp;<code>mod</code>&nbsp;&nbsp;<i>expr</i><br>
         <i>expr</i>&nbsp;&nbsp;<code>&#x00B7;</code> or <code>&#x22C5;</code>&nbsp;&nbsp;<i>expr</i></td>
-        <td>multiply<br>divide<br>integer divide or set difference<br>remainder<br>quotient, remainder<br>modulus<br>dot product (or multiply for scalars)</td><td>left to right</td></tr>
+        <td>multiply<br>divide<br>integer divide or set difference<br>remainder<br>quotient and remainder<br>modulus<br>dot product (or multiply for scalars)</td><td>left to right</td></tr>
     <tr><td>19</td><td>
         <i>expr</i>&nbsp;&nbsp;<code>+</code> or <code>&#x2795;</code>&nbsp;&nbsp;<i>expr</i><br>
-        <i>expr</i>&nbsp;&nbsp;<code>-</code>,  <code>&#x2212;</code>, or <code>&#x2796;</code>&nbsp;&nbsp;<i>expr</i></td>
-        <td>add<br>subtract or set difference</td><td>left to right</td></tr>
+        <i>expr</i>&nbsp;&nbsp;<code>-</code>, <code>&#x2212;</code>, or <code>&#x2796;</code>&nbsp;&nbsp;<i>expr</i><br>
+        <i>expr</i>&nbsp;&nbsp;<code>&#x229E;</code>&nbsp;&nbsp;<i>expr</i></td>
+        <td>add<br>subtract or set difference<br>mediant (of fractions)</td><td>left to right</td></tr>
     <tr><td>18</td><td>
         <i>expr</i>&nbsp;<code> &gt;&gt;&gt; </code>&nbsp;<i>expr</i><br>
         <i>expr</i>&nbsp;<code> &gt;&gt; </code>&nbsp;<i>expr</i><br>
@@ -1084,7 +1085,7 @@ or<br>
         <td>comparison</td><td>left to right</td></tr>
     <tr><td>14</td><td>
         <i>expr</i>&nbsp;<code>OF</code>, <code>IN</code>, <code>WITHIN</code>, <code>&#x2208;</code>, or <code>&#x220A;</code><br>
-        <i>expr</i> ( <code>...</code>,&nbsp;<code>..</code>,&nbsp;or&nbsp;<code>&#x2026;</code>&nbsp;<i>expr</i> ) ( <code>,</code> <i>expr</i> )</td>
+        <i>expr</i>&nbsp; ( <code>...</code>,&nbsp;<code>..</code>,&nbsp;or&nbsp;<code>&#x2026;</code>&nbsp;<i>expr</i> ) ( <code>,</code> <i>expr</i> )</td>
         <td>test set membership, or match a value within a range</td><td>left to right</td></tr>
     <tr><td>13</td><td>
         <i>expr<sub>1</sub></i>&nbsp;<code> &gt;&lt; </code>or<code> &gt;=&lt; </code>&nbsp;<i>expr<sub>2</sub></i><code>, </code><i>expr<sub>3</sub></i></td>
@@ -1105,7 +1106,7 @@ or<br>
     <tr><td>7</td><td><i>expr</i>&nbsp;<code> ? </code>&nbsp;<i>expr</i>&nbsp;<code> : </code>&nbsp;<i>expr</i></td><td>select one or the other value</td><td>right to left</td></tr>
     <tr><td>6</td><td><i>var<sub>1</sub></i>&nbsp;(<code> , </code> <i>var<sub>n</sub></i>&nbsp;) *<code> = </code>&nbsp;<i>expr<sub>1</sub></i>&nbsp;(<code> , </code> <i>expr<sub>n</sub></i>&nbsp;) *</td><td>assign <i>expr(s)</i> values to variable(s)</td><td>right to left</td></tr>
     <tr><td>5</td><td><i>var</i>&nbsp;<code> **=</code>,<code> &times;&times;=</code>,<code> &#x2715;&#x2715;=</code>,<code> &#x2716;&#x2716;=</code>,<code> &#x2303;=</code>,<code> &#x2B61;=</code>,
-        or<code> &#x2191;=</code>&nbsp;<i>expr</i></td><td><i>var</i> to <i>expr</i> power, assign to <i>var</i></td><td>right to left</td></tr>
+        or<code> &#x2191;=</code>&nbsp;&nbsp;<i>expr</i></td><td><i>var</i> to <i>expr</i> power, assign to <i>var</i></td><td>right to left</td></tr>
     <tr><td>4</td><td>
         <i>var</i>&nbsp;<code> *=</code>,<code> &times;=</code>,<code> &#x2715;=</code>, or<code> &#x2716;= </code>&nbsp;<i>expr</i><br>
         <i>var</i>&nbsp;<code> /=</code>,<code> &divide;=</code>,<code> &#x2215;=</code>, or<code> &#x2797;= </code>&nbsp;<i>expr</i><br>
@@ -1114,7 +1115,8 @@ or<br>
         <td>perform the operation, reassign to variable</td><td>right to left</td></tr>
     <tr><td>3</td><td>
         <i>var</i>&nbsp;<code> += </code>or<code> &#x2795;= </code>&nbsp;<i>expr</i><br>
-        <i>var</i>&nbsp;<code> -= </code>,<code> &#x2212;=</code>, or<code> &#x2796;= </code>&nbsp;<i>expr</i></td>
+        <i>var</i>&nbsp;<code> -= </code>,<code> &#x2212;=</code>, or<code> &#x2796;= </code>&nbsp;<i>expr</i>
+        <i>var</i>&nbsp;<code> &#x229E;= </code>&nbsp;<i>expr</i></td>
         <td>result assigned to variable again</td><td>right to left</td></tr>
     <tr><td>2</td><td>
         <i>var</i>&nbsp;<code> &gt;&gt;&gt;= </code>&nbsp;<i>expr</i><br>

@@ -947,6 +947,8 @@
  *	    #792: Deal nicely with continued lines during "eval" (roughly the same way as REPL mode).
  *	15-Jan-2026 (rlwhitcomb)
  *	    #795: Processing for "WITH" statement.
+ *	23-Jan-2026 (rlwhitcomb)
+ *	    #803: Mediant operator for fractions.
  */
 package info.rlwhitcomb.calc;
 
@@ -5322,6 +5324,20 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 
 			return fixupToInteger(d1.subtract(d2, settings.mc));
 		    }
+		case "\u229E":
+		    if (e1 instanceof BigFraction || e2 instanceof BigFraction) {
+			BigFraction f1 = convertToFraction(e1, ctx1);
+			BigFraction f2 = convertToFraction(e2, ctx2);
+
+			return f1.mediant(f2);
+		    }
+		    else if (e1 instanceof ContinuedFraction || e2 instanceof ContinuedFraction) {
+			ContinuedFraction cf1 = ContinuedFraction.valueOf(e1);
+			ContinuedFraction cf2 = ContinuedFraction.valueOf(e2);
+
+			return cf1.mediant(cf2);
+		    }
+		    // Fall through here
 		default:
 		    throw new UnknownOpException(oper, ctx);
 	    }

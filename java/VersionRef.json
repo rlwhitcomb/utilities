@@ -3,6 +3,10 @@
 /*======================*/
 
 [
+    { version: '3.3.8', date: d'2026-01-23',
+      issues: [ 803 ],
+      comment: 'Mediant operator for fractions.'
+    },
     { version: '3.3.5', date: d'2026-01-23',
       issues: [ 804 ],
       comment: 'New Kotlin-like keywords: "fun" and "val"; add some missing aliases.'

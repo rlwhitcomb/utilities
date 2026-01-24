@@ -599,6 +599,8 @@
  *	    #795: Add "WITH" statement for parsing groups from a regex.
  *	23-Jan-2026 (rlwhitcomb)
  *	    #804: New Kotlin-like keywords; some other missing aliases.
+ *	23-Jan-2026 (rlwhitcomb)
+ *	    #803: New "mediant" operator (for fractions).
  */
 
 grammar Calc;
@@ -1680,6 +1682,7 @@ MULT_OP
 ADD_OP
        : ( '+' | '\u2795' )
        | ( '-' | '\u2212' | '\u2796' )
+       | '\u229E'
        ;
 
 POW_ASSIGN
@@ -1697,6 +1700,7 @@ MULT_ASSIGN
 ADD_ASSIGN
        : ( '+=' | '\u2795=' )
        | ( '-=' | '\u2212=' | '\u2796=' )
+       | '\u229E='
        ;
 
 EQUAL_OP

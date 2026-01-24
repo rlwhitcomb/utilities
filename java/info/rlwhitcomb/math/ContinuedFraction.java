@@ -1,7 +1,7 @@
 /*
  * The MIT License (MIT)
  *
- * Copyright (c) 2025 Roger L. Whitcomb.
+ * Copyright (c) 2025-2026 Roger L. Whitcomb.
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -26,6 +26,7 @@
  * History:
  *  21-Nov-25 rlw #643	Initial coding.
  *  09-Dec-25 rlw #643	More coding.
+ *  23-Jan-26 rlw #803	Mediant method.
  */
 package info.rlwhitcomb.math;
 
@@ -284,6 +285,18 @@ public class ContinuedFraction extends Number implements Comparable<ContinuedFra
 	 */
 	public ContinuedFraction add(final ContinuedFraction o) {
 	    return fromFraction(toFraction().add(o.toFraction()));
+	}
+
+	/**
+	 * Compute the mediant value of this fraction and the other.
+	 * <p> The mediant is going to be {@code (n1 + n2) / (d1 + d2)}
+	 * (with these fractions transformed to regular fractions).
+	 *
+	 * @param o Continued fraction to compute the mediant with.
+	 * @return  New continued fraction of the mediant value.
+	 */
+	public ContinuedFraction mediant(final ContinuedFraction o) {
+	    return fromFraction(toFraction().mediant(o.toFraction()));
 	}
 
 	/**

@@ -1,7 +1,7 @@
 /*
  * The MIT License (MIT)
  *
- * Copyright (c) 2021-2025 Roger L. Whitcomb.
+ * Copyright (c) 2021-2026 Roger L. Whitcomb.
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -85,6 +85,7 @@
  *  28-Jun-25 rlw #695	New "toIntExact()" method.
  *  22-Jul-25 rlw #677	"divideAndRemainder" and "toIntegerFraction" methods.
  *  10-Dec-25 rlw #643	More continued fraction support.
+ *  23-Jan-26 rlw #803	"mediant" method.
  */
 package info.rlwhitcomb.math;
 
@@ -897,6 +898,23 @@ public class BigFraction extends Number
 	    if (!sameDenom) {
 		den = den.multiply(other.denom);
 	    }
+
+	    return new BigFraction(num, den);
+	}
+
+	/**
+	 * Compute the mediant value of this fraction and the other.
+	 * <p> The value would be {@code (n1 + n2) / (d1 + d2)}, which
+	 * will always be between f1 and f2.
+	 *
+	 * @param other The second value to compute with.
+	 * @return      A new fraction with the mediant value of the two.
+	 */
+	public BigFraction mediant(final BigFraction other) {
+	    // Note: important that the sign is always normalized to the numerator
+	    BigInteger num = this.numer.add(other.numer);
+	    // and thus the denominator will always be positive
+	    BigInteger den = this.denom.add(other.denom);
 
 	    return new BigFraction(num, den);
 	}

@@ -192,4 +192,8 @@ cg3 + cg4
 cg3 - cg4
 cg3 * cg4
 cg3 / cg4
+cg3 ⊞ cg4
+cg4 ⊞ cg3
+-cg3 ⊞ -cg4
+cg4 ⊞ -cg3
 
