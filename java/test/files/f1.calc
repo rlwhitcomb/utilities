@@ -153,6 +153,7 @@ abs((1, -1))
 abs((0,6))
 c7 = ℂ("(2+5i)")
 abs(c7)
+abs( (3,4) )
 
 c5 < c7
 1.0 == (1, 0)
@@ -202,6 +203,7 @@ i**61 @I
 (4,3) @P
 c9 = Complex("{ radius: 5, θ: 0.875 }")
 c9@p
+(1,1)@p
 
 // Complex roots of real numbers
 cr1 = √-2
@@ -258,6 +260,8 @@ cf1[1]
 cf4[1]=6
 cf4
 
+$rational on { (3, 2) / (1, -1) }
+
 // Test of issue #703
 $rational on
 cr1=(6,3)
@@ -266,6 +270,19 @@ cr1/cr2
 $rational off
 cr1/cr2
 
+(5, 2) ∗
+(-3, -1) ∗
+
+i²@i
+0@i
+
+// Issue #806 (extended @i formatting)
+0@+i
+$rational on { 3/4@+i; (3/4, 0)@+i }
+3/4@i
+3/4@+i
+complex('3i')@i
+complex('3i')@+i
 
 // more to come (to complex powers)
 

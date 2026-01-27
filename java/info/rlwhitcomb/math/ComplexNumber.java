@@ -1,7 +1,7 @@
 /*
  a The MIT License (MIT)
  *
- * Copyright (c) 2022-2025 Roger L. Whitcomb.
+ * Copyright (c) 2022-2026 Roger L. Whitcomb.
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -72,6 +72,7 @@
  *			add "toDecimalComplex()" for these fixes.
  *  10-Aug-25 rlw #745	Change exponent for "pow" to BigDecimal.
  *  29-Nov-25 rlw #643	New method to return the list of component parts; add "decrement()".
+ *  26-Jan-26 rlw #806	New "extra" parameter to "toLongString" for enhanced formatting.
  */
 package info.rlwhitcomb.math;
 
@@ -1447,11 +1448,12 @@ public abstract class ComplexNumber extends Number implements Serializable, Comp
 	 * <p> Note: this form is recognizable by {@link #parse}.
 	 *
 	 * @param upperCase Casing for the representation of {@code i}.
+	 * @param extra     Always format with zero parts included.
 	 * @param sep       Whether to format with thousands separators.
 	 * @param space     Whether to use extra spaces for the fractional form.
 	 * @return The alternate string representation of this number.
 	 */
-	public abstract String toLongString(final boolean upperCase, final boolean sep, final boolean space);
+	public abstract String toLongString(final boolean upperCase, final boolean extra, final boolean sep, final boolean space);
 
 
 	/**
@@ -1760,29 +1762,31 @@ class RationalComplexNumber extends ComplexNumber
 	}
 
 	@Override
-	public String toLongString(final boolean upperCase, final boolean sep, final boolean space) {
+	public String toLongString(final boolean upperCase, final boolean extra, final boolean sep, final boolean space) {
 	    char i = upperCase ? '\u2110' : '\u2148';
+	    BigFraction re = realFrac == null && extra ? BigFraction.ZERO : realFrac;
+	    BigFraction im = imaginaryFrac == null && extra ? BigFraction.ZERO : imaginaryFrac;
 
-	    if (realFrac == null) {
-		if (imaginaryFrac.equals(BigFraction.ONE))
+	    if (re == null && !extra) {
+		if (im.equals(BigFraction.ONE))
 		    return String.format(I_POS_FORMAT, i);
-		else if (imaginaryFrac.equals(BigFraction.MINUS_ONE))
+		else if (im.equals(BigFraction.MINUS_ONE))
 		    return String.format(I_NEG_FORMAT, i);
 		else
-		    return String.format(IMAG_FORMAT, imaginaryFrac.toFormatString(sep, space), i);
+		    return String.format(IMAG_FORMAT, im.toFormatString(sep, space), i);
 	    }
-	    else if (imaginaryFrac == null) {
-		return realFrac.toFormatString(sep, space);
+	    else if (im == null && !extra) {
+		return re.toFormatString(sep, space);
 	    }
 	    else {
-		if (imaginaryFrac.signum() < 0)
+		if (im.signum() < 0)
 		    return String.format(LONG_NEG_FORMAT,
-			    realFrac.toFormatString(sep, space),
-			    imaginaryFrac.abs().toFormatString(sep, space), i);
+			    re.toFormatString(sep, space),
+			    im.abs().toFormatString(sep, space), i);
 		else
 		    return String.format(LONG_POS_FORMAT,
-			    realFrac.toFormatString(sep, space),
-			    imaginaryFrac.toFormatString(sep, space), i);
+			    re.toFormatString(sep, space),
+			    im.toFormatString(sep, space), i);
 	    }
 	}
 }
@@ -2115,29 +2119,31 @@ class DecimalComplexNumber extends ComplexNumber
 	}
 
 	@Override
-	public String toLongString(final boolean upperCase, final boolean sep, final boolean space) {
+	public String toLongString(final boolean upperCase, final boolean extra, final boolean sep, final boolean space) {
 	    char i = upperCase ? '\u2110' : '\u2148';
+	    BigDecimal re = realPart == null && extra ? BigDecimal.ZERO : realPart;
+	    BigDecimal im = imaginaryPart == null && extra ? BigDecimal.ZERO : imaginaryPart;
 
-	    if (realPart == null) {
-		if (imaginaryPart.equals(BigDecimal.ONE))
+	    if (re == null && !extra) {
+		if (im.equals(BigDecimal.ONE))
 		    return String.format(I_POS_FORMAT, i);
-		else if (imaginaryPart.equals(D_MINUS_ONE))
+		else if (im.equals(D_MINUS_ONE))
 		    return String.format(I_NEG_FORMAT, i);
 		else
-		    return String.format(IMAG_FORMAT, Num.formatWithSeparators(imaginaryPart, sep), i);
+		    return String.format(IMAG_FORMAT, Num.formatWithSeparators(im, sep), i);
 	    }
-	    else if (imaginaryPart == null) {
-		return Num.formatWithSeparators(realPart, sep);
+	    else if (im == null && !extra) {
+		return Num.formatWithSeparators(re, sep);
 	    }
 	    else {
-		if (imaginaryPart.signum() < 0)
+		if (im.signum() < 0)
 		    return String.format(LONG_NEG_FORMAT,
-			    Num.formatWithSeparators(realPart, sep),
-			    Num.formatWithSeparators(imaginaryPart.abs(), sep), i);
+			    Num.formatWithSeparators(re, sep),
+			    Num.formatWithSeparators(im.abs(), sep), i);
 		else
 		    return String.format(LONG_POS_FORMAT,
-			    Num.formatWithSeparators(realPart, sep),
-			    Num.formatWithSeparators(imaginaryPart, sep), i);
+			    Num.formatWithSeparators(re, sep),
+			    Num.formatWithSeparators(im, sep), i);
 	    }
 	}
 }

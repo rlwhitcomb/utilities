@@ -3,6 +3,10 @@
 /*======================*/
 
 [
+    { version: '3.3.10', date: d'2026-01-27',
+      issues: [ 803, 806 ],
+      comment: 'Mediant operator for complex numbers; extended "@+i" formatting.'
+    },
     { version: '3.3.8', date: d'2026-01-23',
       issues: [ 803 ],
       comment: 'Mediant operator for fractions.'

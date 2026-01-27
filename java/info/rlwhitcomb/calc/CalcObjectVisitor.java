@@ -949,6 +949,9 @@
  *	    #795: Processing for "WITH" statement.
  *	23-Jan-2026 (rlwhitcomb)
  *	    #803: Mediant operator for fractions.
+ *	25-Jan-2026 (rlwhitcomb)
+ *	    #803: Trivially extend mediant to complex numbers.
+ *	    #806: Extended formatting for "@+i".
  */
 package info.rlwhitcomb.calc;
 
@@ -3023,9 +3026,12 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 			    c = (ComplexNumber) result;
 			}
 			else {
-			    c = ComplexNumber.real(convertToDecimal(result, settings.mc, ctx));
+			    if (settings.rationalMode && result instanceof BigFraction)
+				c = ComplexNumber.real((BigFraction) result);
+			    else
+				c = ComplexNumber.real(convertToDecimal(result, settings.mc, ctx));
 			}
-			valueBuf.append(c.toLongString(formatChar == 'I', separators, true));
+			valueBuf.append(c.toLongString(formatChar == 'I', signChar == '+', separators, true));
 			break;
 
 		    case 'P':
@@ -3035,7 +3041,10 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 			    c2 = (ComplexNumber) result;
 			}
 			else {
-			    c2 = ComplexNumber.real(convertToDecimal(result, settings.mc, ctx));
+			    if (settings.rationalMode && result instanceof BigFraction)
+				c2 = ComplexNumber.real((BigFraction) result);
+			    else
+				c2 = ComplexNumber.real(convertToDecimal(result, settings.mc, ctx));
 			}
 			valueBuf.append(c2.toPolarString(formatChar == 'P', separators,
 				MathUtil.divideContext(c2, settings.mcDivide)));
@@ -5336,6 +5345,13 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 			ContinuedFraction cf2 = ContinuedFraction.valueOf(e2);
 
 			return cf1.mediant(cf2);
+		    }
+		    else if (e1 instanceof ComplexNumber || e2 instanceof ComplexNumber) {
+			ComplexNumber c1 = ComplexNumber.valueOf(e1, settings.rationalMode);
+			ComplexNumber c2 = ComplexNumber.valueOf(e2, settings.rationalMode);
+
+			// Mediant for complex numbers is the same as "add"
+			return c1.add(c2);
 		    }
 		    // Fall through here
 		default:
