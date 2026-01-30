@@ -1,7 +1,7 @@
 /*
  * The MIT License (MIT)
  *
- * Copyright (c) 2020-2022,2024-2025 Roger L. Whitcomb.
+ * Copyright (c) 2020-2022,2024-2026 Roger L. Whitcomb.
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -35,20 +35,18 @@
  *  01-Oct-22 rlw #288	Rename "piFraction" to "ratpi".
  *  03-Jan-24 rlw #640	Refactor.
  *  30-Jul-25 rlw #746	Add "ln(10)" to the calculation.
+ *  28-Jan-26 rlw #809	Rename and change packages.
  */
-package info.rlwhitcomb.calc;
+package info.rlwhitcomb.math;
 
-import info.rlwhitcomb.math.BigFraction;
-import info.rlwhitcomb.math.MathUtil;
 import info.rlwhitcomb.util.ClassUtil;
 import info.rlwhitcomb.util.QueuedThread;
+import static info.rlwhitcomb.util.Constants.*;
 
 import java.math.BigDecimal;
 import java.math.MathContext;
 import java.util.concurrent.Semaphore;
 import java.util.function.Supplier;
-
-import static info.rlwhitcomb.util.Constants.*;
 
 
 /**
@@ -57,7 +55,7 @@ import static info.rlwhitcomb.util.Constants.*;
  * requiring some seconds of calculation time, potentially) by doing the
  * expensive calculations in a background thread.
  */
-public class CalcPiWorker
+public class PiWorker
 {
 	private MathContext mc = null;
 	private int precision;
@@ -103,7 +101,7 @@ public class CalcPiWorker
 	 * The only constructor of this object.
 	 * <p> Use the {@link #apply} method before attempting to acquire any values.
 	 */
-	public CalcPiWorker() {
+	public PiWorker() {
 	}
 
 	/**

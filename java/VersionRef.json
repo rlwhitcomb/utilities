@@ -3,6 +3,11 @@
 /*======================*/
 
 [
+    { version: '3.3.12', date: d'2026-01-29',
+      issues: [ 807, 809 ],
+      comment: '''Fix bug trying to format true quaternions with "@i" or "@p" formats;
+\t use trig mode to display angles for complex number "@p" format.'''
+    },
     { version: '3.3.10', date: d'2026-01-27',
       issues: [ 803, 806 ],
       comment: 'Mediant operator for complex numbers; extended "@+i" formatting.'

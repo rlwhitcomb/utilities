@@ -204,6 +204,8 @@ i**61 @I
 c9 = Complex("{ radius: 5, θ: 0.875 }")
 c9@p
 (1,1)@p
+$degrees { (1,1)@p; (-5, 0)@p; (0, -12)@p }
+$grads   { (1,1)@p; (-5, -5)@p; (-10, 12)@p }
 
 // Complex roots of real numbers
 cr1 = √-2

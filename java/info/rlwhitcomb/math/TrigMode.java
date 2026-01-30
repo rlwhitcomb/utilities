@@ -29,11 +29,15 @@
  *  24-Aug-22 rlw #447	Add "GRADS" mode.
  *  05-Jan-26 rlw #799	Fix NPE on null/empty inputs to "getFrom"; use our own
  *			exception for invalid values.
+ *  27-Jan-26 rlw #809	Move to "math" package; move conversions into here.
  */
-package info.rlwhitcomb.calc;
+package info.rlwhitcomb.math;
 
 import info.rlwhitcomb.util.CharUtil;
 import info.rlwhitcomb.util.Intl;
+
+import java.math.BigDecimal;
+import java.math.MathContext;
 
 
 /**
@@ -44,17 +48,66 @@ public enum TrigMode
 	/**
 	 * Angles are measured / returned in degrees (0 - 360).
 	 */
-	DEGREES,
+	DEGREES {
+		@Override
+		public BigDecimal fromRadians(final PiWorker source, final BigDecimal radians, final MathContext mc) {
+		    return MathUtil.fixup(radians.divide(source.getPiOver180(), mc), mc);
+		}
 
-	/**
-	 * Angles are measured / returned in radians (0 - 2𝛑).
-	 */
-	RADIANS,
+		@Override
+		public BigDecimal toRadians(final PiWorker source, final BigDecimal angle, final MathContext mc) {
+		    return MathUtil.fixup(angle.multiply(source.getPiOver180(), mc), mc);
+		}
+	},
 
 	/**
 	 * Angles are measured / returned in gradians (0 - 400).
 	 */
-	GRADS;
+	GRADS {
+		@Override
+		public BigDecimal fromRadians(final PiWorker source, final BigDecimal radians, final MathContext mc) {
+		    return MathUtil.fixup(radians.divide(source.getPiOver200(), mc), mc);
+		}
+
+		@Override
+		public BigDecimal toRadians(final PiWorker source, final BigDecimal angle, final MathContext mc) {
+		    return MathUtil.fixup(angle.multiply(source.getPiOver200(), mc), mc);
+		}
+	},
+
+	/**
+	 * Angles are measured / returned in radians (0 - 2𝛑).
+	 */
+	RADIANS {
+		@Override
+		public BigDecimal fromRadians(final PiWorker source, final BigDecimal radians, final MathContext mc) {
+		    return radians;
+		}
+
+		@Override
+		public BigDecimal toRadians(final PiWorker source, final BigDecimal angle, final MathContext mc) {
+		    return angle;
+		}
+	};
+
+
+	/**
+	 * Member function to convert from radians to the named mode.
+	 *
+	 * @param radians Radians to convert from.
+	 * @param mc      Settings for rounding and precision.
+	 * @return        The input radians converted to the specified mode.
+	 */
+	public abstract BigDecimal fromRadians(final PiWorker source, final BigDecimal radians, final MathContext mc);
+
+	/**
+	 * Member function to convert to radians from the named mode.
+	 *
+	 * @param angle Input angle in the named mode.
+	 * @param mc    Settings for rounding and precision.
+	 * @return      Angle converted appropriately to radians.
+	 */
+	public abstract BigDecimal toRadians(final PiWorker source, final BigDecimal angle, final MathContext mc);
 
 
 	/**

@@ -1,7 +1,7 @@
 /*
  * The MIT License (MIT)
  *
- * Copyright (c) 2020-2025 Roger L. Whitcomb.
+ * Copyright (c) 2020-2026 Roger L. Whitcomb.
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -365,6 +365,8 @@
  *	    #761: Add "noquiet" option; change the way we do "quiet" around silent blocks.
  *	24-Oct-2025 (rlwhitcomb)
  *	    #760: Add GUI shutdown signal and exit REPL mode with "$gui" directive.
+ *	27-Jan-2026 (rlwhitcomb)
+ *	    #809: Move TrigMode to "math" package.
  */
 package info.rlwhitcomb.calc;
 
@@ -372,6 +374,7 @@ import info.rlwhitcomb.IntlProvider;
 import info.rlwhitcomb.jarfile.Launcher;
 import info.rlwhitcomb.math.BigFraction;
 import info.rlwhitcomb.math.NumericUtil.RangeMode;
+import info.rlwhitcomb.math.TrigMode;
 import info.rlwhitcomb.util.*;
 import org.antlr.v4.runtime.*;
 import org.antlr.v4.runtime.tree.ParseTree;

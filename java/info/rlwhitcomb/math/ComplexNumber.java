@@ -73,6 +73,7 @@
  *  10-Aug-25 rlw #745	Change exponent for "pow" to BigDecimal.
  *  29-Nov-25 rlw #643	New method to return the list of component parts; add "decrement()".
  *  26-Jan-26 rlw #806	New "extra" parameter to "toLongString" for enhanced formatting.
+ *  27-Jan-26 rlw #809	TrigMode parameter to "toPolarString" method.
  */
 package info.rlwhitcomb.math;
 
@@ -1463,18 +1464,21 @@ public abstract class ComplexNumber extends Number implements Serializable, Comp
 	 * <p> Also considering that the theta value is VERY rarely going to be rational even with rational parts, we
 	 * will always return decimal values here.
 	 *
+	 * @param piWorker  Where to find values for PI.
 	 * @param upperCase Case to use for the map keys.
 	 * @param sep       Whether to use thousands separators.
+	 * @param angleMode What trig mode to use for the angle value.
 	 * @param mc        Rounding and precision for the conversion to polar values.
 	 * @return Polar form (r, theta) of this complex number (as a string).
 	 */
-	public String toPolarString(final boolean upperCase, final boolean sep, final MathContext mc) {
+	public String toPolarString(final PiWorker piWorker, final boolean upperCase, final boolean sep, final TrigMode angleMode, final MathContext mc) {
 	    char r = upperCase ? 'R' : 'r';
 	    char theta = upperCase ? '\u0398' : '\u03B8';
+	    BigDecimal angle = angleMode.fromRadians(piWorker, theta(mc), mc);
 
 	    return String.format(POLAR_FORMAT,
 			r,     Num.formatWithSeparators(radius(mc), sep),
-			theta, Num.formatWithSeparators(theta(mc), sep));
+			theta, Num.formatWithSeparators(angle,      sep));
 	}
 
 }

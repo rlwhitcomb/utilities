@@ -952,6 +952,10 @@
  *	25-Jan-2026 (rlwhitcomb)
  *	    #803: Trivially extend mediant to complex numbers.
  *	    #806: Extended formatting for "@+i".
+ *	27-Jan-2026 (rlwhitcomb)
+ *	    #807: Fix quaternion to complex conversion for formats.
+ *	    #809: Move TrigMode to "math" package; pass to polar conversion; also move CalcPiWorker
+ *	    to "math" package and rename; some refactoring for clarity.
  */
 package info.rlwhitcomb.calc;
 
@@ -965,6 +969,8 @@ import info.rlwhitcomb.math.DateUtil;
 import info.rlwhitcomb.math.MathUtil;
 import info.rlwhitcomb.math.Num;
 import info.rlwhitcomb.math.NumericUtil;
+import info.rlwhitcomb.math.PiWorker;
+import info.rlwhitcomb.math.TrigMode;
 import info.rlwhitcomb.math.Quaternion;
 import info.rlwhitcomb.util.*;
 import net.iharder.b64.Base64;
@@ -1295,7 +1301,7 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 	 * The worker used to maintain the current e/pi values, and calculate them
 	 * in a background thread.
 	 */
-	private CalcPiWorker piWorker = new CalcPiWorker();
+	private PiWorker piWorker = new PiWorker();
 
 	/** Stack of previous "timing" mode values. */
 	private final Deque<Boolean> timingModeStack          = new ArrayDeque<>();
@@ -1432,7 +1438,7 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 	{
 	    displayer = resultDisplayer;
 	    settings  = new Settings(rational, separators, quiet, silence, ignoreCase, quotes, proper, sortKeys);
-	    setIntMathContext(MathContext.DECIMAL128);
+	    setMathContext(MathContext.DECIMAL128);
 
 	    globals = new GlobalScope();
 	    pushScope(globals);
@@ -1452,7 +1458,7 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 	    SystemValue.define(sets, settings, "quoteStrings",      processQuoteStringsMode   );
 	    SystemValue.define(sets, settings, "properFractions",   processProperFractionsMode);
 	    SystemValue.define(sets, settings, "sortKeys",          processSortKeysMode       );
-	    SystemValue.define(sets, settings, "precision",         this::setPrecision        );
+	    SystemValue.define(sets, settings, "precision",         this::setMathContext      );
 	    sets.setImmutable(true);
 
 	    initialized = true;
@@ -1522,14 +1528,54 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 
 	/* ============= Math Context (Precision) ============= */
 
-	public int setMathContext(final MathContext newMathContext) {
-	    int prec = newMathContext.getPrecision();
+	private static final MathContext AVAILABLE_CONTEXTS[] = {
+	    MathContext.DECIMAL32,
+	    MathContext.DECIMAL64,
+	    MathContext.DECIMAL128
+	};
+
+	/**
+	 * Set the new math context and update the calculated values based on this new precision.
+	 * <p> For unlimited precision apply our internal limit for division.
+	 * <p> Also display the appropriate directive message for the result.
+	 *
+	 * @param newValue Either a new precision or new {@link MathContext} to set.
+	 * @return         The updated precision after the set operation.
+	 */
+	public int setMathContext(final Object newValue) {
+	    MathContext newMathContext = null;
+	    int precision = 0;
+
+	    if (newValue instanceof Number) {
+		Number newPrec = (Number) newValue;
+		precision = newPrec.intValue();
+
+		if (precision <= 0 || precision >= MC_MAX_DIGITS.getPrecision()) {
+		    newMathContext = MathContext.UNLIMITED;
+		    precision = 0;
+		}
+		else {
+		    for (MathContext mcAvail : AVAILABLE_CONTEXTS) {
+			if (precision == mcAvail.getPrecision()) {
+			    newMathContext = mcAvail;
+			    break;
+			}
+		    }
+		}
+		if (newMathContext == null) {
+		    newMathContext = new MathContext(precision);
+		}
+	    }
+	    else {
+		newMathContext = (MathContext) newValue;
+		precision = newMathContext.getPrecision();
+	    }
 
 	    settings.mc        = newMathContext;
-	    settings.precision = prec;
+	    settings.precision = precision;
 
 	    // Use a limited precision of our max digits in the case of unlimited precision
-	    settings.mcDivide = (prec == 0) ? MC_MAX_DIGITS : newMathContext;
+	    settings.mcDivide = (precision == 0) ? MC_MAX_DIGITS : newMathContext;
 
 	    // Trigger a background (re)calculation with the new precision
 	    piWorker.apply(settings.mcDivide, settings.rationalMode);
@@ -1542,10 +1588,6 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 		displayDirectiveMessage("%calc#precDigits", settings.precision);
 
 	    return settings.precision;
-	}
-
-	public BigInteger setIntMathContext(final MathContext newMathContext) {
-	    return BigInteger.valueOf(setMathContext(newMathContext));
 	}
 
 
@@ -1988,12 +2030,7 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 	private BigDecimal getDecimalTrigValue(final ParserRuleContext ctx) {
 	    BigDecimal value = getDecimalValue(ctx);
 
-	    if (settings.trigMode == TrigMode.DEGREES)
-		value = value.multiply(piWorker.getPiOver180(), settings.mc);
-	    else if (settings.trigMode == TrigMode.GRADS)
-		value = value.multiply(piWorker.getPiOver200(), settings.mc);
-
-	    return MathUtil.fixup(value, settings.mc);
+	    return settings.trigMode.toRadians(piWorker, value, settings.mc);
 	}
 
 	private double getTrigValue(final ParserRuleContext ctx) {
@@ -2003,25 +2040,13 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 	private BigDecimal returnTrigValue(final double value) {
 	    BigDecimal radianValue = new BigDecimal(value, MC_DOUBLE);
 
-	    if (settings.trigMode == TrigMode.DEGREES)
-		radianValue = radianValue.divide(piWorker.getPiOver180(), MC_DOUBLE);
-	    else if (settings.trigMode == TrigMode.GRADS)
-		radianValue = radianValue.divide(piWorker.getPiOver200(), MC_DOUBLE);
-
-	    return MathUtil.fixup(radianValue, MC_DOUBLE);
+	    return settings.trigMode.fromRadians(piWorker, radianValue, MC_DOUBLE);
 	}
 
-	private BigDecimal returnTrigValue(final BigDecimal value) {
-	    BigDecimal radianValue = value;
-
+	private BigDecimal returnTrigValue(final BigDecimal radianValue) {
 	    MathContext mcDivide = MathUtil.divideContext(radianValue, settings.mcDivide);
 
-	    if (settings.trigMode == TrigMode.DEGREES)
-		radianValue = radianValue.divide(piWorker.getPiOver180(), mcDivide);
-	    else if (settings.trigMode == TrigMode.GRADS)
-		radianValue = radianValue.divide(piWorker.getPiOver200(), mcDivide);
-
-	    return MathUtil.fixup(radianValue, settings.mc);
+	    return settings.trigMode.fromRadians(piWorker, radianValue, mcDivide);
 	}
 
 	private Charset getCharsetValue(final ParserRuleContext ctx, final boolean useDefault) {
@@ -2052,20 +2077,44 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 	}
 
 
-	private Object directiveMathContextBlock(CalcParser.BracketBlockContext blockCtx, Object defValue, MathContext oldContext) {
+	/**
+	 * Process setting a new math context (that is, math precision), executing the block (if present), restoring the original context,
+	 * then returning either the block value or the result of the context set.
+	 *
+	 * @param newMathContext New math context to set, either once, or temporarily for the duration of the block (can be {@link Integer} or {@link MathContext}).
+	 * @param blockCtx The statement block to execute under the new precision.
+	 * @return         Return value from the block (if it exists), or return from the "set math context" operation.
+	 */
+	private Object directiveMathContextBlock(Object newMathContext, CalcParser.BracketBlockContext blockCtx) {
+	    MathContext oldMathContext = settings.mc;
+
+	    int precision = setMathContext(newMathContext);
+
 	    if (blockCtx != null) {
 		try {
 		    return evaluate(blockCtx);
 		}
 		finally {
-		    setMathContext(oldContext);
+		    setMathContext(oldMathContext);
 		}
 	    }
 
-	    return defValue;
+	    return BigInteger.valueOf(precision);
 	}
 
-	private Object directiveTrigModeBlock(CalcParser.BracketBlockContext blockCtx, Object defValue, TrigMode oldMode) {
+	/**
+	 * Process setting a new trig mode, executing the block (if present), restoring the original mode,
+	 * then returning either the block value or the result of the mode set.
+	 *
+	 * @param mode     New trig mode to set, either once, or temporarily for the duration of the block.
+	 * @param blockCtx The statement block to execute under the new trig mode.
+	 * @return         Return value from the block (if it exists), or return from the "set mode" operation.
+	 */
+	private Object directiveTrigModeBlock(TrigMode mode, CalcParser.BracketBlockContext blockCtx) {
+	    TrigMode oldMode = settings.trigMode;
+
+	    String defaultValue = setTrigMode(mode);
+
 	    if (blockCtx != null) {
 		try {
 		    return evaluate(blockCtx);
@@ -2075,28 +2124,37 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 		}
 	    }
 
-	    return defValue;
+	    return defaultValue;
 	}
 
-	private Object directiveRangeModeBlock(CalcParser.BracketBlockContext blockCtx, Object defValue, RangeMode oldMode) {
+	/**
+	 * Process setting a new units value, executing the block (if present), restoring the original units,
+	 * then returning either the block value or the result of the unit set.
+	 *
+	 * @param units    New units value to set, either once, or temporarily for the duration of the block.
+	 * @param blockCtx The statement block to execute under the new units value.
+	 * @return         Return value from the block (if it exists), or return from the "set units" operation.
+	 */
+	private Object directiveRangeModeBlock(RangeMode units, CalcParser.BracketBlockContext blockCtx) {
+	    RangeMode oldUnits = settings.units;
+
+	    String defaultValue = setUnits(units);
+
 	    if (blockCtx != null) {
 		try {
 		    return evaluate(blockCtx);
 		}
 		finally {
-		    setUnits(oldMode);
+		    setUnits(oldUnits);
 		}
 	    }
 
-	    return defValue;
+	    return defaultValue;
 	}
 
 	@Override
 	public Object visitDecimalDirective(CalcParser.DecimalDirectiveContext ctx) {
 	    BigDecimal dPrecision = getDecimalValue(ctx.expr1().expr());
-	    CalcParser.BracketBlockContext blockCtx = ctx.bracketBlock();
-	    MathContext oldMc = settings.mc;
-
 	    int precision = 0;
 	    try {
 		precision = dPrecision.intValueExact();
@@ -2105,129 +2163,57 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 		throw new CalcExprException(ctx, "%calc#precNotInteger", dPrecision);
 	    }
 
-	    BigInteger intValue = BigInteger.valueOf(setPrecision(precision));
-
-	    return directiveMathContextBlock(blockCtx, intValue, oldMc);
-	}
-
-	@Override
-	public Object visitDoubleDirective(CalcParser.DoubleDirectiveContext ctx) {
-	    CalcParser.BracketBlockContext blockCtx = ctx.bracketBlock();
-	    MathContext oldMc = settings.mc;
-
-	    BigInteger intValue = setIntMathContext(MathContext.DECIMAL64);
-
-	    return directiveMathContextBlock(blockCtx, intValue, oldMc);
+	    return directiveMathContextBlock(precision, ctx.bracketBlock());
 	}
 
 	@Override
 	public Object visitFloatDirective(CalcParser.FloatDirectiveContext ctx) {
-	    CalcParser.BracketBlockContext blockCtx = ctx.bracketBlock();
-	    MathContext oldMc = settings.mc;
+	    return directiveMathContextBlock(MathContext.DECIMAL32, ctx.bracketBlock());
+	}
 
-	    BigInteger intValue = setIntMathContext(MathContext.DECIMAL32);
-
-	    return directiveMathContextBlock(blockCtx, intValue, oldMc);
+	@Override
+	public Object visitDoubleDirective(CalcParser.DoubleDirectiveContext ctx) {
+	    return directiveMathContextBlock(MathContext.DECIMAL64, ctx.bracketBlock());
 	}
 
 	@Override
 	public Object visitDefaultDirective(CalcParser.DefaultDirectiveContext ctx) {
-	    CalcParser.BracketBlockContext blockCtx = ctx.bracketBlock();
-	    MathContext oldMc = settings.mc;
-
-	    BigInteger intValue = setIntMathContext(MathContext.DECIMAL128);
-
-	    return directiveMathContextBlock(blockCtx, intValue, oldMc);
+	    return directiveMathContextBlock(MathContext.DECIMAL128, ctx.bracketBlock());
 	}
 
 	@Override
 	public Object visitUnlimitedDirective(CalcParser.UnlimitedDirectiveContext ctx) {
-	    CalcParser.BracketBlockContext blockCtx = ctx.bracketBlock();
-	    MathContext oldMc = settings.mc;
-
-	    BigInteger intValue = setIntMathContext(MathContext.UNLIMITED);
-
-	    return directiveMathContextBlock(blockCtx, intValue, oldMc);
-	}
-
-	private static final MathContext AVAILABLE_CONTEXTS[] = {
-	    MathContext.DECIMAL32,
-	    MathContext.DECIMAL64,
-	    MathContext.DECIMAL128
-	};
-
-	public int setPrecision(Number prec) {
-	    int precision = prec.intValue();
-
-	    if (precision <= 0) {
-		return setMathContext(MathContext.UNLIMITED);
-	    }
-	    else {
-		for (MathContext mcAvail : AVAILABLE_CONTEXTS) {
-		    if (precision == mcAvail.getPrecision())
-			return setMathContext(mcAvail);
-		}
-	    }
-	    if (precision >= 1 && precision <= MC_MAX_DIGITS.getPrecision()) {
-		return setMathContext(new MathContext(precision));
-	    }
-	    else {
-		return setMathContext(MC_MAX_DIGITS);
-	    }
+	    return directiveMathContextBlock(MathContext.UNLIMITED, ctx.bracketBlock());
 	}
 
 	@Override
 	public Object visitDegreesDirective(CalcParser.DegreesDirectiveContext ctx) {
-	    TrigMode oldMode = settings.trigMode;
-
-	    String value = setTrigMode(TrigMode.DEGREES);
-
-	    return directiveTrigModeBlock(ctx.bracketBlock(), value, oldMode);
+	    return directiveTrigModeBlock(TrigMode.DEGREES, ctx.bracketBlock());
 	}
 
 	@Override
 	public Object visitRadiansDirective(CalcParser.RadiansDirectiveContext ctx) {
-	    TrigMode oldMode = settings.trigMode;
-
-	    String value = setTrigMode(TrigMode.RADIANS);
-
-	    return directiveTrigModeBlock(ctx.bracketBlock(), value, oldMode);
+	    return directiveTrigModeBlock(TrigMode.RADIANS, ctx.bracketBlock());
 	}
 
 	@Override
 	public Object visitGradsDirective(CalcParser.GradsDirectiveContext ctx) {
-	    TrigMode oldMode = settings.trigMode;
-
-	    String value = setTrigMode(TrigMode.GRADS);
-
-	    return directiveTrigModeBlock(ctx.bracketBlock(), value, oldMode);
+	    return directiveTrigModeBlock(TrigMode.GRADS, ctx.bracketBlock());
 	}
 
 	@Override
 	public Object visitBinaryDirective(CalcParser.BinaryDirectiveContext ctx) {
-	    RangeMode oldUnits = settings.units;
-
-	    String value = setUnits(RangeMode.BINARY);
-
-	    return directiveRangeModeBlock(ctx.bracketBlock(), value, oldUnits);
+	    return directiveRangeModeBlock(RangeMode.BINARY, ctx.bracketBlock());
 	}
 
 	@Override
 	public Object visitSiDirective(CalcParser.SiDirectiveContext ctx) {
-	    RangeMode oldUnits = settings.units;
-
-	    String value = setUnits(RangeMode.DECIMAL);
-
-	    return directiveRangeModeBlock(ctx.bracketBlock(), value, oldUnits);
+	    return directiveRangeModeBlock(RangeMode.DECIMAL, ctx.bracketBlock());
 	}
 
 	@Override
 	public Object visitMixedDirective(CalcParser.MixedDirectiveContext ctx) {
-	    RangeMode oldUnits = settings.units;
-
-	    String value = setUnits(RangeMode.MIXED);
-
-	    return directiveRangeModeBlock(ctx.bracketBlock(), value, oldUnits);
+	    return directiveRangeModeBlock(RangeMode.MIXED, ctx.bracketBlock());
 	}
 
 
@@ -3029,7 +3015,7 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 			    if (settings.rationalMode && result instanceof BigFraction)
 				c = ComplexNumber.real((BigFraction) result);
 			    else
-				c = ComplexNumber.real(convertToDecimal(result, settings.mc, ctx));
+				c = ComplexNumber.valueOf(result, settings.rationalMode);
 			}
 			valueBuf.append(c.toLongString(formatChar == 'I', signChar == '+', separators, true));
 			break;
@@ -3044,10 +3030,10 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 			    if (settings.rationalMode && result instanceof BigFraction)
 				c2 = ComplexNumber.real((BigFraction) result);
 			    else
-				c2 = ComplexNumber.real(convertToDecimal(result, settings.mc, ctx));
+				c2 = ComplexNumber.valueOf(result, settings.rationalMode);
 			}
-			valueBuf.append(c2.toPolarString(formatChar == 'P', separators,
-				MathUtil.divideContext(c2, settings.mcDivide)));
+			valueBuf.append(c2.toPolarString(piWorker, formatChar == 'P', separators,
+				settings.trigMode, MathUtil.divideContext(c2, settings.mcDivide)));
 			break;
 
 		    // @E = US format: MM/dd/yyyy

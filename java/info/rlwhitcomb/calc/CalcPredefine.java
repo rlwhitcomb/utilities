@@ -1,7 +1,7 @@
 /*
  * The MIT License (MIT)
  *
- * Copyright (c) 2022-2023,2025 Roger L. Whitcomb.
+ * Copyright (c) 2022-2023,2025-2026 Roger L. Whitcomb.
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -47,10 +47,12 @@
  *  09-Feb-23 rlw ----	Rearrange some code and all history.
  *  05-May-23 rlw #610	Add "currentdir" to "info.os".
  *  05-Jan-25 rlw #698	Add copyright string to "info" at the top level.
+ *  28-Jan-26 rlw #809	Renamed CalcPiWorker now in new package.
  */
 package info.rlwhitcomb.calc;
 
 import de.onyxbits.SemanticVersion;
+import info.rlwhitcomb.math.PiWorker;
 import info.rlwhitcomb.util.CharUtil;
 import info.rlwhitcomb.util.Environment;
 import info.rlwhitcomb.util.Exceptions;
@@ -144,7 +146,7 @@ class CalcPredefine
 	 */
 	public static void define(
 		final GlobalScope globalScope,
-		final CalcPiWorker piWorker,
+		final PiWorker piWorker,
 		final Supplier<Object> phiSupplier,
 		final Supplier<Object> phi1Supplier)
 	{

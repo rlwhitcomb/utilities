@@ -1,7 +1,7 @@
 /*
  * The MIT License (MIT)
  *
- * Copyright (c) 2022,2024-2025 Roger L. Whitcomb.
+ * Copyright (c) 2022,2024-2026 Roger L. Whitcomb.
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -43,11 +43,14 @@
  *	    #672: New option for always using proper fraction display mode.
  *	14-Sep-2025 (rlwhitcomb)
  *	    #761: New constructor parameter to set "silent" mode.
+ *	27-Jan-2026 (rlwhitcomb)
+ *	    #809: Move TrigMode to "math" package.
  */
 package info.rlwhitcomb.calc;
 
 import info.rlwhitcomb.annotations.Scriptable;
 import info.rlwhitcomb.math.NumericUtil.RangeMode;
+import info.rlwhitcomb.math.TrigMode;
 
 import java.math.MathContext;
 
