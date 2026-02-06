@@ -68,6 +68,8 @@ $silencedirectives on {
 help_mort
 monthly(244000, 3.25, 30)
 PMT2(350000, 0.3, 180)
+nper(50000, -500, 0.05/12)
+nper(50000, -500, .05/12, , 1)
   }
 }
 

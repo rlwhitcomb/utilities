@@ -53,6 +53,8 @@
 >
 >monthly(244000, 3.25, 30) -> Full monthly payment is $1,061.90
 >PMT2(350000, 0.3, 180) -> 2519.31
+>nper(50000, -500, 0.05 / 12) -> 129.628
+>nper(50000, -500, .05 / 12, , 1) -> 128.917
 >s1 = eval stack -> { _values: [ ] }
 >isempty(s1) -> true
 >peek(s1) -> <null>
