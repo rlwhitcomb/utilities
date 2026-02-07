@@ -1,7 +1,7 @@
 /*
  * The MIT License (MIT)
  *
- * Copyright (c) 2020,2022 Roger L. Whitcomb.
+ * Copyright (c) 2020,2022,2026 Roger L. Whitcomb.
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -29,6 +29,8 @@
  *	Finished conversion from C.
  *    03-Feb-2022 (rlwhitcomb)
  *	Add "hasWildCards" method for use with Calc.
+ *    06-Feb-2026 (rlwhitcomb)
+ *	Small updates to Javadoc.
  */
 package info.rlwhitcomb.directory;
 
@@ -44,6 +46,12 @@ package info.rlwhitcomb.directory;
 public class Match
 {
 	/**
+	 * All static class has private constructor.
+	 */
+	private Match() {
+	}
+
+	/**
 	 * Check if a pattern has any wild card characters in it (because if not, then
 	 * regular matching works fine, without having to use these methods).
 	 *
@@ -56,16 +64,16 @@ public class Match
 
 	/**
 	 * Decide whether or not the given pattern is a string
-	 * of all "*" characters, meaning it should match any input.
+	 * of all <code>'*'</code> characters, meaning it should match any input.
 	 * <p> Note: this differs from the C code which would also
-	 * check for "?". BUT a string of "?" should only match
+	 * check for <code>'?'</code>. BUT a string of <code>'?'</code> should only match
 	 * input of the same length, but this code is only (currently)
 	 * used to decide if an empty input string matches the pattern
-	 * so "?" doesn't qualify in that scenario.
+	 * so <code>'?'</code> doesn't qualify in that scenario.
 	 *
 	 * @param pattern	The pattern to test.
 	 * @return		Whether or not the pattern is entirely
-	 *			a string of "*".
+	 *			a string of <code>'*'</code>.
 	 */
 	private static boolean allWild(final String pattern) {
 	    if (pattern == null || pattern.isEmpty())
@@ -88,7 +96,7 @@ public class Match
 
 	/**
 	 * Match an input character against the corresponding pattern character,
-	 * in a case-sensitive manner or not. The single character wildcard ("?")
+	 * in a case-sensitive manner or not. The single character wildcard (<code>'?'</code>)
 	 * is checked here.
 	 * <p> Note: all the caveats for {@link Character#toUpperCase(int)} or
 	 * {@link Character#toLowerCase(int)} apply here: namely that context and locale
@@ -119,8 +127,8 @@ public class Match
 	/**
 	 * Do a wildcard string match of the input against the pattern, possibly in a
 	 * case-insensitive manner.
-	 * <p> Wildcard patterns are: "*" matches any run of characters in the input,
-	 * while "?" matches any single character in the input.
+	 * <p> Wildcard patterns are: <code>'*'</code> matches any run of characters in the input,
+	 * while <code>'?'</code> matches any single character in the input.
 	 *
 	 * @param input		The input string to match.
 	 * @param pattern	The pattern to match against.

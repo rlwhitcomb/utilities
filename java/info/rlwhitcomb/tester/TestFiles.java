@@ -1,7 +1,7 @@
 /*
  * The MIT License (MIT)
  *
- * Copyright (c) 2022-2023 Roger L. Whitcomb.
+ * Copyright (c) 2022-2023,2026 Roger L. Whitcomb.
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -24,12 +24,14 @@
  *	Holder for file-related objects for testing.
  *
  * History:
- *  26-Oct-22 rlw #540:	Move out of Tester into separate class file.
- *  10-Feb-23 rlw  ---	Small optimization not to write empty strings.
+ *  26-Oct-22 rlw #540	Move out of Tester into separate class file.
+ *  10-Feb-23 rlw ----	Small optimization not to write empty strings.
+ *  09-Jan-26 rlw #800	Update class Javadoc; new reporting in "deleteFiles".
  */
 package info.rlwhitcomb.tester;
 
 import info.rlwhitcomb.util.FileUtilities;
+import info.rlwhitcomb.util.Intl;
 
 import java.io.BufferedWriter;
 import java.io.File;
@@ -39,8 +41,8 @@ import java.nio.file.Files;
 
 
 /**
- * An object to hold the multiple file-related objects that need to be passed around
- * during operation.
+ * An object to hold the file-related objects used for deconstructing the original
+ * test "canon" file into its component streams (input, output, and error).
  */
 class TestFiles
 {
@@ -137,9 +139,14 @@ class TestFiles
 	    closeStreams();
 	}
 
-	public void deleteFiles()
+	public void deleteFiles(final boolean report)
 		throws IOException
 	{
+	    if (report) {
+		Intl.outFormat("tester#cleanupFileName", inputFile.getName());
+		Intl.outFormat("tester#cleanupFileName", outputFile.getName());
+		Intl.outFormat("tester#cleanupFileName", errorFile.getName());
+	    }
 	    inputFile.delete();
 	    outputFile.delete();
 	    errorFile.delete();

@@ -94,6 +94,8 @@
 #	    #736: New parsing exception error message.
 #	09-Jan-2026 (rlwhitcomb)
 #	    #736: Update help for expression check syntax.
+#	06-Feb-2026 (rlwhitcomb)
+#	    #800: Verbose output for file cleanup.
 #
 
 mismatch		= Mismatch on test \"%1$s\":%n  Canon file: %2$s%n Output file: %3$s
@@ -139,6 +141,8 @@ missingDescFile		= Must specify at least one description file name.
 exception		= Exception thrown during testing: %1$s
 parseException          = Expression parsing error: %1$s
 compareFiles		= compare files(\"%1$s\",%2$s,%3$s)
+cleanupDirName		= Cleaning up temp files in '%1$s' directory ...
+cleanupFileName		= Removing '%1$s' ...
 statusPassed		= Passed
 statusFailed		= Failed
 statusTimingMemory	= %1$s (%2$.6f secs) (%3$s used, %4$s free)

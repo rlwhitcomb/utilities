@@ -1,7 +1,7 @@
 /**
  * The MIT License (MIT)
  *
- * Copyright (c) 2010-2011,2013-2017,2019-2023 Roger L. Whitcomb.
+ * Copyright (c) 2010-2011,2013-2017,2019-2023,2026 Roger L. Whitcomb.
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -131,6 +131,8 @@
  *	Add option to "compareFileLines" for case-insensitive compares.
  *    05-Feb-2023 (rlwhitcomb)
  *	Option for "compareFileLines" to use UTF-8.
+ *    06-Feb-2026 (rlwhitcomb)
+ *	#800: New "getTempDir" method to find temporary files.
  */
 package info.rlwhitcomb.util;
 
@@ -179,6 +181,11 @@ public final class FileUtilities
      * Default list of executable extensions (in case "PATHEXT" is not found in the environment.
      */
     private static final String DEFAULT_EXECUTABLES = ".COM;.EXE;.BAT;.CMD;.VBS;.VBE;.JS;.JSE;.WSF;.WSH;.MSC";
+
+    /**
+     * Saved last-used temporary file directory on this platform.
+     */
+    private static File lastTempDirectory = new File(System.getProperty("java.io.tmpdir"));
 
 
     /**
@@ -379,6 +386,15 @@ public final class FileUtilities
     }
 
     /**
+     * Retrieve the directory last used for creating temporary files.
+     *
+     * @return The last used temporary file directory.
+     */
+    public static File getTempDir() {
+	return lastTempDirectory;
+    }
+
+    /**
      * Create a temporary file with the given name prefix and extension.
      *
      * @param	prefix		Prefix for the file name (must be &gt; 3 characters)
@@ -394,6 +410,7 @@ public final class FileUtilities
 		throws IOException
     {
 	File tempFile = File.createTempFile(prefix, suffix == null || suffix.startsWith(".") ? suffix : "." + suffix);
+	lastTempDirectory = tempFile.getParentFile();
 	if (deleteOnExit)
 	    tempFile.deleteOnExit();
 	return tempFile;

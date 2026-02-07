@@ -1,7 +1,7 @@
 /*
  * The MIT License (MIT)
  *
- * Copyright (c) 2012-2023,2025 Roger L. Whitcomb.
+ * Copyright (c) 2012-2023,2025-2026 Roger L. Whitcomb.
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -261,6 +261,9 @@
  *	25-Jul-2025 (rlwhitcomb)
  *	    #736: New syntax for canon files to allow arbitrary expressions to choose alternate
  *	    canon lines.
+ *	09-Jan-2026 (rlwhitcomb)
+ *	    #800: Minor refactoring (mostly for understanding); add "deleteAlways" command-line option;
+ *	    add "-cleanup" option.
  */
 package info.rlwhitcomb.tester;
 
@@ -281,10 +284,13 @@ import java.net.URLClassLoader;
 import java.nio.charset.Charset;
 import java.nio.charset.UnsupportedCharsetException;
 import java.nio.file.Files;
+import java.nio.file.FileVisitOption;
+import java.nio.file.Path;
 import java.security.Permission;
 import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.EnumSet;
 import java.util.List;
 import java.util.Locale;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -314,6 +320,10 @@ public class Tester
 
 	private static final String NEWLINE = Environment.lineSeparator();
 
+	private static final String INPUT_PREFIX  = "<";
+	private static final String OUTPUT_PREFIX = ">";
+	private static final String ERROR_PREFIX  = ">>";
+
 	private boolean createCanons = false;
 	private boolean verbose = false;
 	private boolean log = false;
@@ -322,6 +332,8 @@ public class Tester
 	private boolean debug = false;
 	private boolean abortOnFirstError = false;
 	private boolean defaultAbortOnFirstError = false;
+	private boolean alwaysDeleteFiles = false;
+	private boolean cleanupFiles = false;
 
 	private long totalElapsedTime = 0L;
 
@@ -768,7 +780,12 @@ public class Tester
 		if (createCanons) {
 		    // TODO: Read and merge testIn, testOut and testErr into the new canon file
 		    
-		    if (ret == SUCCESS) {
+		    if (ret == SUCCESS || alwaysDeleteFiles) {
+			if (verbose) {
+			    Intl.outFormat("tester#cleanupFileName", testIn.getName());
+			    Intl.outFormat("tester#cleanupFileName", testOut.getName());
+			    Intl.outFormat("tester#cleanupFileName", testErr.getName());
+			}
 			testIn.delete();
 			testOut.delete();
 			testErr.delete();
@@ -781,7 +798,12 @@ public class Tester
 		    else
 			ret = compareCanons(testName, files.outputFile, testOut, files.errorFile, testErr, cs);
 
-		    if (ret == SUCCESS) {
+		    if (ret == SUCCESS || alwaysDeleteFiles) {
+			// Note: testIn does not exist in this case
+			if (verbose) {
+			    Intl.outFormat("tester#cleanupFileName", testOut.getName());
+			    Intl.outFormat("tester#cleanupFileName", testErr.getName());
+			}
 			testOut.delete();
 			testErr.delete();
 		    }
@@ -1081,8 +1103,8 @@ public class Tester
 		    // TODO: pass in canonWriter somehow for this case
 		    int ret = runTestAndCompareOrCreateCanons(testClassName, testName, files, cs, commandLine, expectedExitCode);
 
-		    if (ret == 0) {
-			files.deleteFiles();
+		    if (ret == 0 || alwaysDeleteFiles) {
+			files.deleteFiles(verbose);
 		    }
 
 		    return ret;
@@ -1156,14 +1178,14 @@ public class Tester
 			else if (!line.isEmpty()) {
 			    String outLine = platformAndVersionCheck(line);
 			    if (outLine != null) {
-				if (outLine.startsWith(">>")) {
-				    files.writeErrorLine(outLine.substring(2));
+				if (outLine.startsWith(ERROR_PREFIX)) {
+				    files.writeErrorLine(outLine.substring(ERROR_PREFIX.length()));
 				}
-				else if (outLine.startsWith(">")) {
-				    files.writeOutputLine(outLine.substring(1));
+				else if (outLine.startsWith(OUTPUT_PREFIX)) {
+				    files.writeOutputLine(outLine.substring(OUTPUT_PREFIX.length()));
 				}
-				else if (outLine.startsWith("<")) {
-				    files.writeInputLine(outLine.substring(1));
+				else if (outLine.startsWith(INPUT_PREFIX)) {
+				    files.writeInputLine(outLine.substring(INPUT_PREFIX.length()));
 				}
 				else {
 				    // Default is to write to standard output
@@ -1181,8 +1203,8 @@ public class Tester
 
 		    int ret = runTestAndCompareOrCreateCanons(testClassName, testName, files, cs, commandLine, expectedExitCode);
 
-		    if (ret == 0) {
-			files.deleteFiles();
+		    if (ret == 0 || alwaysDeleteFiles) {
+			files.deleteFiles(verbose);
 		    }
 
 		    return ret;
@@ -1606,11 +1628,13 @@ public class Tester
 	private void resetToInitialOptions() {
 	    createCanons = false;
 
-	    verbose = false;
-	    log     = false;
-	    timing  = false;
-	    memory  = false;
-	    debug   = false;
+	    verbose           = false;
+	    log               = false;
+	    timing            = false;
+	    memory            = false;
+	    debug             = false;
+	    alwaysDeleteFiles = false;
+	    cleanupFiles      = false;
 
 	    abortOnFirstError = defaultAbortOnFirstError = false;
 
@@ -1667,6 +1691,10 @@ public class Tester
 		createCanons = true;
 	    else if (Options.matchesOption(opt, true, "debug"))
 		debug = true;
+	    else if (Options.matchesOption(opt, true, "alwaysdelete", "deletealways", "always", "delete", "del"))
+		alwaysDeleteFiles = true;
+	    else if (Options.matchesOption(opt, true, "cleanup", "clean", "cln"))
+		cleanupFiles = alwaysDeleteFiles = true;
 	    else if (Options.matchesOption(opt, true, ABORT_OPTIONS))
 		abortOnFirstError = defaultAbortOnFirstError = true;
 	    else if (Options.matchesOption(opt, true, NO_ABORT_OPTIONS))
@@ -1766,7 +1794,8 @@ public class Tester
 	    // Now the regular command-line arguments
 	    processArgs(args);
 
-	    if (testDescriptionFiles.size() == 0) {
+	    // Allow no testing as long as we're just cleaning up temp files
+	    if (!cleanupFiles && testDescriptionFiles.size() == 0) {
 		Intl.errPrintln("tester#missingDescFile");
 		Intl.printHelp("tester#");
 		return MISSING_OPTION;
@@ -1792,6 +1821,25 @@ public class Tester
 	    }
 	    finally {
 		exitSecurityManager.setAllowed(true);
+	    }
+
+	    // Final cleanup of all pre-existing temp files if requested
+	    if (cleanupFiles) {
+		try {
+		    Path tempDir = FileUtilities.getTempDir().toPath();
+		    if (verbose)
+			Intl.outFormat("tester#cleanupDirName", tempDir.toString());
+
+		    FileCleanupVisitor visitor = new FileCleanupVisitor(verbose, true,
+			"desc*.tmp",
+			"canoninput*.tmp", "canonoutput*.tmp", "canonerror*.tmp",
+			"testinput*.tmp", "testoutput*.tmp", "testerror*.tmp");
+		    Files.walkFileTree(tempDir, EnumSet.noneOf(FileVisitOption.class), 1, visitor);
+		}
+		catch (IOException ioe) {
+		    Intl.errFormat("tester#exception", Exceptions.toString(ioe));
+		    return OTHER_ERROR;
+		}
 	    }
 
 	    int failed = numberFailed.intValue();
