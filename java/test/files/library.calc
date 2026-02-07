@@ -866,13 +866,14 @@ Usage: PMT (P = present value, R = yearly interest rate (%), N = number of years
  * @return Negative number of periods to achieve a future value or positive periods to payoff loan.
  */
 define nper(pv, pmt, rate, fv = 0, type = 0) = {
+   $assert (type === 0 || type === 1), 'nper: type must be 0 or 1'
    if rate == 0
       round((-pv - fv) / pmt, 3)
    else {
       const r1 = 1 + rate
       const rt = 1 + rate * type
-      const pmt1 = pmt * rt
-      round(ln((-rate * fv + pmt1) / (rate * pv + pmt1)) / ln(r1), 3)
+      const partial_pmt = pmt * rt
+      round(ln((-rate * fv + partial_pmt) / (rate * pv + partial_pmt)) / ln(r1), 3)
    }
 }
 
