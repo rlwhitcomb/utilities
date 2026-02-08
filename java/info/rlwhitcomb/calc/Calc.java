@@ -367,6 +367,8 @@
  *	    #760: Add GUI shutdown signal and exit REPL mode with "$gui" directive.
  *	27-Jan-2026 (rlwhitcomb)
  *	    #809: Move TrigMode to "math" package.
+ *	07-Feb-2026 (rlwhitcomb)
+ *	    #811: Preprocess command line arguments that have combined values in a single arg.
  */
 package info.rlwhitcomb.calc;
 
@@ -2197,6 +2199,25 @@ public class Calc
 	}
 
 	/**
+	 * Preprocess arguments, separating into individual strings.
+	 *
+	 * @param originalArgs Incoming arguments, maybe with multiples separated by
+	 *                     commas or semicolons.
+	 * @return Possibly modified list with the multiples broken out.
+	 */
+	private static List<String> preProcessArgs(String[] originalArgs) {
+	    List<String> newArgs = new ArrayList<>(originalArgs.length * 2);
+
+	    for (String arg : originalArgs) {
+		String[] pieces = arg.split("[;,]+");
+		for (String piece : pieces)
+		    newArgs.add(piece);
+	    }
+
+	    return newArgs;
+	}
+
+	/**
 	 * Process one command line option.
 	 *
 	 * @param arg    The complete argument, including leading characters.
@@ -2579,8 +2600,10 @@ public class Calc
 	    return Expecting.DEFAULT;
 	}
 
-	private static void processArgs(String[] args, List<String> argList) {
+	private static void processArgs(String[] originalArgs, List<String> argList) {
 	    expecting = Expecting.DEFAULT;
+
+	    List<String> args = preProcessArgs(originalArgs);
 
 	    for (String arg : args) {
 		String opt = Options.isOption(arg, true);

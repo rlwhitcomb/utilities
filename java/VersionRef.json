@@ -3,6 +3,10 @@
 /*======================*/
 
 [
+    { version: '3.3.13', date: d'2026-02-07',
+      issues: [ 811 ],
+      comment: 'Update command line parsing to allow multiple options separated by commas.'
+    },
     { version: '3.3.12', date: d'2026-01-29',
       issues: [ 807, 809 ],
       comment: '''Fix bug trying to format true quaternions with "@i" or "@p" formats;
