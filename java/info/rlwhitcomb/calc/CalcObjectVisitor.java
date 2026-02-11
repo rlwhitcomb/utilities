@@ -956,6 +956,8 @@
  *	    #807: Fix quaternion to complex conversion for formats.
  *	    #809: Move TrigMode to "math" package; pass to polar conversion; also move CalcPiWorker
  *	    to "math" package and rename; some refactoring for clarity.
+ *	10-Feb-2026 (rlwhitcomb)
+ *	    #815: Rename "stringToValue" to "inputToValue".
  */
 package info.rlwhitcomb.calc;
 
@@ -1493,9 +1495,7 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 	 */
 	public void setArgument(final int index, final String arg) {
 	    String argKey = String.format("%1$s%2$d", GlobalScope.GLOBAL_PREFIX, index);
-	    Object value = stringToValue(arg);
-
-	    ParameterValue.define(globals, argKey, value);
+	    ParameterValue.define(globals, argKey, inputToValue(arg));
 	}
 
 	/**
@@ -1506,7 +1506,7 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 	 *		(if possible) to a number or boolean.
 	 */
 	public void setGlobalVariable(final String name, final String value) {
-	    globals.setValue(name, stringToValue(value));
+	    globals.setValue(name, inputToValue(value));
 	}
 
 	/**
@@ -8915,7 +8915,7 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 
 	@Override
 	public Object visitNumberValue(CalcParser.NumberValueContext ctx) {
-	    return stringToValue(ctx.NUMBER().getText());
+	    return inputToValue(ctx.NUMBER().getText());
 	}
 
 	@Override

@@ -282,6 +282,9 @@
  *	    #643: Start of continued fraction support.
  *	11-Dec-2025 (rlwhitcomb)
  *	    #643: More continued fraction support.
+ *	09-Feb-2026 (rlwhitcomb)
+ *	    #815: Translate escape sequencees inside command-line arguments; rename "stringToValue"
+ *	    to "inputToValue".
  */
 package info.rlwhitcomb.calc;
 
@@ -798,7 +801,7 @@ public final class CalcUtil
 	 * @see CalcObjectVisitor#setArgument
 	 * @see CalcObjectVisitor#setGlobalVariable
 	 */
-	public static Object stringToValue(final String arg) {
+	public static Object inputToValue(final String arg) {
 	    try {
 		return fixupToInteger(new BigDecimal(arg));
 	    }
@@ -807,7 +810,7 @@ public final class CalcUtil
 		    return Boolean.valueOf(CharUtil.getBooleanValue(arg));
 		}
 		catch (IllegalArgumentException iae) {
-		    return CharUtil.stripAnyQuotes(arg, true);
+		    return CharUtil.convertEscapeSequences(CharUtil.stripAnyQuotes(arg, true), false);
 		}
 	    }
 	}

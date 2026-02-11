@@ -3,6 +3,10 @@
 /*======================*/
 
 [
+    { version: '3.3.15', date: d'2026-02-10',
+      issues: [ 814, 815 ],
+      comment: 'Convert escape sequences inside strings passed on command line.'
+    },
     { version: '3.3.13', date: d'2026-02-07',
       issues: [ 811 ],
       comment: 'Update command line parsing to allow multiple options separated by commas.'
