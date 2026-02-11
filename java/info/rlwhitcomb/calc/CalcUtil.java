@@ -285,6 +285,7 @@
  *	09-Feb-2026 (rlwhitcomb)
  *	    #815: Translate escape sequencees inside command-line arguments; rename "stringToValue"
  *	    to "inputToValue".
+ *	    Further fix (for Windows mostly), with illegal Unicode escape in an input string.
  */
 package info.rlwhitcomb.calc;
 
@@ -810,7 +811,13 @@ public final class CalcUtil
 		    return Boolean.valueOf(CharUtil.getBooleanValue(arg));
 		}
 		catch (IllegalArgumentException iae) {
-		    return CharUtil.convertEscapeSequences(CharUtil.stripAnyQuotes(arg, true), false);
+		    String unquoted = CharUtil.stripAnyQuotes(arg, true);
+		    try {
+			return CharUtil.convertEscapeSequences(unquoted);
+		    }
+		    catch (NumberFormatException nfe2) {
+			return unquoted;
+		    }
 		}
 	    }
 	}
