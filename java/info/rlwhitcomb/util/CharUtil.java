@@ -1,7 +1,7 @@
 /*
  * The MIT License (MIT)
  *
- * Copyright (c) 2011-2025 Roger L. Whitcomb.
+ * Copyright (c) 2011-2026 Roger L. Whitcomb.
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -20,6 +20,8 @@
  * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
+ *
+ *	Collection of character/string utilities of all kinds.
  *
  *  History:
  *	27-Jun-2011 (rlwhitcomb)
@@ -360,6 +362,8 @@
  *	    #781: Traditional octal escape sequence inside strings.
  *	12-Dec-2025 (rlwhitcomb)
  *	    #792: New "unwrapText" method for dealing with line continuations.
+ *	12-Feb-2026 (rlwhitcomb)
+ *	    Add some actual "throws" declarations as needed (and already documented).
  */
 package info.rlwhitcomb.util;
 
@@ -894,7 +898,8 @@ public final class CharUtil
 	 *		({@code null} input produces {@code null} output).
 	 * @throws	IllegalArgumentException if a Unicode escape is improperly formatted.
 	 */
-	public static String convertUnicodeLiteral(final String input) {
+	public static String convertUnicodeLiteral(final String input)
+			throws IllegalArgumentException {
 	    int len = input == null ? 0 : input.length();
 	    if (len < 3) {
 		return input;
@@ -1031,7 +1036,8 @@ public final class CharUtil
 	 * @return The hex literal converted to a String according to the charset.
 	 * @throws IllegalArgumentException if the string is malformed.
 	 */
-	public static String convertHexLiteral(final String input, final Charset charset) {
+	public static String convertHexLiteral(final String input, final Charset charset)
+			throws IllegalArgumentException {
 	    if (isNullOrEmpty(input))
 		throw new Intl.IllegalArgumentException("util#char.illegalHexLiteral");
 	    int len = input.length();
@@ -1079,7 +1085,7 @@ public final class CharUtil
 		final int index,
 		final int radix,
 		final int normalLength,
-		final StringBuilder output)
+		final StringBuilder output) throws NumberFormatException
 	{
 	    StringBuilder charBuilder = new StringBuilder();
 	    int pos = index;
@@ -2934,7 +2940,8 @@ public final class CharUtil
 	 * @throws	IllegalArgumentException for bad string values or bad types.
 	 * @see	#getBooleanValue(Object, boolean)
 	 */
-	public static boolean getBooleanValue(final Object value) {
+	public static boolean getBooleanValue(final Object value)
+			throws IllegalArgumentException {
 	    return getBooleanValue(value, false);
 	}
 
@@ -2946,11 +2953,13 @@ public final class CharUtil
 	 *
 	 * @param	value		The candidate value.
 	 * @param	extended	Whether to use the extended string conversions
-	 *				(like "T"/"F", "yes"/"no", etc.)
+	 *				(like "T"/"F", "yes"/"no", etc.) (which are
+	 *				internationalizable in the "resources*.utf8" files).
 	 * @return			If possible, the boolean value that corresponds.
 	 * @throws	IllegalArgumentException for bad string values or bad types.
 	 */
-	public static boolean getBooleanValue(final Object value, final boolean extended) {
+	public static boolean getBooleanValue(final Object value, final boolean extended)
+			throws IllegalArgumentException {
 	    if (value instanceof Boolean) {
 		return ((Boolean) value).booleanValue();
 	    }
