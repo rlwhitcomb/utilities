@@ -1,7 +1,7 @@
 /*
  * The MIT License (MIT)
  *
- * Copyright (c) 2022,2025 Roger L. Whitcomb.
+ * Copyright (c) 2022,2025-2026 Roger L. Whitcomb.
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -23,19 +23,15 @@
  *
  *	Main processor for JSON data files.
  *
- *  History:
- *      16-Feb-2022 (rlwhitcomb)
- *	    #196: Initial coding.
- *	    Add option to "toStringValue" to switch line endings.
- *	23-Mar-2022 (rlwhitcomb)
- *	    New "writeObject" methods.
- *	08-Jul-2022 (rlwhitcomb)
- *	    #393: Cleanup imports.
- *	25-Oct-2022 (rlwhitcomb)
- *	    #196: Add convenience methods to read straight from a File.
- *	12-Oct-2025 (rlwhitcomb)
- *	    #146: A bit of code reformatting; add final line ending to string form
- *	    in "pretty" mode; support character field outputs as strings.
+ * History:
+ *  16-Feb-22 rlw #196	Initial coding.
+ *			Add option to "toStringValue" to switch line endings.
+ *  23-Mar-22 rlw ----	New "writeObject" methods.
+ *  08-Jul-22 rlw #393	Cleanup imports.
+ *  25-Oct-22 rlw #196	Add convenience methods to read straight from a File.
+ *  12-Oct-25 rlw #146	A bit of code reformatting; add final line ending to string form
+ *			in "pretty" mode; support character field outputs as strings.
+ *  11-Feb-26 rlw #778	Cleanup history.
  */
 package info.rlwhitcomb.json;
 
