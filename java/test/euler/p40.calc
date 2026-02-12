@@ -16,29 +16,30 @@
  */
 $quiet on {
 
-const LIMIT = 1e6
-var str = "."
+const TEST = 12
+const DIGIT_NUMBERS = [ 1, 10, 1e2, 1e3, 1e4, 1e5, 1e6 ]
+
+const LIMIT = max(DIGIT_NUMBERS)
+var fraction_string = "."
 var value = 1
 
-while length(str) <= LIMIT {
-   str += @@value++
+// Construct a string with as many numeric values as we need to fulfill the search criteria
+while length(fraction_string) <= LIMIT {
+   fraction_string += @@value++
 }
-print `Length = ${length str}, last value = $value`
-
-const TEST = 12
-const DIGITS = [ 1, 10, 1e2, 1e3, 1e4, 1e5, 1e6 ]
+print `Length = ${length fraction_string}, last value = $value`
 
 var digits = []
-loop d over DIGITS {
-   digits += str[d]
+loop d over DIGIT_NUMBERS {
+   digits += fraction_string[d]
 }
 
 } // end of quiet on
 
 $resultsonly on {
 
-   print `${TEST}th digit is ${str[TEST]}`
-   print `Product of the ${DIGITS}th digits is ${productOf(digits)}.`
+   print `${TEST}th digit is ${fraction_string[TEST]}`
+   print `Product of the ${DIGIT_NUMBERS}th digits is ${productOf(digits)}.`
 
 } // end of results on
 

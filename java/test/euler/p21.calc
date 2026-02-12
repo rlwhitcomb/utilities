@@ -19,6 +19,8 @@ var sums = []
 // Precompute the sums of proper divisors of each value up to the limit
 loop a within LIMIT {
    var facts = factors(a)
+   // Note: "factors" produces all the divisors INCLUDING the number itself
+   // so here we remove that value to get only the "proper divisors"
    facts--
    sums += sumof(facts)
 }
@@ -26,6 +28,7 @@ loop a within LIMIT {
 // Now find the amicable numbers in the range and add them up
 var sum = 0
 
+// "a" is the index into "sums" so we can figure out the amicable pair(s)
 loop a within length(sums) {
    const b = sums[a]
    if notnull(b) && sums[b] == a && a ≠ b { sum += a }

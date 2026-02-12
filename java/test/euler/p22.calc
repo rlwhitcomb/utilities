@@ -16,6 +16,7 @@
 $quiet on {
 
 const FILENAME = 'test/data/p022_names.txt'
+// We're going to do a quick test of the underlying calculation using the example from the comment above
 const TEST = 938
 const A = codes('A')
 
@@ -27,20 +28,26 @@ define word_score(n) = {
    score
 }
 
+// Note: "line" is a one-based line number, while the "names" array uses zero-based indexing
+define score(line) = {
+   line × word_score(names[line - 1])
+}
+
 // Read, process, and sort the input names
+// Note: the file is a single line of names each surrounded by quotes and separated by commas
 var names = sort(split(replace(read(FILENAME), '"'), ','))
 
 var sum = 0
 
-loop ix within length(names) {
-   sum += (ix + 1) × word_score(names[ix])
+loop line in length(names) {
+   sum += score(line)
 }
 
 }
 
 $resultsonly on {
 
-`The "name score" for the ${TEST}th value (${names[TEST-1]}) is ${word_score(names[TEST-1])×TEST}.`
+`The "name score" for the ${TEST}th value (${names[TEST-1]}) is ${score(TEST)}.`
 `The total of all the name scores in "$FILENAME" is $sum.`
 
 }
