@@ -36,65 +36,96 @@
  *  03-Jan-24 rlw #640	Refactor.
  *  30-Jul-25 rlw #746	Add "ln(10)" to the calculation.
  *  28-Jan-26 rlw #809	Rename and change packages.
+ *  08-Mar-26 rlw #818	Allow interruption; use separate futures to release each
+ *			value as it is ready.
  */
 package info.rlwhitcomb.math;
 
+import info.rlwhitcomb.logging.Logging;
 import info.rlwhitcomb.util.ClassUtil;
+import info.rlwhitcomb.util.Intl;
 import info.rlwhitcomb.util.QueuedThread;
 import static info.rlwhitcomb.util.Constants.*;
 
 import java.math.BigDecimal;
 import java.math.MathContext;
-import java.util.concurrent.Semaphore;
+import java.util.EnumMap;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ExecutionException;
 import java.util.function.Supplier;
 
 
 /**
  * Calculates and maintains the value of <code>pi</code> and <code>e</code>
- * to what could be a significant number of decimal places (and therefore
+ * (plus related values) to what could be a significant number of decimal places (and therefore
  * requiring some seconds of calculation time, potentially) by doing the
  * expensive calculations in a background thread.
  */
 public class PiWorker
 {
+	private static final Logging logger = new Logging(PiWorker.class);
+
 	private MathContext mc = null;
+	private MathContext mc2 = null;
 	private int precision;
 	private boolean rational = false;
 
 	/**
-	 * Euler's constant (e) or the base of the natural logarithms.
-	 */
-	private BigDecimal e;
-	/**
-	 * The ratio of the circumference to the diameter of a circle (or pi).
+	 * The ratio of the circumference to the diameter of a circle (or pi);
+	 * cached here for the derivative values.
 	 */
 	private BigDecimal pi;
+
 	/**
-	 * One half of {@link #pi}.
+	 * Set while {@link #calculate} is actually working.
 	 */
-	private BigDecimal piOver2;
+	private volatile boolean calculating = false;
+
 	/**
-	 * {@link #pi} divided by 180, or the conversion between degrees and radians.
+	 * A monitor for the {@link #calculating} flag.
 	 */
-	private BigDecimal piOver180;
+	private final Object calcMonitor = new Object();
+
+
 	/**
-	 * {@link #pi} divided by 200, or the conversion between grads and radians.
+	 * Enumeration of each of the values we calculate so as to make
+	 *  each available as they finish calculation.
 	 */
-	private BigDecimal piOver200;
-	/**
-	 * Natural logarithm of 10, used to calculate "log".
-	 */
-	private BigDecimal ln10;
+	private enum CALCULATED_VALUES
+	{
+		/**
+		 * Euler's constant (e) or the base of the natural logarithms.
+		 */
+		E,
+		/**
+		 * "PI" value, or the ratio between circumference and diameter of a circle.
+		 */
+		PI,
+		/**
+		 * {@link #pi} divided by two.
+		 */
+		PI2,
+		/**
+		 * {@link #pi} divided by 180, or the conversion between degrees and radians.
+		 */
+		PI180,
+		/**
+		 * {@link #pi} divided by 200, or the conversion between grads and radians.
+		 */
+		PI200,
+		/**
+		 * Natural logarithm of 10, used to calculate "log".
+		 */
+		LN10
+	}
 
 
 	/** The captive thread used to do the background calculations. */
 	private final QueuedThread queuedThread = new QueuedThread();
 
-	/** Initialize the semaphore with one permit available, which will
-	 *  be acquired right away from the constructor when it calls
-	 *  {@code calculate()}.
-	 */
-	private final Semaphore readySem = new Semaphore(1);
+	/** Set of future values corresponding to each completed calculation. */
+	private EnumMap<CALCULATED_VALUES, CompletableFuture<BigDecimal>> futures =
+		new EnumMap<>(CALCULATED_VALUES.class);
 
 
 	/**
@@ -103,6 +134,7 @@ public class PiWorker
 	 */
 	public PiWorker() {
 	}
+
 
 	/**
 	 * Apply the new settings to this object and initiate a recalculation if necessary.
@@ -117,12 +149,46 @@ public class PiWorker
 
 	    // Only start a new calculation if the settings have changed
 	    if (!ClassUtil.objectsEqual(mc, newMC)) {
-		readySem.acquireUninterruptibly();
+		// Before we go on, we need to make sure an earlier calculation
+		//  that is still in progress is stopped since the results won't
+		//  be used anyway.
+		if (calculating) {
+		    logger.debug("calculating, so interrupting queued thread");
+		    queuedThread.interrupt();
+
+		    // now need to wait for "calculating" to be reset
+		    logger.debug("waiting for 'calculating' to be reset");
+		    synchronized (calcMonitor) {
+			while (calculating) {
+			    try {
+				calcMonitor.wait();
+				logger.debug("done waiting for 'calculating' flag");
+			    }
+			    catch (InterruptedException ie) {
+				logger.debug("interrupted while waiting on 'calculating' monitor");
+			    }
+			}
+			logger.debug("'calculating' is now %1$s", calculating);
+		    }
+		}
+
+		// Initially reset all the futures to "incomplete" until we finish
+		synchronized (futures) {
+		    logger.debug("resetting futures to 'incomplete'");
+		    for (CALCULATED_VALUES value : CALCULATED_VALUES.values()) {
+			futures.put(value, new CompletableFuture<>());
+		    }
+		}
 
 		mc        = newMC;
+		mc2       = MathUtil.newPrecision(mc, 2);
 		precision = mc.getPrecision();
 
 		// Starting a new calculation; the result is not available until it's done
+		logger.debug("calculating set to true");
+		synchronized (calcMonitor) {
+		    calculating = true;
+		}
 		queuedThread.submitWork( () -> calculate() );
 	    }
 	}
@@ -136,38 +202,91 @@ public class PiWorker
 	 * and {@link #getPi} is determined exactly by the desired precision.
 	 */
 	private void calculate() {
-	    e         = MathUtil.e(precision + 2);
-	    pi        = MathUtil.pi(precision + 2);
+	    // Step through all the calculations with interrupt checks in between each,
+	    //  but we will rely on the longer methods to check "interrupted" status
+	    //  periodically themselves.
+	    try {
+		BigDecimal value = null;
 
-	    MathContext mc2 = MathUtil.newPrecision(mc, 2);
+		for (CALCULATED_VALUES v : CALCULATED_VALUES.values()) {
+		    logger.debug("starting calculation for value %1$s", v);
 
-	    piOver2   = pi.divide(D_TWO, mc2);
-	    piOver180 = pi.divide(D_180, mc2);
-	    piOver200 = pi.divide(D_200, mc2);
+		    switch (v) {
+			case E:
+			    value = MathUtil.e(precision + 2);
+			    break;
 
-	    ln10      = MathUtil.ln(D_TEN, mc2);
+			case PI:
+			    value = pi = MathUtil.pi(precision + 2);
+			    break;
 
-	    // Release a permit to say the calculation results are now available
-	    readySem.release();
+			case PI2:
+			    value = pi.divide(D_TWO, mc2);
+			    break;
+
+			case PI180:
+			    value = pi.divide(D_180, mc2);
+			    break;
+
+			case PI200:
+			    value = pi.divide(D_200, mc2);
+			    break;
+
+			case LN10:
+			    value = MathUtil.ln(D_TEN, mc2);
+			    break;
+		    }
+
+		    // If we interrupted this calculation, make sure we don't "complete" the value
+		    //  because we will reset them anyway.
+		    // Note: this "interrupted" call will reset the flag, effectively ending the
+		    //  interruption.
+		    if (Thread.interrupted()) {
+			logger.debug("thread is interrupted at value %1$s", v);
+			break;	// out of CALCULATED_VALUES loop
+		    }
+
+		    // If we were NOT interrupted, then make the value we just finished available
+		    // to other callers now.
+		    synchronized (futures) {
+			logger.debug("complete future for value %1$s", v);
+			futures.get(v).complete(value);
+		    }
+		}
+	    }
+	    finally {
+		logger.debug("calculating set to false");
+		synchronized (calcMonitor) {
+		    calculating = false;
+		    calcMonitor.notifyAll();
+		}
+	    }
 	}
 
 	/**
-	 * Generic function to wait on the {@link #readySem} before returning the value
-	 * produced by the given supplier.
-	 * <p> Once the value is ready the semaphore is released for the next caller.
+	 * Generic function to wait on the given future before returning the value.
 	 *
-	 * @param f	The value supplier lambda expression.
-	 * @return	The value produced by the supplier.
+	 * @param v     Identifier for which future to wait on.
+	 * @return	The value returned from the given future.
 	 */
-	private BigDecimal getWhenReady(final Supplier<BigDecimal> f) {
+	private BigDecimal getWhenReady(final CALCULATED_VALUES v) {
 	    ClassUtil.throwNullException(mc, "calc#workerNotStarted");
 
-	    readySem.acquireUninterruptibly();
+	    logger.debug("getWhenReady(%1$s)", v);
 	    try {
-		return f.get();
+		CompletableFuture<BigDecimal> future = null;
+		synchronized (futures) {
+		    logger.debug("about to get future %1$s", v);
+		    future = futures.get(v);
+		}
+
+		logger.debug("now about to get future value %1$s", v);
+		BigDecimal value = future.get();
+		logger.debug("got future value for %1$s", v);
+		return value;
 	    }
-	    finally {
-		readySem.release();
+	    catch (InterruptedException | ExecutionException ex) {
+		throw new Intl.IllegalStateException("util#piworker.valueNotAvail", v);
 	    }
 	}
 
@@ -179,7 +298,7 @@ public class PiWorker
 	 * @return The value of <code>e</code> to the current precision.
 	 */
 	public BigDecimal getE() {
-	    return getWhenReady( () -> e.round(mc) );
+	    return getWhenReady(CALCULATED_VALUES.E).round(mc);
 	}
 
 	/**
@@ -190,7 +309,7 @@ public class PiWorker
 	 * @return The value of <code>pi</code> to the current precision.
 	 */
 	public BigDecimal getPi() {
-	    return getWhenReady( () -> pi.round(mc) );
+	    return getWhenReady(CALCULATED_VALUES.PI).round(mc);
 	}
 
 	/**
@@ -198,10 +317,10 @@ public class PiWorker
 	 * <p> Waits until the background thread is done with the calculation
 	 * if a new precision was just recently specified.
 	 *
-	 * @return The value of <code>pi / 2</code> to the current precision.
+	 * @return The value of <code>pi / 2</code> to the current precision plus 2.
 	 */
 	public BigDecimal getPiOver2() {
-	    return getWhenReady( () -> piOver2 );
+	    return getWhenReady(CALCULATED_VALUES.PI2);
 	}
 
 	/**
@@ -212,7 +331,7 @@ public class PiWorker
 	 * @return The value of <code>pi / 180</code> to the current precision plus 2.
 	 */
 	public BigDecimal getPiOver180() {
-	    return getWhenReady( () -> piOver180 );
+	    return getWhenReady(CALCULATED_VALUES.PI180);
 	}
 
 	/**
@@ -223,7 +342,7 @@ public class PiWorker
 	 * @return The value of <code>pi / 200</code> to the current precision plus 2.
 	 */
 	public BigDecimal getPiOver200() {
-	    return getWhenReady( () -> piOver200 );
+	    return getWhenReady(CALCULATED_VALUES.PI200);
 	}
 
 	/**
@@ -234,7 +353,7 @@ public class PiWorker
 	 * @return The value of <code>ln 10</code> to the current precision plus 2.
 	 */
 	public BigDecimal getLn10() {
-	    return getWhenReady( () -> ln10 );
+	    return getWhenReady(CALCULATED_VALUES.LN10);
 	}
 
 	/**

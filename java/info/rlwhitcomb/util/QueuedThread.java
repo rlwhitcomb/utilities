@@ -1,7 +1,7 @@
 /*
  * The MIT License (MIT)
  *
- * Copyright (c) 2013,2016,2018,2020-2022 Roger L. Whitcomb.
+ * Copyright (c) 2013,2016,2018,2020-2022,2026 Roger L. Whitcomb.
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -27,34 +27,27 @@
  *	the connection overheads each time.
  *
  * History:
- *	12-Feb-2013 (rlwhitcomb)
- *	    First version.
- *	21-Mar-2013 (rlwhitcomb)
- *	    Add processing for uncaught exceptions.  Enhance by allowing this
- *	    thread to queue itself up for work on an external queue when it
- *	    is available.  That way it can be reused in various situations.
- *	06-Jan-2016 (rlwhitcomb)
- *	    Null out the runnable as soon as possible to assist in GC.
- *	    Rename "queue" to "workQueue" to assist in comprehension!
- *	    Also rename a constructor parameter for the same reason.
- *	22-Jan-2018 (rlwhitcomb)
- *	    Allow the executor service to set a terminate flag.
- *	03-Feb-2020 (rlwhitcomb)
- *	    Use atomic variables to better work with separate threads.
- *	    Add "busy" flag; work better with the worker queue if supplied
- *	    at construction time.
- *	    Change the work queue to a LinkedTransferQueue and NOT a
- *	    SynchronousQueue, which is just not appropriate.
- *	    Better logging throughout.
- *	28-Mar-2020 (rlwhitcomb)
- *	    I think we need an atomic integer for the id.
- *	21-Dec-2020 (rlwhitcomb)
- *	    Update obsolete Javadoc constructs.
- *	19-Feb-2021 (rlwhitcomb)
- *	    It is not appropriate to call "start()" in the constructor, so do it
- *	    inside "submitWork" if necessary (that is, if someone else hasn't done so).
- *	12-Oct-2022 (rlwhitcomb)
- *	    #513: Move Logging to new package.
+ *  12-Feb-13 rlw ----	First version.
+ *  21-Mar-13 rlw ----	Add processing for uncaught exceptions.  Enhance by allowing this
+ *			thread to queue itself up for work on an external queue when it
+ *			is available.  That way it can be reused in various situations.
+ *  06-Jan-16 rlw ----	Null out the runnable as soon as possible to assist in GC.
+ *			Rename "queue" to "workQueue" to assist in comprehension!
+ *			Also rename a constructor parameter for the same reason.
+ *  22-Jan-18 rlw ----	Allow the executor service to set a terminate flag.
+ *  03-Feb-20 rlw ----	Use atomic variables to better work with separate threads.
+ *			Add "busy" flag; work better with the worker queue if supplied
+ *			at construction time.
+ *			Change the work queue to a LinkedTransferQueue and NOT a
+ *			SynchronousQueue, which is just not appropriate.
+ *			Better logging throughout.
+ *  28-Mar-20 rlw ----	I think we need an atomic integer for the id.
+ *  21-Dec-20 rlw ----	Update obsolete Javadoc constructs.
+ *  19-Feb-21 rlw ----	It is not appropriate to call "start()" in the constructor, so do it
+ *			inside "submitWork" if necessary (that is, if someone else hasn't done so).
+ *  12-Oct-22 rlw #513	Move Logging to new package.
+ *  07-Mar-26 rlw #818	Rearrange history and starting Javadoc; don't completely stop if interrupted
+ *			waiting for work (unless "terminated" is set).
  */
 package info.rlwhitcomb.util;
 
@@ -67,9 +60,9 @@ import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
 
 /**
- * This class implements a simple thread that waits on queued work and then runs it
- * when available.  The thread is a "daemon" thread that can be killed by the JVM
- * when the main thread quits without harm.
+ * This class implements a simple thread that waits on queued work, runs it when available,
+ * then loops back to wait again. The thread is a "daemon" thread which can be killed by
+ * the JVM when the main thread quits, without harm.
  * <p> The main point to this class is to keep one thread context around, in the case
  * (for instance) where some context is tied to the thread. Plus, the overhead of thread
  * creation for every job is avoided.
@@ -218,7 +211,7 @@ public class QueuedThread extends Thread
 		}
 		catch (InterruptedException ie) {
 		    logger.debug("Interrupted while waiting for work.");
-		    break executionLoop;
+//		    break executionLoop;
 		}
 
 		// One more check before we run the task to see if we have been terminated
