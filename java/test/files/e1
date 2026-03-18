@@ -1024,6 +1024,10 @@ length set1
 scale set1
 3 within set1
 0 in set1
+2 ∈ set1
+7 ∉ set1
+3 ∉ set1
+8 ∊ set1
 index(set1, 2)
 set1[1]
 // Symmetric difference
@@ -1427,6 +1431,13 @@ c12 has h
 -12 in -1..-20, -2
 -12.0 in 0.0 .. -20.0, -2.0
 -12.0 in -1.0 .. -20.0, -2.0
+
+1 ∈ 2..20
+1 ∉ 2..20
+2 ∈ 2..20
+2 ∉ 2..20
+21 ∉ 2..20
+21 ∈ 2..2
 
 #
 # Tests of "sumof" and "productof"

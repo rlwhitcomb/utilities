@@ -958,6 +958,8 @@
  *	    to "math" package and rename; some refactoring for clarity.
  *	10-Feb-2026 (rlwhitcomb)
  *	    #815: Rename "stringToValue" to "inputToValue".
+ *	17-Mar-2026 (rlwhitcomb)
+ *	    #822: Add "not in" operator for set-like operations.
  */
 package info.rlwhitcomb.calc;
 
@@ -8724,13 +8726,17 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 		private CalcParser.ExprContext valueCtx;
 		private CalcParser.LoopCtlContext loopCtx;
 		private Object inValue;
-		private Boolean compared = Boolean.FALSE;
+		private boolean notInSet;
+		private Boolean compared;
 
 
-		InVisitor(CalcParser.ExprContext ctx1, CalcParser.LoopCtlContext ctx2, Object value) {
+		InVisitor(CalcParser.ExprContext ctx1, CalcParser.LoopCtlContext ctx2, Object value, boolean notIn) {
 		    valueCtx = ctx1;
 		    loopCtx  = ctx2;
 		    inValue  = value;
+		    notInSet = notIn;
+
+		    compared = Boolean.valueOf(notInSet);
 		}
 
 		@Override
@@ -8748,14 +8754,15 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 			false, true, false, false, true);
 
 		    if (cmp == 0)
-			compared = Boolean.TRUE;
+			compared = notInSet ? Boolean.FALSE : Boolean.TRUE;
 
 		    return compared;
 		}
 
 		@Override
 		public Object finalValue(Number start, Number stop, Number step) {
-		    return IterationVisitor.containedIn(CalcObjectVisitor.this, inValue, start, stop, step, valueCtx);
+		    boolean contained = IterationVisitor.containedIn(CalcObjectVisitor.this, inValue, start, stop, step, valueCtx);
+		    return Boolean.valueOf(notInSet ? !contained : contained);
 		}
 	}
 
@@ -8768,8 +8775,9 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 	    Object value = evaluate(expr);
 	    Object retValue;
 	    boolean doingWithin = ctx.K_WITHIN() != null;
+	    boolean notIn = ctx.SET_NOT_IN() != null;
 
-	    InVisitor visitor = new InVisitor(expr, ctlCtx, value);
+	    InVisitor visitor = new InVisitor(expr, ctlCtx, value, notIn);
 
 	    if (exprList != null)
 		retValue = iterateOverRangeExpr(exprList.expr(), null, false, visitor, true, doingWithin);
