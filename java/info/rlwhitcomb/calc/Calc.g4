@@ -601,6 +601,8 @@
  *	    #804: New Kotlin-like keywords; some other missing aliases.
  *	23-Jan-2026 (rlwhitcomb)
  *	    #803: New "mediant" operator (for fractions).
+ *	10-Mar-2026 (rlwhitcomb)
+ *	    #822: Set "not in" operator.
  */
 
 grammar Calc;
@@ -864,7 +866,7 @@ expr
    | expr BIT_OP expr                             # bitExpr
    | expr SPACE_OP expr                           # spaceshipExpr
    | expr COMPARE_OP expr                         # compareExpr
-   | expr ( K_OF|K_IN|K_WITHIN|SET_IN ) loopCtl   # inExpr
+   | expr ( K_OF|K_IN|K_WITHIN|SET_IN|SET_NOT_IN ) loopCtl   # inExpr
    | expr BETWEEN_OP expr COMMA expr              # betweenExpr
    | expr EQUAL_OP expr                           # equalExpr
    | expr EOL* ( BOOL_AND_OP | K_AND ) EOL* expr  # booleanAndExpr
@@ -1787,6 +1789,10 @@ ASSIGN : '=' ;
 SET_IN
        : '\u2208'
        | '\u220A'
+       ;
+
+SET_NOT_IN
+       : '\u2209'
        ;
 
 EMPTY_SET

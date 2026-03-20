@@ -14,4 +14,4 @@ else
    canon=$2
 fi
 # Note: these options must match the $defaultOptions in calctest
-c -noOptions -timing -noColors -dir test/files -noSeps -quotes -sense -utf8 -loc en-US -- 'abc' «def» 1 2 3 text -- -define verbose=true $test | mkcanon > test/canons/${canon//[,;]/_}.canon
+c -noOptions -noLib -timing -noColors -dir test/files -noSeps -quotes -sense -utf8 -loc en-US -- 'abc' «def» 1 2 3 text -- -define verbose=true $test | mkcanon > test/canons/${canon//[,;]/_}.canon

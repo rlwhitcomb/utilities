@@ -1084,9 +1084,9 @@ or<br>
         <i>expr</i>&nbsp;<code> &gt; </code>&nbsp;<i>expr</i></td>
         <td>comparison</td><td>left to right</td></tr>
     <tr><td>14</td><td>
-        <i>expr</i>&nbsp;<code>OF</code>, <code>IN</code>, <code>WITHIN</code>, <code>&#x2208;</code>, or <code>&#x220A;</code><br>
+        <i>expr</i>&nbsp;<code>OF</code>, <code>IN</code>, <code>WITHIN</code>, <code>&#x2208;</code>, <code>&#x220A;</code>, or <code>&#x2209;</code><br>
         <i>expr</i>&nbsp; ( <code>...</code>,&nbsp;<code>..</code>,&nbsp;or&nbsp;<code>&#x2026;</code>&nbsp;<i>expr</i> ) ( <code>,</code> <i>expr</i> )</td>
-        <td>test set membership, or match a value within a range</td><td>left to right</td></tr>
+        <td>test set membership, or match a value within a range<br>(<code>&#x2209;</code> means "not in" set or range)</td><td>left to right</td></tr>
     <tr><td>13</td><td>
         <i>expr<sub>1</sub></i>&nbsp;<code> &gt;&lt; </code>or<code> &gt;=&lt; </code>&nbsp;<i>expr<sub>2</sub></i><code>, </code><i>expr<sub>3</sub></i></td>
         <td>"in-between" operators</td><td>left to right</td></tr>
