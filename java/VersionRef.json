@@ -3,6 +3,9 @@
 /*======================*/
 
 [
+    { version: '3.3.19', date: d'2026-03-19',
+      issues: [ 818 ],
+      comment: 'Interrupt background "pi" calculations to start new ones.'
     { version: '3.3.17', date: d'2026-03-17',
       issues: [ 822 ],
       comment: 'Add "not in" or "\u2209" operator to "in" operators for sets or ranges.'

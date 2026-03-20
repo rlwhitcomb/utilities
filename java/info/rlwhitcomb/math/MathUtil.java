@@ -1,7 +1,7 @@
 /*
  * The MIT License (MIT)
  *
- * Copyright (c) 2021-2025 Roger L. Whitcomb.
+ * Copyright (c) 2021-2026 Roger L. Whitcomb.
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -80,6 +80,7 @@
  *  04-Dec-25 rlw ----	Change default rounding mode to HALF_EVEN, as is the Java default; add "toMC"
  *			for getting precision for use with any BigDecimal value.
  *  16-Dec-25 rlw ----	Change rounding modes back to what they were; tests were failing.
+ *  07-Mar-26 rlw #818	Allow "pi", "e", and "ln" calculations to be interrupted.
  */
 package info.rlwhitcomb.math;
 
@@ -1273,9 +1274,11 @@ public final class MathUtil
 	/**
 	 * Taken from <a href="http://www.codecodex.com/wiki/index.php?title=Digits_of_pi_calculation#Java">
 	 * http://www.codecodex.com/wiki/index.php?title=Digits_of_pi_calculation#Java</a>
+	 * <p> Note: this calculation can be interrupted with normal thread "interrupt()"
+	 * which will return {@code null} instead of a valid result.
 	 *
 	 * @param digits - returns good results up to 12500 digits
-	 * @return that many digits of PI
+	 * @return that many digits of PI, or <code>null</code> if interrupted
 	 * @throws IllegalArgumentException if the requested number of digits is &gt; 12,500
 	 * @throws IllegalStateException if we don't get the right number of digits from
 	 * the calculation.
@@ -1306,6 +1309,11 @@ public final class MathUtil
 		    sum /= j * 2 - 1;
 		}
 
+		if (Thread.currentThread().isInterrupted()) {
+		    logger.debug("piDigits: thread is interrupted, returning null");
+		    return null;
+		}
+
 		pi.append(String.format("%04d", carry + sum / SCALE));
 		carry = sum % SCALE;
 	    }
@@ -1326,9 +1334,12 @@ public final class MathUtil
 	/**
 	 * Like pi, e is a real number with an infinite number of non-repeating digits.  We can
 	 * approximate e with the following formula:  e = 1/0! + 1/1! + 1/2! + 1/3! + 1/4! + ...
+	 * <p> Note: this calculation can be interrupted with a normal thread "interrupt()" call,
+	 * which will return <code>null</code> instead of a real value.
 	 *
 	 * @param digits The number of digits to compute.
-	 * @return       The decimal value of e to the given number of digits.
+	 * @return       The decimal value of e to the given number of digits, or {@code null} if
+	 *               thread is interrupted.
 	 */
 	public static BigDecimal eDecimal(final int digits) {
 	    // e will accumulate the sum of 1/i! for an ever increasing i
@@ -1344,6 +1355,11 @@ public final class MathUtil
 		//    ensure a limit to the iterations when division is limitless like 1/3
 		BigDecimal term = BigDecimal.ONE.divide(factorial, loops, RoundingMode.HALF_UP);
 		e = e.add(term);
+
+		if (Thread.currentThread().isInterrupted()) {
+		    logger.debug("eDecimal: thread is interrupted, returning 'null'");
+		    return null;
+		}
 	    }
 	    return e.round(roundingContext);
 	}
@@ -1528,15 +1544,17 @@ public final class MathUtil
 		if (PI_DIGITS == null || PI_DIGITS.length() <= digits) {
 		    PI_DIGITS = piDigits(digits + 1);
 		}
-		CALCULATED_PI = new BigDecimal(PI_DIGITS.substring(0, digits + 1)).movePointLeft(digits);
+		if (PI_DIGITS != null) {
+		    CALCULATED_PI = new BigDecimal(PI_DIGITS.substring(0, digits + 1)).movePointLeft(digits);
 
-		// Now calculate the related values at the same scale
-		TWO_PI             = CALCULATED_PI.multiply(D_TWO, mc);
-		MINUS_TWO_PI       = TWO_PI.negate();
-		PI_OVER_TWO        = CALCULATED_PI.divide(D_TWO, mc);
-		MINUS_PI_OVER_TWO  = PI_OVER_TWO.negate();
-		PI_OVER_FOUR       = CALCULATED_PI.divide(D_FOUR, mc);
-		MINUS_PI_OVER_FOUR = PI_OVER_FOUR.negate();
+		    // Now calculate the related values at the same scale
+		    TWO_PI             = CALCULATED_PI.multiply(D_TWO, mc);
+		    MINUS_TWO_PI       = TWO_PI.negate();
+		    PI_OVER_TWO        = CALCULATED_PI.divide(D_TWO, mc);
+		    MINUS_PI_OVER_TWO  = PI_OVER_TWO.negate();
+		    PI_OVER_FOUR       = CALCULATED_PI.divide(D_FOUR, mc);
+		    MINUS_PI_OVER_FOUR = PI_OVER_FOUR.negate();
+		}
 	    }
 
 	    return CALCULATED_PI;
@@ -1563,11 +1581,15 @@ public final class MathUtil
 	 * @param digits The number of digits desired after the decimal point.
 	 */
 	public static BigDecimal e(final int digits) {
+	    logger.debug("about to do 'e(%1$d)'...", digits);
 	    // Use the previously calculated value if possible
 	    if (CALCULATED_E == null || CALCULATED_E.scale() != digits) {
 		if (E_DIGITS == null || E_DIGITS.length() < digits + 2) {
+		    logger.debug("doing 'eDecimal(%1$d)'...", digits);
 		    CALCULATED_E = eDecimal(digits);
-		    E_DIGITS = CALCULATED_E.toPlainString();
+		    logger.debug("done with 'eDecimal', CALCULATED_E has %1$d digits", CALCULATED_E == null ? 0 : CALCULATED_E.precision());
+		    if (CALCULATED_E != null)
+			E_DIGITS = CALCULATED_E.toPlainString();
 		}
 		else {
 		    CALCULATED_E = new BigDecimal(E_DIGITS.substring(0, digits + 2));
@@ -1979,10 +2001,14 @@ public final class MathUtil
 
 	/**
 	 * Calculate the natural logarithm of a number.
+	 * <p> Note: this can take a long time for large precision, so it can be
+	 * interrupted via normal {@link Thread#interrupt}, which will return {@code null}
+	 * as the (unnatural) result.
 	 *
 	 * @param input The value to calculate the natural logarithm of.
 	 * @param mc    The desired precision and rounding mode for the result.
-	 * @return      The value such that <code>e ** value == input</code>.
+	 * @return      The value such that <code>e ** value == input</code>, or <code>null</code>
+	 *              if the calculation is interrupted.
 	 * @throws IllegalArgumentException if the input is negative or zero.
 	 */
 	public static BigDecimal ln(final BigDecimal input, final MathContext mc) {
@@ -1990,8 +2016,14 @@ public final class MathUtil
 		throw new Intl.IllegalArgumentException("math#numeric.outOfRange");
 
 	    // Calculate a sufficient number of loops for the value to converge nicely
-	    int loops = mc.getPrecision() * 15;	// TODO: find out a good value
-	    MathContext lc = newPrecision(mc, mc.getPrecision() / 2);
+	    int loops = mc.getPrecision() * 3 / 2;	// TODO: find out a good value
+	    MathContext lc = newPrecision(mc, 2);
+	    logger.debug("ln: loops=%1$d, mc=(%2$s), lc=(%3$s)", loops, mc, lc);
+
+	    if (Thread.currentThread().isInterrupted()) {
+		logger.debug("ln: thread is interrupted, before 'e()' returning 'null'");
+		return null;
+	    }
 
 	    // Range reduce to get the argument value below one, so that:
 	    // ln(x) = ln(e**n * x/e**n)
@@ -2001,6 +2033,12 @@ public final class MathUtil
 	    // when x/e**n < 2
 	    BigDecimal x = input;
 	    BigDecimal eValue = e(lc);
+
+	    if (eValue == null) {
+		logger.debug("ln: e(%1$d) == null", lc.getPrecision());
+		return null;
+	    }
+
 	    BigDecimal eSmall = BigDecimal.ONE.divide(eValue, lc);
 	    int n = 0;
 
@@ -2029,8 +2067,14 @@ public final class MathUtil
 		BigDecimal loopTerm = power.divide(kValue, lc);
 		result = result.add(loopTerm, lc);
 		logger.debug("ln: k=%1$d, loopTerm=%2$s, result=%3$s", k, loopTerm.toPlainString(), result.toPlainString());
-		if (result.equals(lastResult))
+		if (result.equals(lastResult)) {
+		    logger.debug("ln: exit after no change: k=%1$d", k);
 		    break;
+		}
+		if (Thread.currentThread().isInterrupted()) {
+		    logger.debug("ln: thread has been interrupted at k=%1$d", k);
+		    return null;
+		}
 		lastResult = result;
 	    }
 

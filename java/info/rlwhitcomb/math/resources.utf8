@@ -36,6 +36,7 @@
 #  13-Oct-25 rlw #777	Update message for allowed KMG prefixes.
 #  28-Nov-25 rlw #643	Bad index message for ContinuedFraction.
 #  05-Jan-26 rlw #799	Null / empty and unknown value messages for units.
+#  19-Mar-26 rlw #818	New message for unavailable value in PiWorker.
 #
 
 #
@@ -98,6 +99,11 @@ complex.imaginaryInt	= Number with imaginary part(s) cannot be converted to inte
 # From ContinuedFraction.java
 #
 cfrac.badIndex		= Index <y>%1$d<.> is out of range of <u>0 \u2026 %2$d<.>.
+
+#
+# From PiWorker.java
+#
+piworker.valueNotAvail	= Value of <y>%1$s<.> is not available yet.
 
 #
 # From Quaternion.java
