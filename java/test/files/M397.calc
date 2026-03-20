@@ -1,0 +1,24 @@
+$precision 125 {
+
+//
+// M397 factors from: https://www.mersenne.ca/exponent/397
+//
+prime_factors = [
+                            2383,
+                            6353,
+                           50023,
+                           53993,
+                          202471,
+                         5877983,
+  814132872808522587940886856743,
+ 1234904213576000272542841146073,
+ 6597485910270326519900042655193
+]
+
+const m397 = 2 ⌃ 397 - 1
+m397_trial = productof(prime_factors)
+
+$assert m397 === m397_trial, "M397 test fails."
+
+}
+
