@@ -38,6 +38,7 @@
  *  28-Jan-26 rlw #809	Rename and change packages.
  *  08-Mar-26 rlw #818	Allow interruption; use separate futures to release each
  *			value as it is ready.
+ *  19-Mar-26 rlw #818	Simplify the interrupt logic.
  */
 package info.rlwhitcomb.math;
 
@@ -75,16 +76,6 @@ public class PiWorker
 	 * cached here for the derivative values.
 	 */
 	private BigDecimal pi;
-
-	/**
-	 * Set while {@link #calculate} is actually working.
-	 */
-	private volatile boolean calculating = false;
-
-	/**
-	 * A monitor for the {@link #calculating} flag.
-	 */
-	private final Object calcMonitor = new Object();
 
 
 	/**
@@ -149,47 +140,21 @@ public class PiWorker
 
 	    // Only start a new calculation if the settings have changed
 	    if (!ClassUtil.objectsEqual(mc, newMC)) {
-		// Before we go on, we need to make sure an earlier calculation
-		//  that is still in progress is stopped since the results won't
-		//  be used anyway.
-		if (calculating) {
-		    logger.debug("calculating, so interrupting queued thread");
-		    queuedThread.interrupt();
-
-		    // now need to wait for "calculating" to be reset
-		    logger.debug("waiting for 'calculating' to be reset");
-		    synchronized (calcMonitor) {
-			while (calculating) {
-			    try {
-				calcMonitor.wait();
-				logger.debug("done waiting for 'calculating' flag");
-			    }
-			    catch (InterruptedException ie) {
-				logger.debug("interrupted while waiting on 'calculating' monitor");
-			    }
-			}
-			logger.debug("'calculating' is now %1$s", calculating);
-		    }
-		}
-
 		// Initially reset all the futures to "incomplete" until we finish
 		synchronized (futures) {
+		    mc        = newMC;
+		    mc2       = MathUtil.newPrecision(mc, 2);
+		    precision = mc.getPrecision();
+
 		    logger.debug("resetting futures to 'incomplete'");
 		    for (CALCULATED_VALUES value : CALCULATED_VALUES.values()) {
 			futures.put(value, new CompletableFuture<>());
 		    }
 		}
 
-		mc        = newMC;
-		mc2       = MathUtil.newPrecision(mc, 2);
-		precision = mc.getPrecision();
-
-		// Starting a new calculation; the result is not available until it's done
-		logger.debug("calculating set to true");
-		synchronized (calcMonitor) {
-		    calculating = true;
-		}
-		queuedThread.submitWork( () -> calculate() );
+		// The "true" flag means to replace any existing work with this new package
+		logger.debug("about to submitWork with replace=true; precision %1$d", precision);
+		queuedThread.submitWork( () -> calculate(), true );
 	    }
 	}
 
@@ -205,60 +170,49 @@ public class PiWorker
 	    // Step through all the calculations with interrupt checks in between each,
 	    //  but we will rely on the longer methods to check "interrupted" status
 	    //  periodically themselves.
-	    try {
-		BigDecimal value = null;
+	    BigDecimal value = null;
 
-		for (CALCULATED_VALUES v : CALCULATED_VALUES.values()) {
-		    logger.debug("starting calculation for value %1$s", v);
+	    for (CALCULATED_VALUES v : CALCULATED_VALUES.values()) {
+		logger.debug("starting calculation for value %1$s", v);
 
-		    switch (v) {
-			case E:
-			    value = MathUtil.e(precision + 2);
-			    break;
+		switch (v) {
+		    case E:
+			value = MathUtil.e(precision + 2);
+			break;
 
-			case PI:
-			    value = pi = MathUtil.pi(precision + 2);
-			    break;
+		    case PI:
+			value = pi = MathUtil.pi(precision + 2);
+			break;
 
-			case PI2:
-			    value = pi.divide(D_TWO, mc2);
-			    break;
+		    case PI2:
+			value = pi.divide(D_TWO, mc2);
+			break;
 
-			case PI180:
-			    value = pi.divide(D_180, mc2);
-			    break;
+		    case PI180:
+			value = pi.divide(D_180, mc2);
+			break;
 
-			case PI200:
-			    value = pi.divide(D_200, mc2);
-			    break;
+		    case PI200:
+			value = pi.divide(D_200, mc2);
+			break;
 
-			case LN10:
-			    value = MathUtil.ln(D_TEN, mc2);
-			    break;
-		    }
-
-		    // If we interrupted this calculation, make sure we don't "complete" the value
-		    //  because we will reset them anyway.
-		    // Note: this "interrupted" call will reset the flag, effectively ending the
-		    //  interruption.
-		    if (Thread.interrupted()) {
-			logger.debug("thread is interrupted at value %1$s", v);
-			break;	// out of CALCULATED_VALUES loop
-		    }
-
-		    // If we were NOT interrupted, then make the value we just finished available
-		    // to other callers now.
-		    synchronized (futures) {
-			logger.debug("complete future for value %1$s", v);
-			futures.get(v).complete(value);
-		    }
+		    case LN10:
+			value = MathUtil.ln(D_TEN, mc2);
+			break;
 		}
-	    }
-	    finally {
-		logger.debug("calculating set to false");
-		synchronized (calcMonitor) {
-		    calculating = false;
-		    calcMonitor.notifyAll();
+
+		// If we interrupted this calculation, make sure we don't "complete" the value
+		//  because we will reset them anyway.
+		if (Thread.currentThread().isInterrupted()) {
+		    logger.debug("thread is interrupted at value %1$s (skipping 'future complete')", v);
+		    break;	// out of CALCULATED_VALUES loop
+		}
+
+		// If we were NOT interrupted, then make the value we just finished available
+		// to other callers now.
+		synchronized (futures) {
+		    logger.debug("complete future for value %1$s", v);
+		    futures.get(v).complete(value);
 		}
 	    }
 	}
@@ -286,7 +240,8 @@ public class PiWorker
 		return value;
 	    }
 	    catch (InterruptedException | ExecutionException ex) {
-		throw new Intl.IllegalStateException("util#piworker.valueNotAvail", v);
+		logger.except("trying to get " + v, ex);
+		throw new Intl.IllegalStateException("math#piworker.valueNotAvail", v);
 	    }
 	}
 

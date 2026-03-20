@@ -48,6 +48,7 @@
  *  12-Oct-22 rlw #513	Move Logging to new package.
  *  07-Mar-26 rlw #818	Rearrange history and starting Javadoc; don't completely stop if interrupted
  *			waiting for work (unless "terminated" is set).
+ *  19-Mar-26 rlw #818	More interrupt handling.
  */
 package info.rlwhitcomb.util;
 
@@ -97,6 +98,10 @@ public class QueuedThread extends Thread
 
 	/** The actual {@link Runnable} that we are running. If set, we are busy. */
 	private final AtomicReference<Runnable> runnable = new AtomicReference<>();
+
+	/** The actual background thread that we are, once started. */
+	private final AtomicReference<Thread> thisThread = new AtomicReference<>();
+
 
 	/** @return A uniformly formed name for this thread. */
 	private static String newName() {
@@ -153,16 +158,41 @@ public class QueuedThread extends Thread
 	}
 
 	/**
+	 * Check to see if there is a work package currently running.
+	 *
+	 * @return	<code>true</code> if the {@link Runnable} work package
+	 *		is currently executing on this thread.
+	 */
+	public boolean isWorkRunning() {
+	    synchronized(this) {
+		return runnable.get() != null;
+	    }
+	}
+
+	/**
+	 * Submit work for this thread to do, adding the work to the queue.
+	 *
+	 * @param	runnable	The work package to execute.
+	 * @return			<code>false</code> if waiting for the queue to
+	 *				be available is interrupted, <code>true</code>
+	 *				otherwise (i.e., the job was accepted to be run).
+	 */
+	public boolean submitWork(final Runnable runnable) {
+	    return submitWork(runnable, false);
+	}
+
+	/**
 	 * Submit work for this thread to do.
 	 *
 	 * @param	runnable	The work package to execute.
-	 * @return			<code>false</code> if waiting for
-	 *				the queue to be available is
-	 *				interrupted, <code>true</code>
-	 *				otherwise (i.e., the job was
-	 *				accepted to be run).
+	 * @param	replace		Whether to interrupt any running work
+	 *				and have this new work replace it (default is
+	 *				is <code>false</code>).
+	 * @return			<code>false</code> if waiting for the queue to
+	 *				be available is interrupted, <code>true</code>
+	 *				otherwise (i.e., the job was accepted to be run).
 	 */
-	public boolean submitWork(Runnable runnable) {
+	public boolean submitWork(final Runnable runnable, final boolean replace) {
 	    synchronized(this) {
 		if (terminated.get()) {
 		    // Don't accept any more work once we have been terminated.
@@ -173,6 +203,16 @@ public class QueuedThread extends Thread
 		// do it now that we have work to do (if it wasn't started earlier)
 		if (!isAlive())
 		    start();
+
+		// In order to replace an already running work package, the best we can do
+		//  is interrupt the thread and let the runnable complete.
+		synchronized (this) {
+		    if (replace && isWorkRunning()) {
+			Thread runningThread = thisThread.get();
+			logger.debug("replace=true and work is running, so interrupt %1$s", runningThread.getName());
+			runningThread.interrupt();
+		    }
+		}
 
 		// Transfer this new work to the thread immediately, if possible,
 		// but if we're still busy, just queue it.
@@ -191,6 +231,8 @@ public class QueuedThread extends Thread
 	@Override
 	public void run() {
 	    logger.debug("Running %1$s...", getName());
+	    thisThread.set(Thread.currentThread());
+
 	  executionLoop:
 	    for( ; ; ) {
 
@@ -211,7 +253,8 @@ public class QueuedThread extends Thread
 		}
 		catch (InterruptedException ie) {
 		    logger.debug("Interrupted while waiting for work.");
-//		    break executionLoop;
+		    // Being interrupted may just be the background calculation was itself interrupted
+		    //  and doesn't mean we're DONE until the "terminated" flag is set.
 		}
 
 		// One more check before we run the task to see if we have been terminated
@@ -240,6 +283,9 @@ public class QueuedThread extends Thread
 		    finally {
 			synchronized (this) {
 			    runnable.set(null);
+			    // Test and clear the "interrupted" flag now that the work package has
+			    //  definitely finished
+			    Thread.interrupted();
 
 			    // Once we're available for work again, add ourselves
 			    // back to the queue (if we were indeed taken out, which should
@@ -256,7 +302,10 @@ public class QueuedThread extends Thread
 		    }
 		}
 	    }
+
 	    runnable.set(null);
+	    thisThread.set(null);
+
 	    logger.debug("Finished execution loop, exiting %1$s.", getName());
 	}
 
