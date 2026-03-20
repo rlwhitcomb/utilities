@@ -1,7 +1,7 @@
 /*
  * The MIT License (MIT)
  *
- * Copyright (c) 2020-2022 Roger L. Whitcomb.
+ * Copyright (c) 2020-2022,2026 Roger L. Whitcomb.
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -54,6 +54,8 @@
  *	    #513: Move Logging to new package.
  *	22-Dec-2022 (rlwhitcomb)
  *	    #590: Further reduce the initial time ratio for CI builds.
+ *	19-Mar-2026 (rlwhitcomb)
+ *	    #818: Adjust expected ratio if we're on a fast machine.
  */
 package info.rlwhitcomb.test;
 
@@ -217,6 +219,16 @@ public class InitTaskTest
 	 */
 	private static final double DESIRED_RATIO = 5.0e4;
 
+	/**
+	 * Slightly lower expected ratio for a very fast machine (think Mac M4+ machine).
+	 */
+	private static final double DESIRED_FAST_RATIO = 3.0e3;
+
+	/**
+	 * Target time to determine if the machine is "fast".
+	 */
+	private static final double FAST_TIME_SPEED = 2.0d;
+
 
 	/**
 	 * This is the "long-running" task that starts right away at startup of the program,
@@ -281,6 +293,14 @@ public class InitTaskTest
 		}
 
 		/**
+		 * Access the initial absolute time (seconds).
+		 * @return First time seconds.
+		 */
+		public double firstTime() {
+		    return firstTimeSecs;
+		}
+
+		/**
 		 * After the second (or subsequent) accesses, compute the ratio of first/second, which is an
 		 * indication of the success of the initialization work.
 		 * @return First time seconds / second time seconds.
@@ -337,9 +357,17 @@ public class InitTaskTest
 
 	    // Final check: the ratio of first to second elapsed time should be ~100,000 x
 	    double timeRatio = task.timeRatio();
-	    double desiredRatio = ON_WINDOWS ? DESIRED_RATIO / 2.0d : DESIRED_RATIO;
-	    if (Environment.isCIBuild())
-		desiredRatio /= 2.5d;
+	    double desiredRatio = DESIRED_RATIO;
+	    // On a fast machine, reduce the ratio anyway
+	    if (task.firstTime() < FAST_TIME_SPEED) {
+		desiredRatio = DESIRED_FAST_RATIO;
+	    }
+	    else {
+		if (ON_WINDOWS)
+		    desiredRatio /= 2.0d;
+		if (Environment.isCIBuild())
+		    desiredRatio /= 2.5d;
+	    }
 	    if (timeRatio < desiredRatio) {
 		System.out.format("Time ratio too small:  was %1$5.2f, should be %2$5.2f%n",
 			timeRatio, desiredRatio);
