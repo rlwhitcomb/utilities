@@ -30,3 +30,18 @@ loop ______ over __-__..___*___ {
 _____[___*___+__] = chars(___*___+___+__+__)
 
 display _____[___*___-__-__-__]+_____[___-__]+_____[___+___+__]+_____[__+__]+_____[___+___+___-__]+_____[___+___+__+__]+_____[___-__],@@(__+__)+@@(__-__)+@@(__+__)+@@(___+__)
+
+//
+// Assertion that every prime squared (greater than 3) is a multiple of 24 + 1
+//
+
+$quiet on {
+print "Assertion that every prime greater than 3 squared is one more than a multiple of 24..."
+const p = primes(5, 10000)
+loop p1 over p {
+   const p2 = p1²
+   const p3 = (p2 - 1) / 24
+   $assert isint(p3), `$p1² didn't work`
+   display `$p1² == ($p3 × 24) + 1`
+}
+}
