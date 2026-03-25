@@ -1396,7 +1396,7 @@ or<br>
   <p>The <code>callers()</code> function returns either the name of the specified function caller (with a numeric parameter), or a list
      of all callers (no parameter). The "name" is the full function name (including the parameter names). When called with a single
      integer parameter to retrieve the caller at the specified level, <code>0</code> means the current function (so, the return is
-     equivalent to the <code>_funcname</code> predefined value), while any higher number is the full function name of the next outer
+     equivalent to the <code>__funcname__</code> predefined value), while any higher number is the full function name of the next outer
      calling function. If there are not that many nested function calls, the value returned is <code>null</code>.
   <p>The <code>info</code> object contains seven read-only subobjects:  <code>version</code>, <code>libversion</code>,
      <code>cpu</code>, <code>os</code>, <code>java</code>, <code>locale</code>, and <code>timezone</code>.
@@ -1471,7 +1471,7 @@ or<br>
      are maintained for each function call. Thus the number of actual parameters passed to the function is available as
      <code>_#</code> inside the function, the first parameter is available through <code>_*[0]</code> or <code>_0</code>, etc. and the whole array of
      parameters is available via <code>_*</code>.
-  <p>Inside a function, the function name can be accessed via the <code>_funcname</code> constant value.
+  <p>Inside a function, the function name can be accessed via the <code>__funcname__</code> constant value.
   <p>A function can declare any number (including zero) of fixed parameters, and use <code>...</code> or <code>..</code> or <code>&#x2026;</code>
      at the end of the parameter list to signify any number of variable parameters after the fixed ones. These variable parameters can be
      accessed using the <code>_*[</code><i>nn</i><code>]</code> parameter array, or using <code>_</code><i>nn</i> where <i>nn</i> is the

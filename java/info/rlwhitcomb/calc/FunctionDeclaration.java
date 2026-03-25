@@ -1,7 +1,7 @@
 /*
  * The MIT License (MIT)
  *
- * Copyright (c) 2021-2025 Roger L. Whitcomb.
+ * Copyright (c) 2021-2026 Roger L. Whitcomb.
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -45,6 +45,7 @@
  *  22-Mar-24 rlw #664	Support for named parameters.
  *  07-Apr-24 rlw #664	Fix bug with positional parameters before named ones.
  *  01-Jun-25 rlw #724	Call "finalizeParameters" at the end of setting up parameters.
+ *  24-Mar-26 rlw ----	Rename "_funcname" to "__funcname__".
  */
 package info.rlwhitcomb.calc;
 
@@ -86,7 +87,7 @@ class FunctionDeclaration
 	/**
 	 * Name of predefined (local) constant that has the function name as the value.
 	 */
-	public static final String FUNCNAME = "_funcname";
+	public static final String FUNCNAME = "__funcname__";
 
 	/**
 	 * Name of this function.

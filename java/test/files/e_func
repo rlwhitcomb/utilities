@@ -130,8 +130,8 @@ loop pp over 2 { `param pp in loop = $pp` @q }
 `var pp after loop = $pp` @q
 }
 
-define testing(v) = { `$_funcname(v=$v)` }
-define finished() = { `Function '$_funcname()' called.` }
+define testing(v) = { `$__funcname__(v=$v)` }
+define finished() = { `Function '$__funcname__()' called.` }
 testing(1); testing('abc'); finished
 
 calls = 0
