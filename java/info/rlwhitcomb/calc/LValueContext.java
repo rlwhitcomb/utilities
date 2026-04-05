@@ -1,7 +1,7 @@
 /*
  * The MIT License (MIT)
  *
- * Copyright (c) 2021-2025 Roger L. Whitcomb.
+ * Copyright (c) 2021-2026 Roger L. Whitcomb.
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -85,6 +85,7 @@
  *  14-May-24 rlw ----	Index into complex numbers and quaternions to get the parts.
  *  15-May-24 rlw ----	Also into fractions.
  *  28-Nov-25 rlw #643	Now also into continued fractions.
+ *  04-Apr-26 rlw #816	Add "__globals__" access and start with "__locals__" also.
  */
 package info.rlwhitcomb.calc;
 
@@ -501,6 +502,15 @@ class LValueContext
 	    else if (ctx instanceof CalcParser.GlobalVarContext) {
 		CalcParser.GlobalVarContext globalVarCtx = (CalcParser.GlobalVarContext) ctx;
 		return new LValueContext(lValue, globalVarCtx, lValue.getPredefinedContextObject(true), globalVarCtx.GLOBALVAR().getText());
+	    }
+	    else if (ctx instanceof CalcParser.GlobalsIdContext) {
+		return new LValueContext(lValue, ctx, visitor.getGlobals());
+	    }
+	    else if (ctx instanceof CalcParser.LocalsIdContext) {
+//		return visitor.getVariables().getLValue();
+//		return new LValueContext(lValue, ctx, visitor.getVariables().getLValue());
+//		return new LValueContext(lValue, ctx, visitor.getVariables());
+		throw new CalcExprException(ctx, "%calc#notImplemented", "__locals__ access");
 	    }
 	    else if (ctx instanceof CalcParser.ArrVarContext) {
 		CalcParser.ArrVarContext arrVarCtx = (CalcParser.ArrVarContext) ctx;

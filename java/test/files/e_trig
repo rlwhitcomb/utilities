@@ -17,6 +17,8 @@ $dec 50
 LOOPS = 50
 x = pi/4
 
+__globals__.settings.trigMode
+
 sin_x = x
 sign = 1
 

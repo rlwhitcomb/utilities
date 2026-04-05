@@ -603,6 +603,8 @@
  *	    #803: New "mediant" operator (for fractions).
  *	10-Mar-2026 (rlwhitcomb)
  *	    #822: Set "not in" operator.
+ *	04-Apr-2026 (rlwhitcomb)
+ *	    #816: Add "__globals__" and "__locals__" identifiers.
  */
 
 grammar Calc;
@@ -1061,6 +1063,8 @@ var
    | var ( LBRACK expr RBRACK | INDEXES ) # arrVar
    | var actualParams                     # functionVar
    | GLOBALVAR                            # globalVar
+   | K_GLOBALS                            # globalsId
+   | K_LOCALS                             # localsId
    ;
 
 value
@@ -1565,6 +1569,12 @@ K_TIMETHIS : 'timethis' | 'TIMETHIS' | 'TimeThis' | 'Timethis' | 'timeThis' ;
 K_PRINT    : 'print'   | 'PRINT'   | 'Print'
            | 'display' | 'DISPLAY' | 'Display'
            ;
+
+
+K_GLOBALS : '__globals__' ;
+
+K_LOCALS  : '__locals__' ;
+
 
 K_NOT    : 'not' | 'NOT' | 'Not' ;
 

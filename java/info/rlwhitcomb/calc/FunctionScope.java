@@ -1,7 +1,7 @@
 /*
  * The MIT License (MIT)
  *
- * Copyright (c) 2021-2022,2024 Roger L. Whitcomb.
+ * Copyright (c) 2021-2022,2024,2026 Roger L. Whitcomb.
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -41,6 +41,7 @@
  *  11-Nov-22 rlw #554	Spiff up the "toString" value with quoted full function name.
  *  22-Mar-24 rlw #645	Start of non-constant parameter processing.
  *		  #664	Set parameter values by either name or index.
+ *  01-Apr-26 rlw #816	Add number of variables in "toString".
  */
 package info.rlwhitcomb.calc;
 
@@ -153,7 +154,7 @@ class FunctionScope extends ParameterizedScope
 	 */
 	@Override
 	public String toString() {
-	    return String.format("%1$s \"%2$s\" scope", toBookCase(), declaration.getFullFunctionName());
+	    return String.format("%1$s \"%2$s\" scope (%3$d entries)", toBookCase(), declaration.getFullFunctionName(), size());
 	}
 
 	/**

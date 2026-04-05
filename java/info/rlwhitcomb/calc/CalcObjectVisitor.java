@@ -960,6 +960,8 @@
  *	    #815: Rename "stringToValue" to "inputToValue".
  *	17-Mar-2026 (rlwhitcomb)
  *	    #822: Add "not in" operator for set-like operations.
+ *	04-Apr-2026 (rlwhitcomb)
+ *	    #816: Access method for the global scope (for "__globals__" access).
  */
 package info.rlwhitcomb.calc;
 
@@ -1346,6 +1348,15 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 	/** Replacement for "dot" operator. */
 	private static final String DOT = "\u00B7";
 
+
+	/**
+	 * Access the global symbol table.
+	 *
+	 * @return The {@link #globals}.
+	 */
+	public NestedScope getGlobals() {
+	    return globals;
+	}
 
 	/**
 	 * Access the currently active symbol table, whether the globals,
