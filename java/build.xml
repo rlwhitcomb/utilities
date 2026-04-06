@@ -404,6 +404,8 @@
 		utilities directory isn't caught by Ant somehow.
 	    10-Jan-2026 (rlwhitcomb)
 		Include "mkcanon" in the install directory (to put it in the path).
+	    05-Apr-2026 (rlwhitcomb)
+		#599: Run "verifyeuler" if the canons and the solutions exist.
 
      ========================================================================== -->
 
@@ -539,6 +541,13 @@
 			<available file="test/euler/p20.canon" type="file"/>
 		</and>
 	</condition>
+	<condition property="euler.solutions.exist" value="true" else="false">
+		<and>
+			<istrue value="${euler.canons.exist}"/>
+			<available file="test/euler/verifyeuler.calc"/>
+		</and>
+	</condition>
+	<property name="std.calc.args" value="-nocolor -nolibs -utf8 -library test/files/library -clear"/>
 
 	<patternset id="wrapper-files">
 		<include name="_find_and_run_class"     unless:true="${on.windows}"/>
@@ -555,6 +564,7 @@
 	</patternset>
 
 	<property name="tester.class" value="info.rlwhitcomb.tester.Tester"/>
+	<property name="calc.class"   value="info.rlwhitcomb.calc.Calc"    />
 
 	<echo message="Build the custom Ant tasks if necessary ..."/>
 	<ant antfile="build-ant-tasks.xml" target="install"/>
@@ -698,13 +708,8 @@
 			<attribute name="Implementation-Title" value="${product.name}"/>
 			<attribute name="Implementation-Version" value="${full.build}"/>
 		</manifest>
-		<java classname="info.rlwhitcomb.calc.Calc" failonerror="true" fork="true">
-			<arg value="-nocolor"/>
-			<arg value="-nolibs"/>
-			<arg value="-utf8"/>
-			<arg value="-library"/>
-			<arg value="test/files/library"/>
-			<arg value="-clear"/>
+		<java classname="${calc.class}" failonerror="true" fork="true">
+			<arg line="${std.calc.args}"/>
 			<arg value="makeScripts"/>
 			<arg value="--"/>
 			<arg value="properties"/>
@@ -796,8 +801,8 @@ Test starting on ${build.date} at ${build.time}
 -----------------------------------------------
 
 </echo>
-		<java classname="info.rlwhitcomb.calc.Calc"           output="${test.log.path}" append="true" failonerror="true" fork="true">
-			<arg value="-nocolors"/>
+		<java classname="${calc.class}"                       output="${test.log.path}" append="true" failonerror="true" fork="true">
+			<arg line="-nocolor -nolibs -utf8"/>
 			<arg value="info.java@j"/>
 		</java>
 		<echo>Test PreProc ...</echo>
@@ -846,6 +851,11 @@ Test starting on ${build.date} at ${build.time}
 			<arg value="-dir:test/euler"/>
 			<arg value="eulertest"/>
 		</java>
+		<echo if:true="${euler.solutions.exist}">Verifying the "Project Euler" results ...</echo>
+		<java classname="${calc.class}"                       output="${test.log.path}" append="true" failonerror="true" fork="true" if:true="${euler.solutions.exist}">
+			<arg line="${std.calc.args}"/>
+			<arg value="test/euler/verifyeuler"/>
+		</java>
 		<echo>Basic tests of Base64 utility ...</echo>
 		<exec executable="./verify_b64"   dir="."             output="${test.log.path}" append="true" unless:true="${on.windows}" failonerror="true"/>
 		<exec executable="cmd"            dir="."             output="${test.log.path}" append="true" if:true="${on.windows}" failonerror="true">
@@ -893,13 +903,8 @@ Test ending on ${end.of.test.date} at ${end.of.test.time}
 	</target>
 
 	<target name="clean" depends="purge" description="Cleans all generated files, old temp files, and old log files.">
-		<java classname="info.rlwhitcomb.calc.Calc" failonerror="true" fork="true" if:true="${utilities.available}">
-			<arg value="-nocolor"/>
-			<arg value="-nolibs"/>
-			<arg value="-utf8"/>
-			<arg value="-library"/>
-			<arg value="test/files/library"/>
-			<arg value="-clear"/>
+		<java classname="${calc.class}" failonerror="true" fork="true" if:true="${utilities.available}">
+			<arg line="${std.calc.args}"/>
 			<arg value="makeScripts"/>
 			<arg value="--"/>
 			<arg value="remove"/>
@@ -973,13 +978,8 @@ Test ending on ${end.of.test.date} at ${end.of.test.time}
 		<fixcrlf srcdir="${env.UTILITIES_HOME}" if:true="${utilities.available}">
 			<patternset refid="wrapper-files"/>
 		</fixcrlf>
-		<java classname="info.rlwhitcomb.calc.Calc" failonerror="true" fork="true" if:true="${utilities.available}">
-			<arg value="-nocolor"/>
-			<arg value="-nolibs"/>
-			<arg value="-utf8"/>
-			<arg value="-library"/>
-			<arg value="test/files/library"/>
-			<arg value="-clear"/>
+		<java classname="${calc.class}" failonerror="true" fork="true" if:true="${utilities.available}">
+			<arg line="${std.calc.args}"/>
 			<arg value="makeScripts"/>
 			<arg value="--"/>
 			<arg value="scripts"/>
