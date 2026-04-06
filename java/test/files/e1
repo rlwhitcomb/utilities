@@ -763,7 +763,9 @@ foundset.username='Don'
 $decimal 200 { 1/7 }
 $decimal 30 { 1/9 }
 $decimal 50 { pi }
+logging LOG_DEBUG: 'Start of "e" to 10000 places'
 $decimal 10000 { e }
+logging LOG_DEBUG: 'Done with "e" to 10000 places'
 
 # The formatting operations
 $binary

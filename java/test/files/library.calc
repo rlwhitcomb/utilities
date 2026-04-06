@@ -63,6 +63,11 @@ const DECIMAL_UNITS = "decimal"
 const MIXED_UNITS   = "mixed"
 
 /*
+ * Logging level values
+ */
+enum LOG_OFF, LOG_FATAL, LOG_ERROR, LOG_WARN, LOG_INFO, LOG_DEBUG
+
+/*
  * Color tags
  */
 const RESET   = "<r>"
