@@ -605,6 +605,8 @@
  *	    #822: Set "not in" operator.
  *	04-Apr-2026 (rlwhitcomb)
  *	    #816: Add "__globals__" and "__locals__" identifiers.
+ *	05-Apr-2026 (rlwhitcomb)
+ *	    #824: "Logging" statement.
  */
 
 grammar Calc;
@@ -632,6 +634,7 @@ stmtOrExpr
    | withStmt
    | timeThisStmt
    | printStmt
+   | loggingStmt
    | emptyStmt
    ;
 
@@ -707,6 +710,10 @@ timeThisStmt
 
 printStmt
    : K_PRINT outputOption ? ( optExprStmt ( COMMA optExprStmt ) * )
+   ;
+
+loggingStmt
+   : K_LOGGING ( expr COLON ) ? exprStmt
    ;
 
 bracketBlock
@@ -1568,6 +1575,10 @@ K_TIMETHIS : 'timethis' | 'TIMETHIS' | 'TimeThis' | 'Timethis' | 'timeThis' ;
 
 K_PRINT    : 'print'   | 'PRINT'   | 'Print'
            | 'display' | 'DISPLAY' | 'Display'
+           ;
+
+K_LOGGING  : 'logging' | 'LOGGING' | 'Logging'
+           | 'logger'  | 'LOGGER'  | 'Logger'
            ;
 
 

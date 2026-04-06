@@ -968,6 +968,7 @@ package info.rlwhitcomb.calc;
 import de.onyxbits.SemanticVersion;
 import info.rlwhitcomb.directory.FileInfo;
 import info.rlwhitcomb.directory.Match;
+import info.rlwhitcomb.logging.Logging;
 import info.rlwhitcomb.math.BigFraction;
 import info.rlwhitcomb.math.ComplexNumber;
 import info.rlwhitcomb.math.ContinuedFraction;
@@ -1347,6 +1348,12 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 
 	/** Replacement for "dot" operator. */
 	private static final String DOT = "\u00B7";
+
+
+	/**
+	 * The ONE logging object for all user logging via the {@code logging} statement.
+	 */
+	private final Logging logger = new Logging("=== === USER === ===");
 
 
 	/**
@@ -2000,6 +2007,10 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 
 	private Boolean getBooleanValue(final ParserRuleContext ctx) {
 	    return toBooleanValue(this, visit(ctx), ctx);
+	}
+
+	protected String getPlainStringValue(final ParserRuleContext ctx) {
+	    return getStringValue(ctx, false, false, false);
 	}
 
 	protected String getStringValue(final ParserRuleContext ctx) {
@@ -4327,6 +4338,48 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 	    displayer.displayMessage(ConsoleColor.color(fullMsg, Calc.getColoredMode()), output);
 
 	    return fullMsg;
+	}
+
+	@Override
+	public Object visitLoggingStmt(CalcParser.LoggingStmtContext ctx) {
+	    boolean enabled = false;
+	    int logLevel    = -1;
+	    String message  = null;
+
+	    CalcParser.ExprStmtContext exprStmt = ctx.exprStmt();
+	    ExprStmtResult res;
+
+	    if (Logging.isLoggingEnabled()) {
+		if (ctx.COLON() != null) {
+		    String level = getPlainStringValue(ctx.expr());
+		    logLevel = Logging.toLoggingLevel(level);
+		    if (logLevel <= 0) {
+			throw new CalcExprException(ctx, "%calc#invalidLogLevel", level);
+		    }
+		}
+		enabled = true;
+	    }
+
+	    // Work it so we don't actually evaluate the message unless
+	    // it will really get logged
+	    if (enabled) {
+		if (logLevel < 0) {
+		    // Unconditional logging
+		    res = formatExpr(exprStmt, false, false);
+		    message = ConsoleColor.color(res.resultString, false);
+		    logger.log(message);
+		}
+		else if (Logging.isLevelEnabled(logLevel)) {
+		    res = formatExpr(exprStmt, false, false);
+		    message = ConsoleColor.color(res.resultString, false);
+		    if (Logging.isErrorLevel(logLevel))
+			logger.logError(logLevel, message);
+		    else
+			logger.log(logLevel, message);
+		}
+	    }
+
+	    return message;
 	}
 
 	@Override

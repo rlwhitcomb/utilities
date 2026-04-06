@@ -208,6 +208,8 @@
 #	    Tweaks to ".." character representation.
 #	23-Jan-2026 (rlwhitcomb)
 #	    Reduce precision of timing messages to just microseconds (from nanos).
+#	05-Apr-2026 (rlwhitcomb)
+#	    #824: Error message for invalid logging level.
 #
 
 #
@@ -325,6 +327,7 @@ undefined		= Variable <y>%1$s<.> is not defined
 infLoopStepZero		= Infinite loop: step value is zero
 invalidConstruct	= Invalid <y>$<.> construct
 invalidConst2		= Invalid <y>${...}<.> construct
+invalidLogLevel		= Invalid logging level value <y>%1$s<.>
 modeError		= Mode option <y>%1$s<.> not recognized
 replaceOptionError	= Replace option <y>%1$s<.> not recognized
 illegalFormat		= Unrecognized format <y>%1$s<.>

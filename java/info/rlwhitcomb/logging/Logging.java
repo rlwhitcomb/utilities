@@ -1,7 +1,7 @@
 /*
  * The MIT License (MIT)
  *
- * Copyright (c) 2008-2022 Roger L. Whitcomb.
+ * Copyright (c) 2008-2022,2026 Roger L. Whitcomb.
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -146,6 +146,9 @@
  *    #513: Move to "logging" package.
  *  07-Dec-2022 (rlwhitcomb)
  *    #552: Get thread id from Environment (wrapper method based on Java version).
+ *  05-Apr-2026 (rlwhitcomb)
+ *    #824: Method for converting input string to a logging level; another method
+ *    to check for an error level.
  */
 package info.rlwhitcomb.logging;
 
@@ -382,6 +385,17 @@ public class Logging
 
 
     /**
+     * Is the given level one of the "error" levels?
+     *
+     * @param	level	A (valid) logging level to check.
+     * @return		{@code true} if this level is {@link #ERROR} or {@link #FATAL}.
+     */
+    public static boolean isErrorLevel(int level) {
+	return level == ERROR || level == FATAL;
+    }
+
+
+    /**
      * A logging interface to log something unconditionally in an instance context.
      *
      * @param	fmt	whatever it is you want to log; will have {@link #prefix} prepended
@@ -569,6 +583,49 @@ public class Logging
 
 
     /**
+     * Convert an input string to a logging level value.
+     * <p> Input can be an integer value from "0" to "5" or one of the string values.
+     *
+     * @param	level	potential logging level value
+     * @return		integer level if valid or {@code -1} if not.
+     */
+    public static int toLoggingLevel(String level) {
+	int lev = -1;
+
+	try {
+	    lev = Integer.parseInt(level);
+	    if (!isLoggingLevelValid(lev))
+		lev = -1;
+	}
+	catch (NumberFormatException nfe) {
+	    switch (level.toUpperCase()) {
+		case LEVEL_DEBUG:
+		    lev = DEBUG;
+		    break;
+		case LEVEL_INFO_INPUT:
+		    lev = INFO;
+		    break;
+		case LEVEL_WARN_INPUT:
+		    lev = WARN;
+		    break;
+		case LEVEL_ERROR:
+		    lev = ERROR;
+		    break;
+		case LEVEL_FATAL:
+		    lev = FATAL;
+		    break;
+		case LEVEL_OFF_INPUT:
+		    lev = OFF;
+		    // fall through
+		default:
+		    break;
+	    }
+	}
+	return lev;
+    }
+
+
+    /**
      * Set the current logging level.
      * <p> This is normally called by the {@link #readConfiguration}
      * method passing the value in the .properties file to set the initial value.
@@ -584,41 +641,13 @@ public class Logging
      *			<code>false</code> if the level was not a good value.
      */
     public static boolean setLoggingLevel(String level) {
-	try {
-	    int lev = Integer.parseInt(level);
-	    if (isLoggingLevelValid(lev)) {
-		loggingLevel = lev;
-	    }
-	    else {
-		System.err.println("Invalid format for logging level value: " + level);
-		return false;
-	    }
+	int newLevel = toLoggingLevel(level);
+	if (newLevel < 0) {
+	    System.err.println("Invalid format for logging level value: " + level);
+	    return false;
 	}
-	catch (NumberFormatException nfe) {
-	    switch (level.toUpperCase()) {
-		case LEVEL_DEBUG:
-		    loggingLevel = DEBUG;
-		    break;
-		case LEVEL_INFO_INPUT:
-		    loggingLevel = INFO;
-		    break;
-		case LEVEL_WARN_INPUT:
-		    loggingLevel = WARN;
-		    break;
-		case LEVEL_ERROR:
-		    loggingLevel = ERROR;
-		    break;
-		case LEVEL_FATAL:
-		    loggingLevel = FATAL;
-		    break;
-		case LEVEL_OFF_INPUT:
-		    loggingLevel = OFF;
-		    break;
-		default:
-		    System.err.println("Invalid format for logging level value: " + level);
-		    return false;
-	    }
-	}
+
+	loggingLevel = newLevel;
 	return true;
     }
 

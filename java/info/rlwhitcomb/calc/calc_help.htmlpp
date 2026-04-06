@@ -1507,7 +1507,7 @@ whether it has previously been used/defined.
   In addition to the functions and operators listed above, Calc has eight different statements which can be used to do
      iterative or repeated calculations, to select between actions based on the value of an expression, and to display text or values.
      These are the: <code>LOOP</code>, <code>WHILE</code>, <code>IF</code> or <code>UNLESS</code>, <code>CASE</code>, <code>LEAVE</code>, <code>NEXT</code>, <code>WITH</code>,
-     <code>TIMETHIS</code>, and the <code>PRINT</code> or <code>DISPLAY</code> statements.
+     <code>TIMETHIS</code>, <code>PRINT</code> or <code>DISPLAY</code>, and the <code>LOGGING</code> or <code>LOGGER</code> statements.
      All keywords in these statements have three differently-cased forms: all lower case, all UPPER case, and MixedCase.  For example: <code>loop</code>, <code>LOOP</code>, and <code>Loop</code>.
   <p>The syntax for each is as follows:
   <p class="indent">
@@ -1545,6 +1545,9 @@ whether it has previously been used/defined.
   </p>
   <p class="indent">
     <code>PRINT</code> (or <code>DISPLAY</code>) [ <i>output</i> <code>:</code> ] [ <i>expr</i> [ <i>format</i> ] ( <code>,</code> <i>expr</i> [ <i>format</i> ] ) * ]
+  </p>
+  <p class="indent">
+    <code>LOGGING</code> (or <code>LOGGER</code>) [ <i>level_expr</i> <code>:</code> ] <i>message_expr</i> [ <i>format</i> ]
   </p>
   <p>In any of these statements the <code>{</code> and <code>}</code> are not needed if there is only one statement or expression in the block. But for <code>timethis</code>, if the brackets are omitted a comma must separate the name expression from the timed expression.
   <p>The <code>LOOP</code> statement will repeatedly execute the block of statements based on several conditions:
@@ -1654,6 +1657,15 @@ whether it has previously been used/defined.
      except in certain cases where the surrounding punctuation shouldn't have it. In the GUI frame, the <code>stdout</code> and
      <code>stderr</code> streams are merged into the "Results" text area, so the output value is essentially meaningless. Specifying
      <code>"both"</code>, however, will display the message twice.
+  <p>The <code>Logging</code> or <code>Logger</code> statement takes an optional logging level value (a single string value of:
+     <code>FATAL</code>, <code>ERROR</code>, <code>WARN</code>, <code>INFO</code>, or <code>DEBUG</code>, or an integer value of <code>1 .. 5</code>
+     ( <code>fatal</code> to <code>debug</code> in order ). If the level is omitted, the logging is unconditional (that is, if ANY logging is enabled),
+     otherwise only if the appropriate level of logging is enabled will the logging occur. Note: if logging is disabled, neither expression will actually
+     be evaluated (for any side-effects), and if the level value is not enabled the message expression will not be evaluated (to reduce the performance hit
+     when logging is turned off). Also note: regardless of the <code>quoteStrings</code> setting string results for the message will not be quoted (unless
+     the <code>@Q</code> format is given), and all color codes will be stripped out in the log file regardless of the "colored" setting.
+  <p>Any messages from this statement that make it to the log file will be annotated by:<br><code>=== === USER === ===</code><br>in order to distinguish them from
+     internal logging messages.
   <p>There are many more code examples in the <code>test/files</code> directory of the source distribution.
 </div>
 <a class="right-link" href="#topofpage">Top</a>
