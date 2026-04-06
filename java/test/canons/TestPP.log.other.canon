@@ -10,7 +10,7 @@ Generating output file 'test/data/TestPP.java'
       34.+	#	define	JKL2	(JKL*2)
       35.+# define T	true
       36.+# define F	false
-      37.+#define LAST_VERSION 4.5.1
+      37.+#define LAST_VERSION 4.5.1-debug_ci_m64_01245
       41.  # if	T
       42.+	private static String TRUE_WORKS = "true works!";
       43.  # else
@@ -56,7 +56,7 @@ Generating output file 'test/data/TestPP.java'
       91. 	#error XYZ defined test failed!
       92. #endif
       94. #if LAST_VERSION > 4.5.0
-      95.+	private static String VERSION = "4.5.1";
+      95.+	private static String VERSION = "4.5.1-debug_ci_m64_01245";
       96. #else
       97. 	#error version check didn't work right
       98. #endif

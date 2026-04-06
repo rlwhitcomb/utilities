@@ -41,7 +41,7 @@ class TestPP {
 	private static String DEF2 = "DEF tested correctly by #defined";
 	private static String XYZ_UNDEF = "This is correct -- XYZ is not defined.";
 
-	private static String VERSION = "4.5.1";
+	private static String VERSION = "4.5.1-debug_ci_m64_01245";
 
 // Test ING_REL being undefined
 	private static String ING_REL_UNDEFINED = "Correct, we should have undefined ING_REL on the command line.";

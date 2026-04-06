@@ -34,7 +34,7 @@
 	#	define	JKL2	(JKL*2)
 # define T	true
 # define F	false
-#define LAST_VERSION 4.5.1
+#define LAST_VERSION 4.5.1-debug_ci_m64_01245
 
 class TestPP {
 	private static int $(GHI) = $(JKL);

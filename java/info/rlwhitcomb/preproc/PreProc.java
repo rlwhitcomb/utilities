@@ -123,6 +123,7 @@
  *			source of copyright notice; add Java data model variable; put title and
  *			version into the "version.properties" file.
  *  08-Jan-26 rlw ----	Update copyright year.
+ *  06-Apr-26 rlw ----	Fix code scanning alert related to (very) inefficient regex for versions.
  */
 package info.rlwhitcomb.preproc;
 
@@ -375,7 +376,7 @@ public class PreProc
 	/** Pattern to match the reserved word <code>"false"</code>. */
 	private static final Pattern FALSE_CONST = Pattern.compile("^[fF][aA][lL][sS][eE]");
 	/** Pattern to match a version string. */
-	private static final Pattern VERSION_CONST = Pattern.compile("^([0-9]+)\\.([0-9]+)(\\.([0-9]+))?([+\\-_\\.][a-zA-Z0-9_]+)*");
+	private static final Pattern VERSION_CONST = Pattern.compile("^([0-9]+)\\.([0-9]+)(\\.([0-9]+))?([+\\-_\\.][a-zA-Z0-9]+)*");
 	/** Pattern to match an integer constant. */
 	private static final Pattern INT_CONST = Pattern.compile("^[0-9]+");
 	/** Pattern to match a floating-point constant. */
