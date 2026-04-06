@@ -544,7 +544,7 @@
 	<condition property="euler.solutions.exist" value="true" else="false">
 		<and>
 			<istrue value="${euler.canons.exist}"/>
-			<available file="test/euler/verifyeuler.calc"/>
+			<available file="test/euler/euler_values.txt"/>
 		</and>
 	</condition>
 	<property name="std.calc.args" value="-nocolor -nolibs -utf8 -library test/files/library -clear"/>
