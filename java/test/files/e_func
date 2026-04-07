@@ -312,3 +312,10 @@ count
 countBack
 come
 comeBack
+
+#
+# Issue 816, access to local variables
+#
+def localfun(n) = { __locals__ }
+localfun(2)
+

@@ -86,6 +86,7 @@
  *  15-May-24 rlw ----	Also into fractions.
  *  28-Nov-25 rlw #643	Now also into continued fractions.
  *  04-Apr-26 rlw #816	Add "__globals__" access and start with "__locals__" also.
+ *  06-Apr-26 rlw #816	Finish "__locals__".
  */
 package info.rlwhitcomb.calc;
 
@@ -212,10 +213,12 @@ class LValueContext
 		else
 		    return parentName + "." + name;
 	    }
-	    else if (index != Integer.MIN_VALUE)
+	    else if (index != Integer.MIN_VALUE) {
 		return parentName + "[" + index + "]";
-	    else
-		return "";
+	    }
+	    else {
+		return parentName;
+	    }
 	}
 
 	/**
@@ -507,10 +510,10 @@ class LValueContext
 		return new LValueContext(lValue, ctx, visitor.getGlobals());
 	    }
 	    else if (ctx instanceof CalcParser.LocalsIdContext) {
-//		return visitor.getVariables().getLValue();
-//		return new LValueContext(lValue, ctx, visitor.getVariables().getLValue());
-//		return new LValueContext(lValue, ctx, visitor.getVariables());
-		throw new CalcExprException(ctx, "%calc#notImplemented", "__locals__ access");
+		ObjectScope localScope = visitor.getVariables();
+		if (localScope instanceof FunctionScope)
+		    localScope = new ObjectScope((FunctionScope) localScope);
+		return new LValueContext(lValue, ctx, localScope);
 	    }
 	    else if (ctx instanceof CalcParser.ArrVarContext) {
 		CalcParser.ArrVarContext arrVarCtx = (CalcParser.ArrVarContext) ctx;

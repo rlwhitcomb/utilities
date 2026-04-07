@@ -1,7 +1,7 @@
 /*
  * The MIT License (MIT)
  *
- * Copyright (c) 2021-2025 Roger L. Whitcomb.
+ * Copyright (c) 2021-2026 Roger L. Whitcomb.
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -73,6 +73,10 @@
  *	    #592: Move "isEmpty()" to CollectionScope.
  *	18-Jul-2025 (rlwhitcomb)
  *	    #738: Implement new "valueList" base method here.
+ *	06-Apr-2026 (rlwhitcomb)
+ *	    #816: New "live" constructor from FunctionScope to make a copy
+ *	    to access function local variables correctly; make "variables"
+ *	    protected to enable this.
  */
 package info.rlwhitcomb.calc;
 
@@ -92,7 +96,7 @@ class ObjectScope extends CollectionScope
 	 * The symbol table for this object (global or local), kept in order of declaration
 	 * for such things as ":save" where order is important.
 	 */
-	private final Map<String, Object> variables;
+	protected final Map<String, Object> variables;
 
 
 	ObjectScope() {
@@ -161,6 +165,17 @@ class ObjectScope extends CollectionScope
 	ObjectScope(final Map<String, Object> map, final boolean sortKeys) {
 	    super(Type.OBJECT);
 	    variables = sortKeys ? new TreeMap<>(map) : new LinkedHashMap<>(map);
+	}
+
+	/**
+	 * Construct one of these as a mirror to the given function scope, to allow
+	 * access to the local variables.
+	 *
+	 * @param function An existing function scope with its local symbol table.
+	 */
+	ObjectScope(final FunctionScope function) {
+	    super(Type.OBJECT);
+	    variables = function.variables;
 	}
 
 	/**

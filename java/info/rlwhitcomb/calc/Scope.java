@@ -41,8 +41,11 @@
  *  06-Aug-23 rlw #621	Add "ENUM" type.
  *  01-Jun-25 rlw #724	Add scope name to "toString".
  *  15-Jan-25 rlw #795	Add WITH type.
+ *  06-Apr-26 rlw #816	Clean up "toString" to eliminate usually empty information.
  */
 package info.rlwhitcomb.calc;
+
+import info.rlwhitcomb.util.CharUtil;
 
 
 /**
@@ -232,7 +235,10 @@ class Scope
 
 	@Override
 	public String toString() {
-	    return String.format("%1$s scope '%2$s'", toBookCase(), name);
+	    if (CharUtil.isNullOrEmpty(name))
+		return String.format("%1$s scope", toBookCase());
+	    else
+		return String.format("%1$s scope '%2$s'", toBookCase(), name);
 	}
 }
 

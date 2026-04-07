@@ -289,3 +289,5 @@
 >countBack -> "countBack: a = -1"
 >come -> 4
 >comeBack -> -1
+>Defining function “localfun(n)” = { __locals__ }
+>localfun(2) -> { __funcname__: "localfun", n: 2, _*: [ 2 ], _#: 1 }
