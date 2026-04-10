@@ -1,3 +1,12 @@
+/*
+ * Compute the least_squares regression for the given set of points, yielding
+ * the coefficients of the linear equation y = mx + b that best approximates
+ * the linear trend of the points.
+ *
+ * @param x A list of x values
+ * @param y Same-sized list of y values
+ * @return An object containing the "m" and "b" values computed from the points.
+ */
 def lsq(x, y) = {
    $assert typeof(x) == "array" && typeof(y) == "array" && length(x) == length(y), `Parameters to "$__funcname__" should be two equal-sized arrays of "x" and "y" values`
 
@@ -14,10 +23,10 @@ def lsq(x, y) = {
    }
 
    const N = length(x)
-   const sum_x = sumof(x)
-   const sum_y = sumof(y)
-   const sum_x2 = sumof(x2)
-   const sum_xy = sumof(xy)
+   const sum_x = ∑(x)
+   const sum_y = ∑(y)
+   const sum_x2 = ∑(x2)
+   const sum_xy = ∑(xy)
 
    const m = (N × sum_xy - sum_x × sum_y) / (N × sum_x2 - sum_x²)
    const b = (sum_y - m × sum_x) / N
