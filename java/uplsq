@@ -1,0 +1,3 @@
+#!/bin/bash
+cn -noopt -time -noc -dir test/files -lib least_squares -noseps -quote -sense -utf8 lsq | mkcanon > test/canons/lsq.canon
+

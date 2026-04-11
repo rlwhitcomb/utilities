@@ -10,3 +10,28 @@ x3 = [ 1, 2, 3, 4 ]
 y3 = [ 23, 27, 30, 34 ]
 lsq(x3, y3)
 
+x4 = [ 2, 3, 5, 7, 9 ]
+y4 = [ 4, 5, 7, 10, 15 ]
+lsq(x4, y4)
+
+// Note: this example is from:
+// https://www.technologynetworks.com/informatics/articles/calculating-a-least-squares-regression-line-equation-example-explanation-310265
+// except that his results are rather wrong ... these are correct
+x5 = [ 6, 10, 2, 4, 6, 7, 0, 1, 8, 5, 3 ]
+y5 = [ 82, 88, 56, 64, 77, 92, 23, 41, 80, 59, 47 ]
+lsq(x5, y5)
+mean(x5)
+mean(y5)
+
+x6 = [ 1, 2, 3, 4, 5 ]
+y6 = [ 2, 5, 3, 8, 7 ]
+lsq(x6, y6)
+
+// Taken from:
+// https://online.stat.psu.edu/stat415/lesson/7/7.2
+heights = [ 64, 73, 71, 69, 66, 69, 75, 71, 63, 72 ]
+weights = [ 121, 181, 156, 162, 142, 157, 208, 169, 127, 165 ]
+const res1 = lsq(heights, weights)
+eval(res1.eq)
+eq(75)
+

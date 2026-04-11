@@ -10,27 +10,24 @@
 def lsq(x, y) = {
    $assert typeof(x) == "array" && typeof(y) == "array" && length(x) == length(y), `Parameters to "$__funcname__" should be two equal-sized arrays of "x" and "y" values`
 
-   var x2 = []
-   var xy = []
-
-   // Note: this is very inefficient to loop over the arrays many times;
-   //  it can all be done in one pass
-   loop _x over x {
-      x2 += _x²
-   }
-   loop ix within length(x) {
-      xy += x[ix] × y[ix]
-   }
-
+   var sum_x = 0, sum_y = 0, sum_x2 = 0, sum_xy = 0
    const N = length(x)
-   const sum_x = ∑(x)
-   const sum_y = ∑(y)
-   const sum_x2 = ∑(x2)
-   const sum_xy = ∑(xy)
+
+   loop n within N {
+      const _x = x[n]
+      const _y = y[n]
+      sum_x += _x
+      sum_y += _y
+      sum_x2 += _x²
+      sum_xy += _x × _y
+   }
 
    const m = (N × sum_xy - sum_x × sum_y) / (N × sum_x2 - sum_x²)
    const b = (sum_y - m × sum_x) / N
+   const eqb = b < 0 ? `x - ${-b@3d}` : `x + ${b@3d}`
 
-   { m: m, b: b }
+   { m: m, b: b, eq: `def eq(x) = ${m@3d} × $eqb` }
 }
+
+def mean(x) = { ∑(x) / length(x) }
 
