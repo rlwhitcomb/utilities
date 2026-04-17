@@ -82,3 +82,26 @@ def quad_lsq(x, y) = {
    { a : β3, b : β2, c : β1, eq : eqq}
 }
 
+/*
+ * Calculate the exponential regression for the set of (x,y) points to give the
+ * coefficients for the equation y = ab^x
+ *
+ * @param x A list of x-values
+ * @param y Same-sized list of y-values
+ * @return An object containing the "a" and "b" values computed from the points.
+ */
+def exp_lsq(x, y) = {
+   $assert typeof(x) == "array" && typeof(y) == "array" && length(x) == length(y), `Parameters to "$__funcname__" should be two equal-sized arrays of "x" and "y" values`
+
+   // Construct a new set of values from x, ln(y)
+   var ln_y = []
+   loop y1 in y {
+      ln_y += ln(y1)
+   }
+   const res = line_lsq(x, ln_y)
+   const _a = epow(res.b)
+   const _b = epow(res.m)
+
+   { a : _a, b : _b, eq : `def eqe(x) = $_a × $_b ↑ x` }
+}
+

@@ -47,3 +47,16 @@ const res2 = quad_lsq(xq1, yq1)
 eval(res2.eq)
 eqq(5)
 
+// Examples from https://math.libretexts.org/Workbench/1250_Draft_3/06%3A_Exponential_and_Logarithmic_Functions/6.09%3A_Exponential_and_Logarithmic_Regressions
+xe1 = [ 0, 0.01, 0.03, 0.05, 0.07, 0.09, 0.11, 0.13, 0.15, 0.17, 0.19, 0.21 ]
+ye1 = [ 1, 1.03, 1.06, 1.38, 2.09, 3.54, 6.41, 12.6, 22.1, 39.05, 65.32, 99.78 ]
+const res3 = exp_lsq(xe1, ye1)
+eval(res3.eq)
+eqe(0.16)@2d
+
+xe2 = arrayof 1..8
+ye2 = [ 620.00, 761.88, 899.80, 1039.93, 1270.63, 1589.04, 1851.31, 2154.92 ]
+const res4 = exp_lsq(xe2, ye2)
+eval(res4.eq)
+eqe(12)@2d
+
