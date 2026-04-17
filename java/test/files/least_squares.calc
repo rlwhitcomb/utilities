@@ -3,11 +3,11 @@
  * the coefficients of the linear equation y = mx + b that best approximates
  * the linear trend of the points.
  *
- * @param x A list of x values
- * @param y Same-sized list of y values
+ * @param x A list of x-values
+ * @param y Same-sized list of y-values
  * @return An object containing the "m" and "b" values computed from the points.
  */
-def lsq(x, y) = {
+def line_lsq(x, y) = {
    $assert typeof(x) == "array" && typeof(y) == "array" && length(x) == length(y), `Parameters to "$__funcname__" should be two equal-sized arrays of "x" and "y" values`
 
    var sum_x = 0, sum_y = 0, sum_x2 = 0, sum_xy = 0
@@ -30,4 +30,55 @@ def lsq(x, y) = {
 }
 
 def mean(x) = { ∑(x) / length(x) }
+
+/*
+ * Compute the least-squares regression for a quadratic fit to the given
+ * data points, yielding the coefficients for the second-order polynomial
+ * y = ax² + bx + c that best approximates the data.
+ * Taken from: https://math.stackexchange.com/questions/267865/equations-for-quadratic-regression
+ *
+ * @param x A list of x-values
+ * @param y Same-sized list of y-values
+ * @return An object containing the "a", "b", and "c" values computed from the points.
+ */
+def quad_lsq(x, y) = {
+   $assert typeof(x) == "array" && typeof(y) == "array" && length(x) == length(y), `Parameters to "$__funcname__" should be two equal-sized arrays of "x" and "y" values`
+
+   var sum_x = 0, sum_x2 = 0, sum_x3 = 0, sum_x4 = 0, sum_y = 0, sum_xy = 0, sum_x2y = 0
+   const N = length(x)
+
+   loop n within N {
+      const _x = x[n]
+      const _y = y[n]
+      const _x2 = _x²
+      const _x3 = _x2 × _x
+      const _x4 = _x2 × _x2
+
+      sum_x += _x
+      sum_x2 += _x2
+      sum_x3 += _x3
+      sum_x4 += _x4
+      sum_y += _y
+      sum_xy += _x × _y
+      sum_x2y += _x2 × _y
+   }
+
+   const S11 = sum_x2 - (sum_x² / N)
+   const S12 = sum_x3 - (sum_x × sum_x2 / N)
+   const S22 = sum_x4 - (sum_x2² / N)
+   const Sy1 = sum_xy - (sum_y × sum_x / N)
+   const Sy2 = sum_x2y - (sum_y × sum_x2 / N)
+
+   const mean_x = sum_x / N
+   const mean_x2 = sum_x2 / N
+   const mean_y = sum_y / N
+
+   const β0 = S22 · S11 - S12²
+   const β2 = (Sy1 · S22 - Sy2 · S12) / β0
+   const β3 = (Sy2 · S11 - Sy1 · S12) / β0
+   const β1 = mean_y - β2 · mean_x - β3 · mean_x2
+
+   const eqq = `def eqq(x) = $β3 × x² + $β2 × x + $β1`
+   { a : β3, b : β2, c : β1, eq : eqq}
+}
 
