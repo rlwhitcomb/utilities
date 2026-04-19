@@ -3,6 +3,10 @@
 /*======================*/
 
 [
+    { version: '3.3.26', date: d'2026-04-18',
+      issues: [ ],
+      comment: 'Add "\u227A" and "\u227B" as aliases of "--" and "++" respectively.'
+    },
     { version: '3.3.25', date: d'2026-04-06',
       issues: [ 816 ],
       comment: 'Access to local variables via "__locals__" inside of any nested scope.'

@@ -607,6 +607,8 @@
  *	    #816: Add "__globals__" and "__locals__" identifiers.
  *	05-Apr-2026 (rlwhitcomb)
  *	    #824: "Logging" statement.
+ *	18-Apr-2026 (rlwhitcomb)
+ *	    Add "precedes" and "succeeds" as aliases for increments and decrements.
  */
 
 grammar Calc;
@@ -1661,8 +1663,8 @@ BIT_NOT_OP
        ;
 
 INC_OP
-       : ( '++' | '\u2795\u2795' )
-       | ( '--' | '\u2212\u2212' | '\u2796\u2796' )
+       : ( '++' | '\u2795\u2795' |                  '\u227B' )
+       | ( '--' | '\u2212\u2212' | '\u2796\u2796' | '\u227A' )
        ;
 
 POWERS

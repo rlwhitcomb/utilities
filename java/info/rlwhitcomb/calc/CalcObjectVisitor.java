@@ -962,6 +962,8 @@
  *	    #822: Add "not in" operator for set-like operations.
  *	04-Apr-2026 (rlwhitcomb)
  *	    #816: Access method for the global scope (for "__globals__" access).
+ *	28-Apr-2026 (rlwhitcomb)
+ *	    Add "precedes" and "succeeds" symbols as aliases for "--" and "++" respectively.
  */
 package info.rlwhitcomb.calc;
 
@@ -4749,11 +4751,13 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 	    switch (op) {
 		case "++":
 		case "\u2795\u2795":
+		case "\u227B":
 		    incr = true;
 		    break;
 		case "--":
 		case "\u2212\u2212":
 		case "\u2796\u2796":
+		case "\u227A":
 		    break;
 		default:
 		    throw new UnknownOpException(op, ctx);
@@ -4864,11 +4868,13 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 	    switch (op) {
 		case "++":
 		case "\u2795\u2795":
+		case "\u227B":
 		    incr = true;
 		    break;
 		case "--":
 		case "\u2212\u2212":
 		case "\u2796\u2796":
+		case "\u227A":
 		    break;
 		default:
 		    throw new UnknownOpException(op, ctx);

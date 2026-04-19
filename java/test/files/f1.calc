@@ -245,9 +245,9 @@ cb1 + cb2
 cb3 = (frac(1,2), frac(7,8))
 bf1 = cb1/cb3
 bf1*cb3
-++cb3
+≻cb3
 cb4 = complex('1/2')
-++cb4
+≻cb4
 cb4**2
 
 cf1 = complex('7/1i')
@@ -261,6 +261,7 @@ cf1[0]
 cf1[1]
 cf4[1]=6
 cf4
+≺cf4
 
 $rational on { (3, 2) / (1, -1) }
 
