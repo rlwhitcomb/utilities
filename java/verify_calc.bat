@@ -4,8 +4,8 @@ set NUMBER=%1
 set DIGITS=%2
 if exist test\data\M%NUMBER%.txt.gz call gunz -keep -out M%NUMBER%.txt test\data\M%NUMBER%.txt.gz
 call lists -single M%NUMBER%.txt >ref.txt
-call c -nocolor -noseps -sense -r "$unl;(2**%NUMBER%)-1" >calc.txt
-for /f %%f in ('call c -nocolor verify') do set count=%%f
+call c -nocolor -noseps -sense -utf8 -r "$unl;(2**%NUMBER%)-1" >calc.txt
+for /f %%f in ('call c -nocolor -utf8 verify') do set count=%%f
 if /I %count% neq %DIGITS% (
    echo Digit count is different!
    echo Reference number of digits is %DIGITS%, calculated number is %count%.
