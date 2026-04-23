@@ -39,6 +39,7 @@
  *  08-Mar-26 rlw #818	Allow interruption; use separate futures to release each
  *			value as it is ready.
  *  19-Mar-26 rlw #818	Simplify the interrupt logic.
+ *  22-Apr-26 rlw #818	Don't set a value if the context/precision has changed since we started.
  */
 package info.rlwhitcomb.math;
 
@@ -140,6 +141,8 @@ public class PiWorker
 
 	    // Only start a new calculation if the settings have changed
 	    if (!ClassUtil.objectsEqual(mc, newMC)) {
+		logger.debug("Switching from old mc:%1$s to newMC:%2$s", mc, newMC);
+
 		// Initially reset all the futures to "incomplete" until we finish
 		synchronized (futures) {
 		    mc        = newMC;
@@ -171,33 +174,42 @@ public class PiWorker
 	    //  but we will rely on the longer methods to check "interrupted" status
 	    //  periodically themselves.
 	    BigDecimal value = null;
+	    MathContext newMC;
+	    MathContext newMC2;
+	    int newPrec;
+
+	    synchronized (futures) {
+		newMC = mc;
+		newMC2 = mc2;
+		newPrec = precision;
+	    }
 
 	    for (CALCULATED_VALUES v : CALCULATED_VALUES.values()) {
-		logger.debug("starting calculation for value %1$s", v);
+		logger.debug("starting calculation for value %1$s, mc: %2$s", v, newMC);
 
 		switch (v) {
 		    case E:
-			value = MathUtil.e(precision + 2);
+			value = MathUtil.e(newPrec + 2);
 			break;
 
 		    case PI:
-			value = pi = MathUtil.pi(precision + 2);
+			value = pi = MathUtil.pi(newPrec + 2);
 			break;
 
 		    case PI2:
-			value = pi.divide(D_TWO, mc2);
+			value = pi.divide(D_TWO, newMC2);
 			break;
 
 		    case PI180:
-			value = pi.divide(D_180, mc2);
+			value = pi.divide(D_180, newMC2);
 			break;
 
 		    case PI200:
-			value = pi.divide(D_200, mc2);
+			value = pi.divide(D_200, newMC2);
 			break;
 
 		    case LN10:
-			value = MathUtil.ln(D_TEN, mc2);
+			value = MathUtil.ln(D_TEN, newMC2);
 			break;
 		}
 
@@ -208,11 +220,17 @@ public class PiWorker
 		    break;	// out of CALCULATED_VALUES loop
 		}
 
-		// If we were NOT interrupted, then make the value we just finished available
-		// to other callers now.
+		// If we were NOT interrupted, then make the value we just finished available to other callers now.
 		synchronized (futures) {
-		    logger.debug("complete future for value %1$s", v);
-		    futures.get(v).complete(value);
+		    // Only save the new result if the current context is still the same (no new calculation has started)
+		    if (newMC.equals(mc)) {
+			logger.debug("complete future for value %1$s, mc: %2$s", v, newMC);
+			futures.get(v).complete(value);
+		    }
+		    else {
+			logger.debug("NOT complete future for %1$s due to calculated newMC(%2$s) != current mc(%3$s)", v, newMC, mc);
+			break;	// again out of big loop
+		    }
 		}
 	    }
 	}

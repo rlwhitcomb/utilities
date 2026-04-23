@@ -3,6 +3,10 @@
 /*======================*/
 
 [
+    { version: '3.3.28', date: d'2026-04-22',
+      issues: [ 818 ],
+      comment: 'Some fixes for synchronization of "pi" background calculations with updated precision.'
+    },
     { version: '3.3.27', date: d'2026-04-22',
       issues: [ ],
       comment: 'Allow "-8" as an alias for "-utf8" on command line.'
