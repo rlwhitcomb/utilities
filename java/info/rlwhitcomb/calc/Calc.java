@@ -369,6 +369,8 @@
  *	    #809: Move TrigMode to "math" package.
  *	07-Feb-2026 (rlwhitcomb)
  *	    #811: Preprocess command line arguments that have combined values in a single arg.
+ *	22-Apr-2026 (rlwhitcomb)
+ *	    Allow "-8" as an alias for "-utf8".
  */
 package info.rlwhitcomb.calc;
 
@@ -2541,6 +2543,7 @@ public class Calc
 		case "utf8":
 		case "utf":
 		case "u":
+		case "8":
 		    inputCharset = StandardCharsets.UTF_8;
 		    break;
 		case "win1252":

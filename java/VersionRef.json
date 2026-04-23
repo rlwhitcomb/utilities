@@ -3,6 +3,10 @@
 /*======================*/
 
 [
+    { version: '3.3.27', date: d'2026-04-22',
+      issues: [ ],
+      comment: 'Allow "-8" as an alias for "-utf8" on command line.'
+    },
     { version: '3.3.26', date: d'2026-04-18',
       issues: [ ],
       comment: 'Add "\u227A" and "\u227B" as aliases of "--" and "++" respectively.'

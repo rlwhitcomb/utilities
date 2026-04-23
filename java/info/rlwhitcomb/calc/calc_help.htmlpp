@@ -408,7 +408,7 @@ h4 {
     <tr><td><code>-file</code>, <code>-text</code>,<br>or <code>-filetext</code></td><td>How to treat values on the command line:<br>as file names, as expression text,<br>or as files (if found) otherwise text <i>(default)</i></td><td><code>-files</code>, <code>-f</code>,<br><code>-txt</code>, <code>-tx</code>,<br><code>-ft</code></td><td></td></tr>
     <tr><td><code>-ctrlenter</code></td><td>Use <code>Ctrl+Enter</code> (or <code>&#x2318;Enter</code> on Mac)<br>to calculate in the GUI input field <i>(default)</i></td><td><code>-cmdenter</code>, <code>-ctrl</code>, <code>-cmd</code></td><td></td></tr>
     <tr><td><code>-enter</code></td><td>Use just <code>Enter</code> to calculate in GUI input field</td><td><code>-ent</code>, <code>-e</code></td><td></td></tr>
-    <tr><td><code>-utf8</code></td><td>Decode all input files using the UTF-8 charset</td><td><code>-utf</code>, <code>-u</code></td><td></td></tr>
+    <tr><td><code>-utf8</code></td><td>Decode all input files using the UTF-8 charset</td><td><code>-utf</code>, <code>-u</code>, <code>-8</code></td><td></td></tr>
     <tr><td><code>-win1252</code></td><td>Use Windows-1252 as the input charset</td><td><code>-win</code>, <code>-w</code></td><td></td></tr>
     <tr><td><code>-charset</code> <i>charset_name</i></td><td>Use the given charset to decode input files</td><td><code>-char</code>, <code>-cs</code></td><td></td></tr>
     <tr><td><code>-default</code></td><td>Use the platform default charset <i>(default)</i></td><td><code>-def</code></td><td></td></tr>
