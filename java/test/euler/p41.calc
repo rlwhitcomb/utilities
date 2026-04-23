@@ -10,9 +10,7 @@
  */
 $quiet on {
 $separators off
-
-/* Excerpt from "library.calc" (which we usually don't include) */
-const SORT_DESCENDING       = 0x0004
+$include "euler_lib"
 
 /* This will hold the primes found among all the permutations */
 var prime_values = []
@@ -25,20 +23,6 @@ var prime_values = []
  */
 define prime_test_callback(p) = {
    if isprime(p) prime_values += p
-}
-
-/*
- * Produce an n-digit pandigital number, like '654321'
- *
- * @param n Number of digits
- * @return  The desired pandigital number
- */
-define pandigital(n) = {
-   var digits = ''
-   loop over n {
-      digits += @@__
-   }
-   ~~reverse(digits)
 }
 
 /*

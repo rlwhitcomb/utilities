@@ -13,12 +13,11 @@
  * how many are triangle words?
  */
 $quiet on {
+$include "euler_lib"
 
 const WORD_FILE = 'test/data/0042_words.txt'
 
 const A = codes('A')
-
-define tri(n) = (n² + n) / 2
 
 /*
  * This limit is empirically derived: counting the max word score is < 200, which means

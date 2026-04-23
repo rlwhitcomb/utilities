@@ -10,17 +10,10 @@
  * (Please note that the palindromic number, in either base, may not include leading zeros.)
  */
 $quiet on {
+$include "euler_lib"
 
 const LIMIT = 1e6
 var sum = 0
-
-/*
- * Decide if the given string is a palindrome, meaning it is the same as its reverse.
- *
- * @param s The string to test.
- * @return  true if the string reads the same in reverse as it does forward, false otherwise.
- */
-define is_palindrome(s) = s === reverse(s)
 
 // The note in the problem description means that every even number (zero in LSD in base 2)
 // will not work, so confine our search to just the odd values.

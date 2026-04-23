@@ -9,21 +9,17 @@
  * Find the largest palindrome made from the product of two 3-digit numbers.
  */
 $quiet on {
+$include "euler_lib"
 
 const UPPER_LIMIT = 999
 const LOWER_LIMIT = 900
-
-define isPalindrome(x) = {
-  const s = @@x
-  s === reverse(s)
-}
 
 var palindromes = []
 
 loop x over UPPER_LIMIT .. LOWER_LIMIT, -1 {
   loop y over x .. LOWER_LIMIT, -1 {
     const product = x * y
-    if isPalindrome(product) palindromes += product
+    if is_palindrome(product) palindromes += product
   }
 }
 

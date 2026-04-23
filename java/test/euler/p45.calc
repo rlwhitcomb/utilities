@@ -14,10 +14,7 @@
  * Find the next triangle number that is also pentagonal and hexagonal.
  */
 $quiet on {
-
-define tri(n) = n * (n + 1) / 2
-define pent(n) = n * (3 * n - 1) / 2
-define hex(n) = n * (2 * n - 1)
+$include "euler_lib"
 
 const TEST_T = 285
 const TEST_P = 165

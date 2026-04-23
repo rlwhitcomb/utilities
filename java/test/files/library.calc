@@ -722,6 +722,15 @@ define datetime_to_epoch_secs(d, t) = d × SECS_PER_DAY + t / TICKS_PER_SECOND
 define is_perfect(n) = sumof ( factors (n) ) - n == n
 
 /*
+ * Determine if a number (or string) is a palindrome, that is, the same
+ * forwards as backwards.
+ *
+ * @param x The candidate number or string value.
+ * @return  boolean if the candidate is truly a palindrome
+ */
+define is_palindrome(x) = { const _x = @@x; _x === reverse(_x) }
+
+/*
  * Return a list of the prime numbers within the given range.
  *
  * @param m Starting value for the list (should be 2 or any odd number); default 2.

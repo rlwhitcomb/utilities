@@ -1,0 +1,46 @@
+/*
+ * Some common values used in the Project Euler test solutions.
+ */
+
+/* Excerpt from "library.calc" (which we usually don't include) */
+const SORT_DESCENDING       = 0x0004
+
+/*
+ * Decide if the given number/string is a palindrome, meaning it is the same as its reverse.
+ *
+ * @param x The number or string to test.
+ * @return  true if the value reads the same in reverse as it does forward, false otherwise.
+ */
+define is_palindrome(x) = {
+   const _x = @@x
+   _x === reverse(_x)
+}
+
+/*
+ * Produce an n-digit pandigital number, like '654321'
+ *
+ * @param n Number of digits
+ * @return  The desired pandigital number
+ */
+define pandigital(n) = {
+   var digits = ''
+   loop d in n..1,-1 {
+      digits += d
+   }
+}
+
+/*
+ * Compute the n-th triangle number.
+ */
+define tri(n) = (n² + n) / 2
+
+/*
+ * Compute the n-th pentagonal number.
+ */
+define pent(n) = (3⋅n² - n) / 2
+
+/*
+ * Compute the n-th hexagonal number.
+ */
+define hex(n) = 2⋅n² - n
+
