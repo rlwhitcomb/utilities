@@ -43,6 +43,8 @@ is_perfect(28)
 is_perfect(99)
 primes(1, 50)
 primes(1, 128)
+are_coprime(2**127 * 3, 18)
+are_coprime(14, 5)
 quad(3,-4,-9)
 quad(1,0,-25)
 quad(1, -1, -1)[0]

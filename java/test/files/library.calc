@@ -748,6 +748,15 @@ define primes(m = 2, n) = {
 }
 
 /*
+ * Are the two values relatively coprime?
+ *
+ * @param a Value one.
+ * @param b Value two.
+ * @return  Whether the values are coprime to each other?
+ */
+define are_coprime(a, b) = gcd(a, b) === 1
+
+/*
  * Solve the quadratic formula to find the roots of a general
  * quadratic equation: a × x² + b × x + c = 0.
  * x = (-b +- √(b² - 4 × a × c))/2 × a
