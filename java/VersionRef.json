@@ -3,6 +3,10 @@
 /*======================*/
 
 [
+    { version: '3.3.30', date: d'2026-04-29',
+      issues: [ 832 ],
+      comment: 'Add "MIN_BYTE", "MAX_BYTE", up to "MAX_LONG" as predefined constants.'
+    },
     { version: '3.3.28', date: d'2026-04-22',
       issues: [ 818 ],
       comment: 'Some fixes for synchronization of "pi" background calculations with updated precision.'

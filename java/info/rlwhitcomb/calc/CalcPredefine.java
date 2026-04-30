@@ -48,6 +48,7 @@
  *  05-May-23 rlw #610	Add "currentdir" to "info.os".
  *  05-Jan-25 rlw #698	Add copyright string to "info" at the top level.
  *  28-Jan-26 rlw #809	Renamed CalcPiWorker now in new package.
+ *  29-Apr-26 rlw #832	Add integer limit symbols.
  */
 package info.rlwhitcomb.calc;
 
@@ -164,6 +165,15 @@ class CalcPredefine
 		LocalTime now = LocalTime.now();
 		return BigInteger.valueOf(now.toNanoOfDay());
 	    });
+
+	    PredefinedValue.define(globalScope, "MIN_BYTE", Byte.MIN_VALUE);
+	    PredefinedValue.define(globalScope, "MAX_BYTE", Byte.MAX_VALUE);
+	    PredefinedValue.define(globalScope, "MIN_SHORT", Short.MIN_VALUE);
+	    PredefinedValue.define(globalScope, "MAX_SHORT", Short.MAX_VALUE);
+	    PredefinedValue.define(globalScope, "MIN_INT", Integer.MIN_VALUE);
+	    PredefinedValue.define(globalScope, "MAX_INT", Integer.MAX_VALUE);
+	    PredefinedValue.define(globalScope, "MIN_LONG", Long.MIN_VALUE);
+	    PredefinedValue.define(globalScope, "MAX_LONG", Long.MAX_VALUE);
 
 	    SemanticVersion v = Environment.programVersion();
 	    ObjectScope version = new ObjectScope();
