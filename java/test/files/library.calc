@@ -878,18 +878,26 @@ Usage: PMT (P = present value, R = yearly interest rate (%), N = number of years
 }
 
 /*
+ * Payment types for financial functions.
+ *  PERIOD_END = payments made at end of period
+ *  PERIOD_BEGIN = payments are made at beginning of perio
+ */
+enum PERIOD_END, PERIOD_BEGIN
+
+/*
  * Calculate the number of periods to either pay off a loan or accumulate a certain
  * future value.
  *
  * @param pv    Present value of the loan or investment.
  * @param pmt   Payment amount per period (negative for loan payments, positive for investments).
  * @param rate  Interest rate per period (as a decimal, as in 6% = 0.06).
- * @param fv    Future value (default is zero for full loan repayment).
- * @param type  When payments are made: 0 = end of period (default), 1 = beginning of period
+ * @param fv    Future value (default is zero for full loan repayment), negative for investments.
+ * @param type  When payments are made:
+ *                 PERIOD_END (0) = end of period (default), PERIOD_BEGIN (1) = beginning of period
  * @return Negative number of periods to achieve a future value or positive periods to payoff loan.
  */
-define nper(pv, pmt, rate, fv = 0, type = 0) = {
-   $assert (type === 0 || type === 1), 'nper: type must be 0 or 1'
+define nper(pv, pmt, rate, fv = 0, type = PERIOD_END) = {
+   $assert (type === PERIOD_END || type === PERIOD_BEGIN), 'nper: type must be PERIOD_END (0) or PERIOD_BEGIN (1)'
    if rate == 0
       round((-pv - fv) / pmt, 3)
    else {
