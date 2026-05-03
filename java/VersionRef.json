@@ -3,6 +3,10 @@
 /*======================*/
 
 [
+    { version: '3.3.32', date: d'2026-05-02',
+      issues: [ ],
+      comment: 'Implement "sort" of string values, with all flag combinations.'
+    },
     { version: '3.3.30', date: d'2026-04-29',
       issues: [ 832 ],
       comment: 'Add "MIN_BYTE", "MAX_BYTE", up to "MAX_LONG" as predefined constants.'

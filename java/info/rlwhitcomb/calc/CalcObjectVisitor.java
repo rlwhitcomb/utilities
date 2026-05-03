@@ -964,6 +964,8 @@
  *	    #816: Access method for the global scope (for "__globals__" access).
  *	28-Apr-2026 (rlwhitcomb)
  *	    Add "precedes" and "succeeds" symbols as aliases for "--" and "++" respectively.
+ *	02-May-2026 (rlwhitcomb)
+ *	    Misc. optimizations; fixes to sort within a string.
  */
 package info.rlwhitcomb.calc;
 
@@ -1017,6 +1019,8 @@ import java.util.function.Supplier;
 import java.util.function.UnaryOperator;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import java.util.stream.IntStream;
+import java.util.stream.Stream;
 
 import static info.rlwhitcomb.calc.CalcUtil.*;
 import static info.rlwhitcomb.math.NumericUtil.RangeMode;
@@ -1233,6 +1237,26 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 		    exprString   = exString;
 		    resultString = resString;
 		    result       = res;
+		}
+	}
+
+	/**
+	 * Compare code points in a case-insensitive manner, either sorted ascending or descending.
+	 */
+	private static class CodePointComparator implements Comparator<Integer>
+	{
+		private boolean descend;
+
+		public CodePointComparator(boolean descending) {
+		    descend = descending;
+		}
+
+		@Override
+		public int compare(Integer a, Integer b) {
+		    if (descend)
+			return Character.toUpperCase(b.intValue()) - Character.toUpperCase(a.intValue());
+		    else
+			return Character.toUpperCase(a.intValue()) - Character.toUpperCase(b.intValue());
 		}
 	}
 
@@ -6382,15 +6406,8 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 	    if (target instanceof ObjectScope) {
 		objects = ((ObjectScope) target).keyList();
 	    }
-	    else if (target instanceof ArrayScope) {
-		@SuppressWarnings("unchecked")
-		ArrayScope<Object> array = (ArrayScope<Object>) target;
-		objects = array.list();
-	    }
-	    else if (target instanceof SetScope) {
-		@SuppressWarnings("unchecked")
-		SetScope<Object> set = (SetScope<Object>) target;
-		objects = set.valueList();
+	    else if (target instanceof CollectionScope) {
+		objects = ((CollectionScope) target).valueList();
 	    }
 	    else {
 		String targetString = getNonNullString(e0ctx, target);
@@ -6643,14 +6660,8 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 
 	    Object value = evaluate(valueCtx);
 
-	    if (value instanceof ArrayScope) {
-		arrayLen = ((ArrayScope) value).size();
-	    }
-	    else if (value instanceof ObjectScope) {
-		arrayLen = ((ObjectScope) value).size();
-	    }
-	    else if (value instanceof SetScope) {
-		arrayLen = ((SetScope) value).size();
+	    if (value instanceof CollectionScope) {
+		arrayLen = ((CollectionScope) value).size();
 	    }
 	    else if (value instanceof ContinuedFraction) {
 		arrayLen = ((ContinuedFraction) value).size();
@@ -6685,30 +6696,13 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 	    // No matter the type of the input object, the result here will be an array
 	    ArrayScope<Object> result = new ArrayScope<>();
 
-	    if (value instanceof ArrayScope) {
-		List<?> valueList = ((ArrayScope) value).list();
-		for (int index = beginIndex; index < endIndex; index++) {
-		    Object val = valueList.get(index);
-		    result.add(val);
-		}
-	    }
-	    else if (value instanceof ObjectScope) {
-		Object[] valueArray = ((ObjectScope) value).values().toArray();
-		for (int index = beginIndex; index < endIndex; index++) {
-		    Object val = valueArray[index];
-		    result.add(val);
-		}
-	    }
-	    else if (value instanceof SetScope) {
-		Object[] valueArray = ((SetScope) value).set().toArray();
-		for (int index = beginIndex; index < endIndex; index++) {
-		    Object val = valueArray[index];
-		    result.add(val);
-		}
+	    if (value instanceof CollectionScope) {
+		List<Object> subList = ((CollectionScope) value).valueList().subList(beginIndex, endIndex);
+		result.addAll(subList);
 	    }
 	    else {
-		List<Object> list = ((ContinuedFraction) value).values();
-		result.addAll(list);
+		List<Object> subList = ((ContinuedFraction) value).values().subList(beginIndex, endIndex);
+		result.addAll(subList);
 	    }
 
 	    return result;
@@ -6904,6 +6898,36 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 	    else if (obj instanceof CollectionScope) {
 		return obj;
 	    }
+	    else if (obj instanceof CharSequence) {
+		CharSequence chars = (CharSequence) obj;
+		IntStream codes, sortedCodes;
+
+		if (caseInsensitive) {
+		    if (sortDescending) {
+			// We're going to reverse the string here in the case of strings like
+			// "cbaCBA" which would sort descending as "cCbBaA". With this reversal
+			// sort ascending and sort descending (case insensitive) are exactly reversed
+			StringBuilder buf = new StringBuilder(chars);
+			codes = buf.reverse().codePoints();
+		    }
+		    else {
+			codes = chars.codePoints();
+		    }
+		    Stream<Integer> ints = codes.boxed().sorted(new CodePointComparator(sortDescending));
+		    sortedCodes = ints.mapToInt(Integer::intValue);
+		}
+		else {
+		    codes = chars.codePoints();
+		    if (sortDescending)
+			sortedCodes = codes.map(i -> -i).sorted().map(i -> -i);
+		    else
+			sortedCodes = codes.sorted();
+		}
+
+		return sortedCodes
+			.collect(StringBuilder::new, StringBuilder::appendCodePoint, StringBuilder::append)
+			.toString();
+	    }
 
 	    // A scalar object, just return it unchanged
 	    return obj;
@@ -6944,8 +6968,8 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 		return new ArrayScope<Object>(set);
 	    }
 	    else if (value instanceof ObjectScope || value instanceof SetScope) {
-		// Well, this is embarrassing - the keys or set values already have to be unique
-		// so there is no point to this
+		// Well, this is easy - the keys or set values already have to be unique
+		// so there is nothing to do for this
 		return value;
 	    }
 	    else {

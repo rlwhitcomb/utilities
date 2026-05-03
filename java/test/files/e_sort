@@ -1,6 +1,11 @@
 #
 # Tests of natural ordering in "sort", "min", and "max"
 #
+// From "library.calc" (which isn't normally included)
+const SORT_CASE_INSENSITIVE = 0x0001
+const SORT_SORT_KEYS        = 0x0002
+const SORT_DESCENDING       = 0x0004
+
 sort($*)
 min($*)
 max($*)
@@ -41,4 +46,10 @@ ar3 = [ "a1.1", "a.1", "a2.1" ]
 sort ar1
 sort ar2
 sort ar3
+
+sort_string = "AbcaBC"
+sort(sort_string)
+sort(sort_string, SORT_DESCENDING)
+sort(sort_string, SORT_CASE_INSENSITIVE)
+sort(sort_string, SORT_CASE_INSENSITIVE | SORT_DESCENDING)
 

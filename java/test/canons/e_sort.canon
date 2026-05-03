@@ -1,3 +1,6 @@
+>Defining constant “SORT_CASE_INSENSITIVE” = 1
+>Defining constant “SORT_SORT_KEYS” = 2
+>Defining constant “SORT_DESCENDING” = 4
 >sort ($*) -> [ "e1", "e2", "e3", "e5", "e10", "e11", "e12", "e20", "e30", "e31" ]
 >min ($*) -> "e1"
 >max ($*) -> "e31"
@@ -27,3 +30,8 @@
 >sort ar1 -> [ "a_1", "a1_1", "a2_1" ]
 >sort ar2 -> [ "a-1", "a1-1", "a2-1" ]
 >sort ar3 -> [ "a.1", "a1.1", "a2.1" ]
+>sort_string = "AbcaBC" -> "AbcaBC"
+>sort (sort_string) -> "ABCabc"
+>sort (sort_string, SORT_DESCENDING) -> "cbaCBA"
+>sort (sort_string, SORT_CASE_INSENSITIVE) -> "AabBcC"
+>sort (sort_string, SORT_CASE_INSENSITIVE | SORT_DESCENDING) -> "CcBbaA"
