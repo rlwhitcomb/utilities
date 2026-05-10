@@ -81,6 +81,8 @@
  *			for getting precision for use with any BigDecimal value.
  *  16-Dec-25 rlw ----	Change rounding modes back to what they were; tests were failing.
  *  07-Mar-26 rlw #818	Allow "pi", "e", and "ln" calculations to be interrupted.
+ *  18-Apr-26 rlw #798	New "toBase" method.
+ *  09-May-26 rlw #813	New method to convert BigInteger to array of integers.
  */
 package info.rlwhitcomb.math;
 
@@ -94,7 +96,9 @@ import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.math.MathContext;
 import java.math.RoundingMode;
+import java.nio.ByteBuffer;
 import java.security.SecureRandom;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashSet;
@@ -2068,7 +2072,7 @@ public final class MathUtil
 		result = result.add(loopTerm, lc);
 		logger.debug("ln: k=%1$d, loopTerm=%2$s, result=%3$s", k, loopTerm.toPlainString(), result.toPlainString());
 		if (result.equals(lastResult)) {
-		    logger.debug("ln: exit after no change: k=%1$d", k);
+		    logger.debug("ln: exit after no change: k=%1$d loops=%2$d", k, loops);
 		    break;
 		}
 		if (Thread.currentThread().isInterrupted()) {
@@ -2293,6 +2297,60 @@ public final class MathUtil
 	 */
 	public static int maximum(final int... values) {
 	    return new MaxInt(values).get();
+	}
+
+	/**
+	 * Similar to the {@link BigInteger#toString(int)} method, return the
+	 * individual values of the given integer as numeric elements of a list.
+	 *
+	 * @param value An integer value to convert.
+	 * @param radix The integer base to convert to.
+	 * @return      List of the individual values (MSD to LSD).
+	 */
+	public static List<Integer> toBase(final BigInteger value, final int radix) {
+	    List<Integer> result = new ArrayList<>();
+
+	    BigInteger term = value;
+	    BigInteger rad = BigInteger.valueOf(radix);
+
+	    while (term.signum() != 0) {
+		BigInteger[] res = term.divideAndRemainder(rad);
+		result.add(0, res[1].intValue());
+		term = res[0];
+	    }
+	    if (result.size() == 0)
+		result.add(0);
+
+	    return result;
+	}
+
+	/**
+	 * Similar to {@link BigInteger#toByteArray} this will convert the value to
+	 * an array of 32-bit integers (MSB first).
+	 *
+	 * @param bigInt The initial big integer value.
+	 * @return       List of the integers of this value.
+	 */
+	public static int[] bigIntegerToIntArray(final BigInteger bigInt) {
+	    byte[] bytes = bigInt.toByteArray();
+
+	    // Pad to ensure length is a proper multiple for int conversion
+	    int padding = Integer.BYTES - (bytes.length % Integer.BYTES);
+	    ByteBuffer buffer = ByteBuffer.allocate(bytes.length + padding);
+
+	    // Fill padding (sign-extend if negative, otherwise zeros)
+	    byte padValue = (byte) (bigInt.signum() < 0 ? 0xFF : 0x00);
+	    for (int i = 0; i < padding; i++) buffer.put(padValue);
+
+	    buffer.put(bytes);
+	    buffer.flip();
+
+	    int[] intArray = new int[buffer.remaining() / Integer.BYTES];
+	    for (int i = 0; i < intArray.length; i++) {
+	        intArray[i] = buffer.getInt();
+	    }
+
+	    return intArray;
 	}
 
 }

@@ -3,6 +3,10 @@
 /*======================*/
 
 [
+    { version: '3.3.33', date: d'2026-05-09',
+      issues: [ 833 ],
+      comment: 'New "@y" or "@Y" formats, similar to "@x" except separates strings into codepoints, not bytes.'
+    },
     { version: '3.3.32', date: d'2026-05-02',
       issues: [ ],
       comment: 'Implement "sort" of string values, with all flag combinations.'

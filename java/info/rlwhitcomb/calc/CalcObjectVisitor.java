@@ -966,6 +966,8 @@
  *	    Add "precedes" and "succeeds" symbols as aliases for "--" and "++" respectively.
  *	02-May-2026 (rlwhitcomb)
  *	    Misc. optimizations; fixes to sort within a string.
+ *	09-May-2026 (rlwhitcomb)
+ *	    #833: Introduce "@y" formatting for codepoints in strings (same as @x otherwise).
  */
 package info.rlwhitcomb.calc;
 
@@ -3171,6 +3173,27 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 				convert(iValue.toByteArray(), 16, formatChar == 'X', false, valueBuf);
 			    else {
 				toUpperCase = formatChar == 'X';
+				valueBuf.append(iValue.toString(16));
+			    }
+			}
+			break;
+
+		    case 'Y':
+		    case 'y':
+			if (result instanceof String) {
+			    int[] i = ((String) result).codePoints().toArray();
+			    valueBuf.append('\'');
+			    convert(i, 16, formatChar == 'Y', true, valueBuf);
+			    valueBuf.append('\'');
+			}
+			else {
+			    if (signChar != '-')
+				valueBuf.append('0').append(formatChar == 'Y' ? 'X' : 'x');
+			    iValue = convertToInteger(result, settings.mc, ctx);
+			    if (iValue.compareTo(BigInteger.ZERO) < 0)
+				convert(MathUtil.bigIntegerToIntArray(iValue), 16, formatChar == 'Y', false, valueBuf);
+			    else {
+				toUpperCase = formatChar == 'Y';
 				valueBuf.append(iValue.toString(16));
 			    }
 			}

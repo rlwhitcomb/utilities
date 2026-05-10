@@ -286,6 +286,8 @@
  *	    #815: Translate escape sequencees inside command-line arguments; rename "stringToValue"
  *	    to "inputToValue".
  *	    Further fix (for Windows mostly), with illegal Unicode escape in an input string.
+ *	09-May-2026 (rlwhitcomb)
+ *	    #833:  Add new form of "convert" for int[].
  */
 package info.rlwhitcomb.calc;
 
@@ -1062,23 +1064,15 @@ public final class CalcUtil
 	    Object value = visitor.evaluateToValue(ctx, obj);
 
 	    // Compatibility with JavaScript here...
-	    if (CharUtil.isNullOrEmpty(value))
+	    if (CharUtil.isNullOrEmpty(value)) {
 		return Boolean.FALSE;
+	    }
 
-	    if (value instanceof ArrayScope) {
-		return Boolean.valueOf(((ArrayScope) value).size() != 0);
+	    if (value instanceof CollectionScope) {
+		return Boolean.valueOf(((CollectionScope) value).size() != 0);
 	    }
-	    else if (value instanceof ObjectScope) {
-		return Boolean.valueOf(((ObjectScope) value).size() != 0);
-	    }
-	    else if (value instanceof SetScope) {
-		return Boolean.valueOf(((SetScope) value).size() != 0);
-	    }
-	    else if (value instanceof CollectionScope) {
-		// This is always the empty collection
-		return Boolean.FALSE;
-	    }
-	    else if (value instanceof ValueScope) {
+
+	    if (value instanceof ValueScope) {
 		value = ((ValueScope) value).getValue();
 	    }
 
@@ -1089,8 +1083,9 @@ public final class CalcUtil
 	    catch (IllegalArgumentException iae) {
 		// Even if the string isn't a "valid" boolean value, accept a
 		// non-empty string as "true" (as does JavaScript)
-		if ((value instanceof String) && !((String) value).isEmpty())
+		if ((value instanceof String) && !((String) value).isEmpty()) {
 		    return Boolean.TRUE;
+		}
 
 		throw new CalcExprException(iae, ctx);
 	    }
@@ -1531,6 +1526,44 @@ public final class CalcUtil
 		if (escape)
 		    buf.append('\\').append(formatChar);
 		CharUtil.padToWidth(buf, number, padWidth, '0', Justification.RIGHT);
+	    }
+	}
+
+	/**
+	 * Convert an array of ints to their numeric representation in the given radix.
+	 *
+	 * @param ints   The set of integers to convert.
+	 * @param radix  Radix to use for conversion (supports 2, 8, and 16).
+	 * @param upper  Whether to use UPPER case characters (hex only).
+	 * @param escape Use escape sequences (suitable for strings)?
+	 * @param buf	 The buffer to append to.
+	 */
+	public static void convert(
+		final int[] ints,
+		final int radix,
+		final boolean upper,
+		final boolean escape,
+		final StringBuilder buf)
+	{
+	    char formatChar = ' ';
+	    int padWidth = 0;
+	    switch (radix) {
+		case 2:  formatChar = 'B'; padWidth = 8; break;
+		case 8:  formatChar = 'o'; padWidth = 3; break;
+		case 16: formatChar = 'u'; padWidth = escape ? 4 : 2; break;
+	    }
+	    for (int i : ints) {
+		String number = Integer.toUnsignedString(i, radix);
+		if (upper)
+		    number = number.toUpperCase();
+		if (escape) {
+		    buf.append('\\').append(formatChar);
+		    if (i > 65535)
+			buf.append('{');
+		}
+		CharUtil.padToWidth(buf, number, padWidth, '0', Justification.RIGHT);
+		if (escape && i > 65535)
+		    buf.append('}');
 	    }
 	}
 
