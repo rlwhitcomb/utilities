@@ -284,6 +284,16 @@
 >tenpow (log (432.7)) -> 432.6999999999996
 >twopow (ln2 (19.7)) -> 19.7
 >Precision is now “34” digits.
+>Defining function “all_primes(m = 2, n)” = {
+>   var list = []
+>   if 2 in m .. n list += 2
+>   const s = max (m | 1, 3)
+>   loop x over s .. n, 2 {
+>      if isprime (x) list += x
+>   }
+>   list
+>}
+>all_primes(900, 1100) -> [ 907, 911, 919, 929, 937, 941, 947, 953, 967, 971, 977, 983, 991, 997, 1009, 1013, 1019, 1021, 1031, 1033, 1039, 1049, 1051, 1061, 1063, 1069, 1087, 1091, 1093, 1097 ]
 >isprime 15485863 -> true
 >t31 = ((2 ** 31 - 1) ** 2) - 1 -> 4611686014132420608
 >isprime (t31) -> false
