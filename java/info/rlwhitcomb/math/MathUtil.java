@@ -83,6 +83,7 @@
  *  07-Mar-26 rlw #818	Allow "pi", "e", and "ln" calculations to be interrupted.
  *  18-Apr-26 rlw #798	New "toBase" method.
  *  09-May-26 rlw #813	New method to convert BigInteger to array of integers.
+ *  20-May-26 rlw #834	Convert to using BitSet for prime number sieve.
  */
 package info.rlwhitcomb.math;
 
@@ -100,6 +101,7 @@ import java.nio.ByteBuffer;
 import java.security.SecureRandom;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.BitSet;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
@@ -1636,7 +1638,7 @@ public final class MathUtil
 	 * odd numbers starting at 3 are represented, with bit 0 (the least-
 	 * significant bit) representing 3.
 	 */
-	private static BigInteger primeSieve = BigInteger.ZERO;
+	private static BitSet primeSieve;
 	/**
 	 * This represents the size in bits of the sieve that we have already
 	 * set correctly. Any value bigger than this is undefined.
@@ -1672,11 +1674,13 @@ public final class MathUtil
 	    if (sizeInBits >= Integer.MAX_VALUE)
 		throw new Intl.IllegalArgumentException("math#math.primeTooBig", BigInteger.valueOf(sizeInBits * 2L + 3L));
 
+	    // First time in, size the sieve as big as we need it for now
+	    if (primeSieve == null)
+		primeSieve = new BitSet((int) sizeInBits);
+
 	    // Don't need to do anything if the sieve is already big enough
 	    if (sizeInBits > primeSieveMax) {
 		// In this implementation, a 0 bit means prime, 1 bit is composite.
-		BigInteger sieve = primeSieve;
-
 		// Only the odd bits are present, and correspond so:
 		// bit 0 -> 3
 		// bit 1 -> 5
@@ -1694,30 +1698,21 @@ public final class MathUtil
 		    // (since all the even multiples are even numbers, and thus NOT prime
 		    // and not even represented in this bitmap)
 		    for (int j = bitPos + prime; j <= (int) sizeInBits; j += prime) {
-			sieve = sieve.setBit(j);
+			primeSieve.set(j);
 		    }
 
 		    // This corresponds to the next larger prime number
-		    int nextBitPos = findLowestClearBit(sieve, bitPos + 1, (int) sizeInBits);
-		    if (nextBitPos < 0) {
+		    int nextBitPos = primeSieve.nextClearBit(bitPos + 1);
+		    if (nextBitPos >= sizeInBits) {
 			break;
 		    }
 		    bitPos = nextBitPos;
 	        }
 
 		// Save the cached sieve for next time
-		primeSieve = sieve;
 		primeSieveMax = sizeInBits;
 		primeSieveBitPos = bitPos;
 	    }
-	}
-
-	private static int findLowestClearBit(final BigInteger bitArray, final int startBitPos, final int lengthInBits) {
-	    for (int bitPos = startBitPos; bitPos < lengthInBits; bitPos++) {
-		if (!bitArray.testBit(bitPos))
-		    return bitPos;
-	    }
-	    return -1;
 	}
 
 	/**
@@ -1749,8 +1744,12 @@ public final class MathUtil
 		907, 911, 919, 929, 937, 941, 947, 953, 967, 971, 977, 983, 991, 997
 	};
 
-	/** A "certainty" factor used with {@link BigInteger#isProbablePrime}. */
-	private static final int PRIME_CERTAINTY = 10;
+	/**
+	 * A "certainty" factor used with {@link BigInteger#isProbablePrime}.
+	 * From: https://stackoverflow.com/questions/2385909/what-would-be-the-fastest-method-to-test-for-primality-in-java
+	 * a value of 15 worked exactly up to Integer.MAX_INT.
+	 */
+	private static final int PRIME_CERTAINTY = 15;
 
 	/**
 	 * Using a Sieve of Eratosthenes, figure out if the given number is prime.
@@ -1810,16 +1809,21 @@ public final class MathUtil
 	    // and we can just test directly
 	    int bitPos = (posN.intValue() - 3) / 2;
 	    if (bitPos >= 0 && bitPos < primeSieveMax)
-		return !primeSieve.testBit(bitPos);
+		return !primeSieve.get(bitPos);
 
 	    // Loop through all the primes in the sieve less than ~sqrt(n)
 	    // to see if the number has any prime factors
 	    // bitPos 0 corresponds to 3, and bitPos will only ever correspond
 	    // to a "clear" bit in the sieve, which is a prime number
 	    bitPos = (SMALL_PRIMES[SMALL_PRIMES.length - 1] - 3) / 2;
+
 	    while (true) {
 		int prime = (bitPos * 2) + 3;
 		BigInteger iPrime = BigInteger.valueOf(prime);
+
+		// If the number is this next prime, we're done here
+		if (posN.equals(iPrime))
+		    return true;
 
 		// If the number is divided evenly by one of the primes, then we have a factor
 		// and the number is by definition NOT prime
@@ -1829,11 +1833,12 @@ public final class MathUtil
 		// Create or expand the sieve to accommodate this next possible prime factor
 		constructSieve(bitPos);
 
-		int nextBitPos = findLowestClearBit(primeSieve, bitPos + 1, (int) maxBitPos);
+		int nextBitPos = primeSieve.nextClearBit(bitPos + 1);
 
 		// No more possible prime factors below the square root -> the number must be prime
-		if (nextBitPos < 0)
+		if (nextBitPos >= primeSieveMax) {
 		    return true;
+		}
 
 		bitPos = nextBitPos;
 	    }
@@ -1982,11 +1987,12 @@ public final class MathUtil
 		// Also redo the max sieve position since we just reduced the number we're examining
 		maxBitPos = maxPrimeBitPos(currentN);
 
-		int nextBitPos = findLowestClearBit(primeSieve, bitPos + 1, (int) maxBitPos);
+		int nextBitPos = primeSieve.nextClearBit(bitPos + 1);
 
 		// No more possible prime factors below the square root
-		if (nextBitPos < 0)
+		if (nextBitPos >= primeSieveMax) {
 		    break;
+		}
 
 		bitPos = nextBitPos;
 	    }
