@@ -3,6 +3,10 @@
 /*======================*/
 
 [
+    { base: '1.13.5', date: d'2026-05-23',
+      issues: [ 834 ],
+      comment: 'Fix new bug with "pfactors" method.'
+    },
     { base: '1.13.4', date: d'2026-05-22',
       issues: [ 834 ],
       comment: 'Speedup large prime number calculations using BitSet instead of BigInteger.'

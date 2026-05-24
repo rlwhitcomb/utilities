@@ -84,6 +84,7 @@
  *  18-Apr-26 rlw #798	New "toBase" method.
  *  09-May-26 rlw #813	New method to convert BigInteger to array of integers.
  *  20-May-26 rlw #834	Convert to using BitSet for prime number sieve.
+ *  23-May-26 rlw #834	Tweaks to the sieve calculations.
  */
 package info.rlwhitcomb.math;
 
@@ -1836,7 +1837,7 @@ public final class MathUtil
 		int nextBitPos = primeSieve.nextClearBit(bitPos + 1);
 
 		// No more possible prime factors below the square root -> the number must be prime
-		if (nextBitPos >= primeSieveMax) {
+		if (nextBitPos >= maxBitPos) {
 		    return true;
 		}
 
@@ -1990,7 +1991,7 @@ public final class MathUtil
 		int nextBitPos = primeSieve.nextClearBit(bitPos + 1);
 
 		// No more possible prime factors below the square root
-		if (nextBitPos >= primeSieveMax) {
+		if (nextBitPos >= maxBitPos) {
 		    break;
 		}
 
