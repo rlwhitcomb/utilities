@@ -11,3 +11,10 @@ length(primes); primes;
 print 'Another interesting Mersenne number (not prime) ...'
 (2⌃67 - 1) == (193707721 × 761838257287)
 pfactors(193707721); pfactors(761838257287)
+
+// Issue #835 a large-ish Mersenne prime is "probably prime"
+$unlimited {
+display 'M9941 (22nd Mersenne prime) is "probably prime" by returning <null>'
+isprime(2⌃9941-1)
+}
+

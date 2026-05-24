@@ -5,3 +5,7 @@
 >(2 ⌃ 67 - 1) == (193707721 × 761838257287) -> true
 >pfactors (193707721) -> [ 193707721 ]
 >pfactors (761838257287) -> [ 761838257287 ]
+>Precision is now “UNLIMITED”.
+>M9941 (22nd Mersenne prime) is "probably prime" by returning <null>
+>isprime (2 ⌃ 9941 - 1) -> <null>
+>Precision is now “34” digits.

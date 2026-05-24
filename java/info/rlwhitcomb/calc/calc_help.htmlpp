@@ -1205,6 +1205,10 @@ or<br>
      Some examples:  <code>join 1 &#x21E8; "1"</code>, while <code>join 1, 2 &#x21E8; "12"</code>.
      The complicated ones look like this:  <code>join 'a','b','c','-' &#x21E8; "a-b-c"</code>.
      While <code>arr=[1,2,3];join arr,'-' &#x21E8; 1-2-3</code>.
+  <p>The <code>isPrime</code> function returns one of three different values: <code>false</code> if one of the values is definitely composite,
+     <code>true</code> if all the values are definitely prime, and <code>null</code> if one of the values is "probably prime", but too big to
+     determine exactly whether it is prime. Note that the <code>true</code> value is the only result that guarantees all values have been
+     checked in the list of parameters.
   <p>The <code>flatmap</code> function simply does the flat mapping of any kind or dimension of array or arrays into a single list. Objects included in the list
      or as array elements have their values (not the keys) included in the final array. Individual values are also included as-is in the result.
   <p>The <code>split</code> function takes one string argument, a second regular expression string, and an optional limit

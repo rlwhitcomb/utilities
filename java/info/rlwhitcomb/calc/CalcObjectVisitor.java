@@ -5907,8 +5907,11 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 	    List<Object> objects = buildValueList(this, exprs, Conversion.INTEGER);
 
 	    for (Object obj : objects) {
-		if (!MathUtil.isPrime((BigInteger) obj))
+		int ret = MathUtil.isPrime((BigInteger) obj);
+		if (ret < 0)
 		    return Boolean.FALSE;
+		if (ret == 0)
+		    return null;
 	    }
 
 	    return Boolean.TRUE;

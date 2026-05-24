@@ -85,6 +85,7 @@
  *  09-May-26 rlw #813	New method to convert BigInteger to array of integers.
  *  20-May-26 rlw #834	Convert to using BitSet for prime number sieve.
  *  23-May-26 rlw #834	Tweaks to the sieve calculations.
+ *  23-May-26 rlw #835	Change return value from "isPrime" to reflect "probably prime".
  */
 package info.rlwhitcomb.math;
 
@@ -1758,25 +1759,24 @@ public final class MathUtil
 	 * a relatively small value (~10**7).
 	 *
 	 * @param n The number to check for possible prime-ness.
-	 * @return  {@code true} if {@code n} is a prime number, {@code false}
-	 *          if the number is composite.
-	 * @throws  IllegalArgumentException if the number is "too big" for this method.
+	 * @return  {@code +1} if the number is prime, {@code -1} if the number is composite
+	 *          but {@code 0} if the number is "probably" prime, but not proved so.
 	 */
-	public static boolean isPrime(final BigInteger n) {
+	public static int isPrime(final BigInteger n) {
 	    // Negative numbers are essentially the same primality as their positive counterparts
 	    BigInteger posN = n.abs();
 
 	    // Easy decisions here: zero and one are not prime
 	    if (posN.compareTo(BigInteger.ONE) <= 0)
-		return false;
+		return -1;
 
 	    // While two IS prime
 	    if (posN.equals(I_TWO))
-		return true;
+		return +1;
 
 	    // Any other even number is NOT prime
 	    if (posN.remainder(I_TWO).signum() == 0)
-		return false;
+		return -1;
 
 	    // Now, make a preliminary pass to see if the number is divisible by any of the other "small" primes
 	    // in the list above before we go to the expensive sieve operation.
@@ -1784,33 +1784,34 @@ public final class MathUtil
 		BigInteger smallPrime = BigInteger.valueOf(SMALL_PRIMES[i]);
 		if (posN.compareTo(smallPrime) > 0) {
 		    if (posN.remainder(smallPrime).signum() == 0)
-			return false;
+			return -1;
 		}
 		else {
 		    // The number is now smaller than the next "small" prime and hasn't been divided yet,
 		    // thence it is itself prime.
-		    return true;
+		    return +1;
 		}
 	    }
 
 	    // Quick test for "is this probably a prime" vs. "is this definitely composite"?
 	    if (!posN.isProbablePrime(PRIME_CERTAINTY))
-		return false;
+		return -1;
 
-	    // Before doing the sieve don't even try if the value is too big
-	    // but the preceding work could have given us an answer without this ...
+	    // At this point the value is "probably prime", which we can make definite for "smaller"
+	    // values using a Sieve of Eratosthenes. If, however, the number is too big for that
+	    // the best we can do is return a "probably prime" answer.
 	    if (posN.compareTo(MAX_PRIME) >= 0)
-		throw new Intl.IllegalArgumentException("math#math.primeTooBig", posN);
+		return 0;
 
 	    // Choose a size for our sieve that is at least as big as the square root
 	    // of the number in question (a little bit bigger is better)
 	    long maxBitPos = maxPrimeBitPos(posN);
 
 	    // Make a preliminary check in case the number itself is within the sieve size
-	    // and we can just test directly
+	    // and we can just test directly: a set bit means composite, clear means prime
 	    int bitPos = (posN.intValue() - 3) / 2;
 	    if (bitPos >= 0 && bitPos < primeSieveMax)
-		return !primeSieve.get(bitPos);
+		return primeSieve.get(bitPos) ? -1 : +1;
 
 	    // Loop through all the primes in the sieve less than ~sqrt(n)
 	    // to see if the number has any prime factors
@@ -1824,12 +1825,12 @@ public final class MathUtil
 
 		// If the number is this next prime, we're done here
 		if (posN.equals(iPrime))
-		    return true;
+		    return +1;
 
 		// If the number is divided evenly by one of the primes, then we have a factor
 		// and the number is by definition NOT prime
 		if (posN.remainder(iPrime).signum() == 0)
-		    return false;
+		    return -1;
 
 		// Create or expand the sieve to accommodate this next possible prime factor
 		constructSieve(bitPos);
@@ -1838,7 +1839,7 @@ public final class MathUtil
 
 		// No more possible prime factors below the square root -> the number must be prime
 		if (nextBitPos >= maxBitPos) {
-		    return true;
+		    return +1;
 		}
 
 		bitPos = nextBitPos;
