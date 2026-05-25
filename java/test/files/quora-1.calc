@@ -45,3 +45,19 @@ loop p1 over p {
    display `$p1² == ($p3 × 24) + 1`
 }
 }
+
+//
+// From Quora article: https://www.quora.com/What-is-an-example-of-a-conjecture-that-was-proven-wrong-for-very-large-numbers/answer/Alon-Amit?ch=17&oid=46517625&share=6e79e31d&srid=obNJ&target_type=answer
+//
+display 'What is an example of a conjecture that was proven wrong for very large numbers?'
+$quiet on {
+def isPrimeResult(d) = {
+   const res = isPrime(~~d1)
+   isNull(res) ? "probably" : @@res
+}
+var d1 = '12'
+loop d over 0...140 {
+   rpad(d1, d+2, '1')
+   display `Is $d1 (${d+2}) prime? ${isPrimeResult(d1)}`
+}
+}
