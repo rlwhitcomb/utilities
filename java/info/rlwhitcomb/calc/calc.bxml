@@ -2,7 +2,7 @@
 
         The MIT License (MIT)
 
-        Copyright (c) 2020-2022,2025 Roger L. Whitcomb.
+        Copyright (c) 2020-2022,2025-2026 Roger L. Whitcomb.
 
         Permission is hereby granted, free of charge, to any person obtaining a copy
         of this software and associated documentation files (the "Software"), to deal
@@ -94,6 +94,8 @@
 		#447: New grads trig mode.
 	    25-May-2025 (rlwhitcomb)
 		#722: New "Library" button.
+	    05-Jun-2026 (rlwhitcomb)
+		Change settings icon.
 
      ========================================================================== -->
 
@@ -280,10 +282,10 @@
 		    <BoxPane orientation="vertical" styles="{horizontalAlignment:'center'}">
 			<PushButton tooltipText="%settingsTip"
 				action="settings"
-				buttonData="%settingsButton"
 				preferredWidth="60"
-				preferredHeight="40"
-				styles="{color:'DarkOrange', font:{size:24,bold:true}}"/>
+				preferredHeight="40">
+				<content:ButtonData icon="/images/settings_32x32.png"/>
+			</PushButton>
 			<Label text="%settingsLabel"/>
 			<Label text="%settingsKeyLabel"/>
 		    </BoxPane>

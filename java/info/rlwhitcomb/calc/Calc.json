@@ -1,7 +1,7 @@
 /*
  * The MIT License (MIT)
  *
- * Copyright (c) 2021-2022,2025 Roger L. Whitcomb.
+ * Copyright (c) 2021-2022,2025-2026 Roger L. Whitcomb.
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -56,6 +56,8 @@
  *	    #447: New "grads" trig mode.
  *	25-May-2025 (rlwhitcomb)
  *	    #722: Text for "Library" button.
+ *	05-Jun-2026 (rlwhitcomb)
+ *	    Remove icon text previously used for "Settings" button.
  */
 {
     title:              'Calc',
@@ -140,7 +142,6 @@
     versionLicense:     'LICENSE',
     versionNotice:      'NOTICE',
 
-    settingsButton:     '\u2261',
     settingsTip:        'Settings dialog (F2)',
     settingsLabel:      'Settings',
     settingsKeyLabel:   'F2',

@@ -3,6 +3,10 @@
 /*======================*/
 
 [
+    { version: '3.3.35', date: d'2026-06-05',
+      issues: [ ],
+      comment: 'Change "Settings" button icon in Calc GUI.'
+    },
     { version: '3.3.34', date: d'2026-05-23',
       issues: [ 835 ],
       comment: '''Change return value of "isPrime" to <null> if the value is "probably prime"
