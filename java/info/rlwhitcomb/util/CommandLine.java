@@ -1,7 +1,7 @@
 /*
  * The MIT License (MIT)
  *
- * Copyright (c) 2022 Roger L. Whitcomb.
+ * Copyright (c) 2022,2026 Roger L. Whitcomb.
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -24,8 +24,9 @@
  *	Deal with command line parsing and wildcard expansion therein.
  *
  * History:
- *  23-Sep-22 rlw #448,#52:	Initial commit from code in Tester.
- *  26-Sep-22 rlw #490:		Fix "~" replacement for shortened paths in Windows.
+ *  23-Sep-22 rlw #448,#52	Initial commit from code in Tester.
+ *  26-Sep-22 rlw #490		Fix "~" replacement for shortened paths in Windows.
+ *  09-Jun-27 rlw #838		Move that method into FileUtilities.
  */
 package info.rlwhitcomb.util;
 
@@ -51,17 +52,6 @@ public class CommandLine
 
 
 	/**
-	 * Substitute the user's home directory for occurrence of {@code "~"} at the
-	 * beginning of the path.
-	 *
-	 * @param path	A file path.
-	 * @return	That path with the starting {@code "~"} character replaced.
-	 */
-	private static String sub(final String path) {
-	    return path.replaceAll("^~", Environment.userHomeDirString());
-	}
-
-	/**
 	 * A {@link LineProcessor} that simply collects the file names during
 	 * {@link LineProcessor#preProcess}, and then supplies the sorted list
 	 * for use by the caller.
@@ -76,7 +66,7 @@ public class CommandLine
 
 		@Override
 		public boolean preProcess(final File inputFile) {
-		    list.add(sub(inputFile.getPath()));
+		    list.add(FileUtilities.substituteHome(inputFile.getPath()));
 		    return true;
 		}
 
@@ -117,7 +107,7 @@ public class CommandLine
 		    result.addAll(lp.fileList());
 		}
 		else {
-		    result.add(sub(arg));
+		    result.add(FileUtilities.substituteHome(arg));
 		}
 	    }
 

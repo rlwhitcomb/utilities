@@ -373,6 +373,8 @@
  *	    Allow "-8" as an alias for "-utf8".
  *	08-Jun-2026 (rlwhitcomb)
  *	    Change call to "unpackFiles" to allow multiple source directories.
+ *	09-Jun-2026 (rlwhitcomb)
+ *	    #838: Use new FileUtilities method to translate "~" as user.home directory in input paths.
  */
 package info.rlwhitcomb.calc;
 
@@ -2048,10 +2050,11 @@ public class Calc
 		// or the "-file" directive is given
 
 		if (initialLibraryLoad || throwError || treatAsFile || !treatAsText) {
-		    File f = new File(file);
+		    String newFile = FileUtilities.substituteHome(file);
+		    File f = new File(newFile);
 		    if (!readFile(f, inputBuf, charset)) {
 			if (inputDirectory != null) {
-			    f = new File(inputDirectory, file);
+			    f = new File(inputDirectory, newFile);
 			    if (!readFile(f, inputBuf, charset)) {
 				unableToRead = true;
 			    }

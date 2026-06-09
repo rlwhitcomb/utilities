@@ -135,6 +135,8 @@
  *	#800: New "getTempDir" method to find temporary files.
  *    05-Jun-2026 (rlwhitcomb)
  *	Allow multiple directory names in the "unpackFiles" method.
+ *    09-Jun-2026 (rlwhitcomb)
+ *	#838: Move private method from CommandLine to here for more general use.
  */
 package info.rlwhitcomb.util;
 
@@ -265,6 +267,17 @@ public final class FileUtilities
 	    return new File(dir, fullName);
 	else
 	    return f;
+    }
+
+    /**
+     * Substitute the user's home directory for occurrence of {@code "~"} at the
+     * beginning of the path.
+     *
+     * @param path	A file path.
+     * @return		That path with the starting {@code "~"} character replaced.
+     */
+    public static String substituteHome(final String path) {
+	return path.replaceAll("^~", Environment.userHomeDirString());
     }
 
     /**

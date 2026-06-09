@@ -3,6 +3,10 @@
 /*======================*/
 
 [
+    { version: '3.3.36', date: d'2026-06-09',
+      issues: [ 838 ],
+      comment: 'Substitute user.home directory for "~" in input paths.'
+    },
     { version: '3.3.35', date: d'2026-06-05',
       issues: [ ],
       comment: 'Change "Settings" button icon in Calc GUI.'
