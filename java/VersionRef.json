@@ -13,7 +13,7 @@
     },
     { version: '3.3.34', date: d'2026-05-23',
       issues: [ 835 ],
-      comment: '''Change return value of "isPrime" to <null> if the value is "probably prime"
+      comment: '''[BREAKING] Change return value of "isPrime" to <null> if the value is "probably prime"
 \t but too large to compute exactly.'''
     },
     { base: '1.13.5', date: d'2026-05-23',
