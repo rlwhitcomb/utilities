@@ -371,6 +371,8 @@
  *	    #811: Preprocess command line arguments that have combined values in a single arg.
  *	22-Apr-2026 (rlwhitcomb)
  *	    Allow "-8" as an alias for "-utf8".
+ *	08-Jun-2026 (rlwhitcomb)
+ *	    Change call to "unpackFiles" to allow multiple source directories.
  */
 package info.rlwhitcomb.calc;
 
@@ -1840,7 +1842,8 @@ public class Calc
 	    try {
 		if (tempHelpDirectory == null) {
 		    JarFile jarFile = Launcher.getJarFile(Launcher.getOurJarFile());
-		    tempHelpDirectory = FileUtilities.unpackFiles(jarFile, ClassUtil.getClassDirectory(Calc.class),
+		    String[] dirs = { ClassUtil.getClassDirectory(Calc.class), "images" };
+		    tempHelpDirectory = FileUtilities.unpackFiles(jarFile, CharUtil.makeSimpleStringList(dirs, ';'),
 				".html;.png", "calchelp", true);
 		}
 		File helpFile = new File(tempHelpDirectory, "calc_help.html");

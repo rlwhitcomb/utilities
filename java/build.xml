@@ -406,6 +406,8 @@
 		Include "mkcanon" in the install directory (to put it in the path).
 	    05-Apr-2026 (rlwhitcomb)
 		#599: Run "verifyeuler" if the canons and the solutions exist.
+	    05-Jun-2026 (rlwhitcomb)
+		Include new "Settings" icon in HTML "doc-files" directory.
 
      ========================================================================== -->
 
@@ -617,6 +619,7 @@
 				<copy todir="doc-files">
 					<fileset dir="info/rlwhitcomb/calc" includes="calc_help.html"/>
 					<fileset dir="info/rlwhitcomb/calc" includes="*.png"/>
+					<fileset dir="images"               includes="settings*.png"/>
 				</copy>
 			</sequential>
 		</parallel>

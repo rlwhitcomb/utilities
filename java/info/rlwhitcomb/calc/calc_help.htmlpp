@@ -1872,7 +1872,7 @@ whether it has previously been used/defined.
   <p>This help page will also be displayed by the <span class="bluebutton">?</span> button (or the <code>F1</code> key).
   <p>Note: colors are not currently implemented in the GUI "Results" area, BUT there are dark and light color schemes implemented for the
      main window, so using the command-line options <code>-darkbg</code> or <code>-lightbg</code>, or the "Colors" setting in the GUI "Window Settings" tab will switch between these color schemes.
-  <p>Most of the settings available using Directives can be set in the GUI using the Settings dialog (the <span class="orangebutton">&#x2261;</span> button or <code>F2</code> key).
+  <p>Most of the settings available using Directives can be set in the GUI using the Settings dialog (the <img src="settings_32x32.png"> button or <code>F2</code> key).
   <p>The calculation settings are also available to either read or write by accesssing the fields in the <code>settings</code> object. Setting one of the <code>settings</code> fields has the exact same effect as using the corresponding directive.
   <p>Although the option for "Color the results?" is visible in the Settings dialog, it is always disabled (and the <code>$colors on</code> directive has no effect) since coloring is not implemented in the GUI Results field.
 </div>

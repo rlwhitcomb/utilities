@@ -133,6 +133,8 @@
  *	Option for "compareFileLines" to use UTF-8.
  *    06-Feb-2026 (rlwhitcomb)
  *	#800: New "getTempDir" method to find temporary files.
+ *    05-Jun-2026 (rlwhitcomb)
+ *	Allow multiple directory names in the "unpackFiles" method.
  */
 package info.rlwhitcomb.util;
 
@@ -1267,7 +1269,7 @@ public final class FileUtilities
      * and return the temp directory object.
      *
      * @param jarFile		The {@link JarFile} object to read things from.
-     * @param dirName		Directory name where the files reside inside the .jar
+     * @param dirs		Directory name(s) where the files reside inside the .jar
      * @param exts		A list of filename extensions that we want to unpack
      *				(comma-separated).
      * @param prefix		The temp directory name prefix.
@@ -1275,7 +1277,7 @@ public final class FileUtilities
      * @return 	The temp directory name (inside the TEMP or TMP location).
      * @throws	IOException if there are problems doing any of this.
      */
-    public static File unpackFiles(final JarFile jarFile, final String dirName, final String exts, final String prefix, final boolean deleteOnExit)
+    public static File unpackFiles(final JarFile jarFile, final String dirs, final String exts, final String prefix, final boolean deleteOnExit)
 		throws IOException
     {
 	Path tempDirPath = Files.createTempDirectory(prefix);
@@ -1284,7 +1286,8 @@ public final class FileUtilities
 	if (deleteOnExit)
 	    tempDir.deleteOnExit();
 
-	String[] extensions = exts.split("\\s*[,;:|]\\s*");
+	String[] extensions  = exts.split("\\s*[,;:|]\\s*");
+	String[] directories = dirs.split("\\s*[,;:|]\\s*");
 
 	for (Enumeration<JarEntry> e = jarFile.entries(); e.hasMoreElements(); ) {
 	    JarEntry entry = e.nextElement();
@@ -1295,7 +1298,14 @@ public final class FileUtilities
 	    if (!trialFile.toPath().normalize().startsWith(tempDirPath))
 		throw new ZipException(Intl.formatString("util#fileutil.outsideDir", name));
 
-	    if (name.startsWith(dirName)) {
+	    boolean startsWith = false;
+	    for (String dirName : directories) {
+		if (name.startsWith(dirName)) {
+		    startsWith = true;
+		    break;
+		}
+	    }
+	    if (startsWith) {
 		for (String ext : extensions) {
 		    if (name.endsWith(ext)) {
 			InputStream is  = jarFile.getInputStream(entry);
