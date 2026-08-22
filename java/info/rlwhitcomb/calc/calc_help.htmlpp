@@ -235,7 +235,7 @@ h4 {
         <li>Looping and conditional statements, including powerful pattern matching, to do pretty much any kind of calculation or programming task.</li>
         <li>Did I mention that this is an actual programming / scripting language?</li>
         <li>Therefore, this "calculator" is a <a href="https://en.wikipedia.org/wiki/Turing_completeness">&ldquo;Turing Complete&rdquo;</a> language.</li>
-        <li>Currently (as of early-2026 at least), it is being actively developed and maintained, meaning features and fixes are constantly being added.</li>
+        <li>Currently (as of mid-2026 at least), it is being actively developed and maintained, meaning features and fixes are constantly being added.</li>
         <li>This is <a href="https://opensource.com/resources/what-open-source">Open-Source Software</a> released under the very permissive
             <a href="https://opensource.org/license/mit">MIT</a> license, so the code can be freely examined, and modified (if desired) for your own use.</li>
       </ul>
@@ -287,7 +287,7 @@ h4 {
       <li>All kinds of date- or time-related calculations, such as intervals between dates or times, calendar generation, past or future dates (such as "what is 90 days from today?"), etc.</li>
       <li>All kinds of quick conversions, such as temperature, metric-to-English measurements, etc. (see "java/test/files/library.calc")</li>
       <li>Building a library of your own frequently-used calculations (again, "library.calc" is a good example)</li>
-      <li>There are even library functions for calculating mortgage and loan payments</li>
+      <li>There are even library functions for calculating mortgage and loan payments, even loan amortization schedules (see "amort" and "amort.calc")</li>
       <li>And the ultimate application could be using "Calc" as an embedded calculation / scripting engine inside one of your own JVM-based programs</li>
   </ul>
   <h3>Notes</h3>
