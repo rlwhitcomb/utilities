@@ -3,6 +3,10 @@
 /*======================*/
 
 [
+    { version: '3.3.38', date: d'2026-09-25',
+      issues: [ 843, 844 ],
+      comment: 'Default to "d" formatting; fix "@-nd" to respect the sign.'
+    },
     { version: '3.3.36', date: d'2026-06-09',
       issues: [ 838 ],
       comment: 'Substitute user.home directory for "~" in input paths.'

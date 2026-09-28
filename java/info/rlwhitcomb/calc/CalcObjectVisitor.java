@@ -968,6 +968,8 @@
  *	    Misc. optimizations; fixes to sort within a string.
  *	09-May-2026 (rlwhitcomb)
  *	    #833: Introduce "@y" formatting for codepoints in strings (same as @x otherwise).
+ *	25-Sep-2026 (rlwhitcomb)
+ *	    #843, #844: Fix "@-nd" formatting to honor sign; default to "d" for "@n" form.
  */
 package info.rlwhitcomb.calc;
 
@@ -1291,7 +1293,7 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 
 	/** Pattern for format specifiers. */
 	private static final Pattern FORMAT_PATTERN =
-		Pattern.compile("\\s*@([\\-+])?([0-9]+)?([\\.](([0-9]+)?([\\.]([0-9]+))?))?([a-zA-Z,_])?([a-zA-Z%$])");
+		Pattern.compile("\\s*@([\\-+])?([0-9]+)?([\\.](([0-9]+)?([\\.]([0-9]+))?))?([a-zA-Z,_])?([a-zA-Z%$])?");
 
 	/** Scale for double operations. */
 	private static final MathContext MC_DOUBLE = MathContext.DECIMAL64;
@@ -2946,6 +2948,11 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 		    String modStr   = m.group(8);
 		    String formStr  = m.group(9);
 
+		    if (formStr == null && modStr != null) {
+			formStr = modStr;
+			modStr = null;
+		    }
+
 		    if (signStr != null)
 			signChar = signStr.charAt(0);
 		    if (precStr != null)
@@ -2956,7 +2963,10 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 			levels = Integer.parseInt(levelStr);
 		    if (modStr != null)
 			modifierChar = modStr.charAt(0);
-		    formatChar = formStr.charAt(0);
+		    if (formStr != null && formStr.length() > 0)
+			formatChar = formStr.charAt(0);
+		    else
+			formatChar = 'd';
 		}
 	    }
 	    separators = modifierChar == ',' || (settings.separatorMode && modifierChar != '_');
@@ -3052,6 +3062,8 @@ public class CalcObjectVisitor extends CalcBaseVisitor<Object>
 			}
 
 			if (precision != Integer.MIN_VALUE) {
+			    if (signChar == '-')
+				precision = -precision;
 			    dValue = MathUtil.round(dValue, precision).setScale(precision);
 			}
 			valueBuf.append(Num.formatWithSeparators(dValue, separators, scale));
