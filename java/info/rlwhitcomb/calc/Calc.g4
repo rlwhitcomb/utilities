@@ -609,6 +609,8 @@
  *	    #824: "Logging" statement.
  *	18-Apr-2026 (rlwhitcomb)
  *	    Add "precedes" and "succeeds" as aliases for increments and decrements.
+ *	25-Sep-2026 (rlwhitcomb)
+ *	    #843, #844: Default to "d" formatting, honor sign on "@d".
  */
 
 grammar Calc;
@@ -2036,6 +2038,7 @@ D_GUI
 
 FORMAT
    : '@' [\-+] ? INT ? ( '.' INT ? ( '.' INT ) ? ) ? [a-zA-Z,_] ? [a-zA-Z%$]
+   | '@' [\-+] ? INT
    ;
 
 STRING
