@@ -25,6 +25,7 @@ e15           : e15
 e_trig        : e_trig
 e_tan         : e_tan
 bernoulli     : bernoulli
+primes_check  : primes_check
 primes_10000  : primes_10000
 factors       : factors
 pfactors      : pfactors

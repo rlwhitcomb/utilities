@@ -14,4 +14,4 @@ else
 fi
 shift 2
 # Note: these options must match the $defaultOptions in calctest
-c -noOptions -noLib -timing -noColors -dir test/files -lib library -noSeps -quotes -sense -utf8 -loc en-US "$@" $test | mkcanon > test/canons/${canon//[,;]/_}.canon
+c -noOptions -noLib -timing -noColors -dir test/files -lib library -noSeps -quotes -sense -utf8 -loc en-US "$@" | mkcanon > test/canons/${canon//[,;]/_}.canon

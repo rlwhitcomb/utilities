@@ -1,0 +1,8 @@
+$quiet on {
+   exec 'lists', '-w', 'test/data/primes_clark.txt', '-c', '-e', '\u005B ', '-f', ' \u005D', '-o', 'primes_clark.json'
+   p1 = eval(read('test/canons/primes_10000.canon'))
+   p2 = eval(read('primes_clark.json'))
+   display 'Does "primes_10000.canon" match with 3rd-party primes list?', p1 === p2
+   delete 'primes_clark.json'
+}
+

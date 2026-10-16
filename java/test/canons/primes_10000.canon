@@ -2,6 +2,9 @@
 # This data was sourced from:
 #   https://primes.utm.edu/lists/small/10000.txt
 # so that we rely on a third-party for verification.
+# Data also verified from:
+#   http://aleph0.clarku.edu/~djoyce/numbers/primes.html
+#   (see "test/data/primes_clark.txt" and "test/files/primes_check.calc")
 #
 
 [
