@@ -32,6 +32,7 @@ perfect       : perfect
 format        : format
 mort          : e_m1,e_m2
 amort         : amort -- 50000 6.75 15
+amort2        : amort -- 110313.04 7.5 30
 f1            : f1
 q1            : q1
 remdiv        : remdiv

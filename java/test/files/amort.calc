@@ -16,11 +16,11 @@ if isnull($0) {
 
 $include 'boxdraw'
 
-var payment = PMT(P=$0, R=$1, N=$2)
+var monthly_payment = PMT(P=$0, R=$1, N=$2)
 const extra = $3 ? ~~$3 : 0
 
-var principal = $0
-const monthly_interest = $1 / 100 / 12
+var remaining_principal = $0
+const monthly_interest_rate = $1 / 100 / 12
 const months = $2 * 12
 
 var total_payments = 0
@@ -28,7 +28,7 @@ var total_interest = 0
 var total_months   = 0
 
 display CLS
-var summary = `Monthly payment on ${principal@2,$} at ${$1}% interest for ${$2} years is $$$payment`
+var summary = `Monthly payment on ${remaining_principal@2,$} at ${$1}% interest for ${$2} years is $$$monthly_payment`
 if extra { summary += ` (with ${extra@2,$} additional)` }
 display summary , '.'
 display
@@ -45,14 +45,24 @@ display lt_cross_cols(WIDTHS)
 
 var year = 1
 loop m over months {
-    var interest = round(monthly_interest * principal, 2)
-    var current_payment = payment + extra
+    var interest = round(monthly_interest_rate * remaining_principal, 2)
+    var current_payment = monthly_payment + extra
 
-    if principal <= current_payment {
-        current_payment = principal + interest
-        payment = current_payment - extra
+    if remaining_principal <= current_payment {
+        current_payment = remaining_principal + interest
+        monthly_payment = current_payment - extra
     }
+
     var principal_decrease = current_payment - interest
+
+    // Final payment must cover any principal shortfall plus the final interest
+    if m == months {
+      const principal_shortfall = remaining_principal - principal_decrease
+
+      current_payment    += principal_shortfall
+      monthly_payment    += principal_shortfall
+      principal_decrease += principal_shortfall
+    }
 
     total_payments += current_payment
     total_interest += interest
@@ -60,13 +70,13 @@ loop m over months {
 
     var line = lt_mid_cols(WIDTHS)
     const ys = (m mod 12 == 1) ? @@year : (m mod 12 == 0) ? YEAR_LINE : ''
-    var values = [ ys, @@m, `${principal@2,$}`, `${payment@2,$}`, `${interest@2,$}`, `${principal_decrease@2,$}` ]
+    var values = [ ys, @@m, `${remaining_principal@2,$}`, `${monthly_payment@2,$}`, `${interest@2,$}`, `${principal_decrease@2,$}` ]
     if extra { values += [ `${extra@2,$}` ] }
     display insert_titles(line, values, WIDTHS, ALIGN_RIGHT)
 
-    principal -= principal_decrease
+    remaining_principal -= principal_decrease
 
-    if principal <= 0 leave
+    if remaining_principal <= 0 leave
 
     if m mod 12 == 0 year++
 }
