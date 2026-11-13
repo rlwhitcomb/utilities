@@ -31,6 +31,8 @@ var dx1, dx2, dx3, dx4, fx1, fx2, fx3, fx4, cx1, cx2, cx3, cx4, qx1, qx2, qx3, q
 
 display 'Testing decimal operations ...'
 
+111111111 × 111111111
+
 d1*d2
 d3*d4
 d1/d2
