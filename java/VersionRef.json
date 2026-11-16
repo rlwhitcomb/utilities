@@ -3,6 +3,10 @@
 /*======================*/
 
 [
+    { version: '3.3.39', date: d'2026-11-26',
+      issues: [ ],
+      comment: 'Allow EOL after opening and before closing parentheses.'
+    },
     { version: '3.3.38', date: d'2026-09-25',
       issues: [ 843, 844 ],
       comment: 'Default to "d" formatting; fix "@-nd" to respect the sign.'

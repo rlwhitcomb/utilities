@@ -611,6 +611,8 @@
  *	    Add "precedes" and "succeeds" as aliases for increments and decrements.
  *	25-Sep-2026 (rlwhitcomb)
  *	    #843, #844: Default to "d" formatting, honor sign on "@d".
+ *	16-Nov-2026 (rlwhitcomb)
+ *	    Allow line endings after opening and before closing parentheses.
  */
 
 grammar Calc;
@@ -859,7 +861,7 @@ expr
    | expr K_HAS ( member | ( LBRACK expr RBRACK ) ) # hasExpr
    | expr K_IS ( STRING | ISTRING | TYPES )       # isExpr
    | expr LBRACK ( slice3 | slice2 | slice1 ) RBRACK # sliceExpr
-   | LPAREN expr RPAREN                           # parenExpr
+   | LPAREN EOL* expr EOL* RPAREN                 # parenExpr
    | var INC_OP                                   # postIncOpExpr
    |<assoc=right> INC_OP var                      # preIncOpExpr
    |<assoc=right> ADD_OP expr                     # negPosExpr
