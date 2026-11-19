@@ -26,7 +26,8 @@
  * History:
  *  23-Sep-22 rlw #448,#52	Initial commit from code in Tester.
  *  26-Sep-22 rlw #490		Fix "~" replacement for shortened paths in Windows.
- *  09-Jun-27 rlw #838		Move that method into FileUtilities.
+ *  09-Jun-26 rlw #838		Move that method into FileUtilities.
+ *  19-Nov-26 rlw #854		Fix peculiarities with "$*" and "$?".
  */
 package info.rlwhitcomb.util;
 
@@ -90,7 +91,8 @@ public class CommandLine
 	    List<String> result = new ArrayList<>();
 
 	    for (String arg : args) {
-		if (Match.hasWildCards(arg)) {
+		// Account for special shell constructs that aren't file wildcard specs
+		if (Match.hasWildCards(arg) && !(arg.equals("$*") || arg.equals("$?"))) {
 		    File f = new File(arg);
 		    File dir = f.getParentFile();
 		    if (dir == null) {

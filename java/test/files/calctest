@@ -18,7 +18,7 @@ $echo
 e1_e2_e3      : -lib library e1,e2,e3
 e7            : e7 -clear -- 'abc' «def» 1 2 3 text -- -define verbose=true
 e8            : e8
-e9            : e9 -- abc 1 2 -- -noc -quote -- 4 5 def --
+e9            : $* -- abc 1 2 -- -noc -quote -- 4 5 def --
 e10           : e10
 e12           : e12
 e14           : e14
