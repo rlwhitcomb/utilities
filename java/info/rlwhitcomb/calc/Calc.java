@@ -375,6 +375,9 @@
  *	    Change call to "unpackFiles" to allow multiple source directories.
  *	09-Jun-2026 (rlwhitcomb)
  *	    #838: Use new FileUtilities method to translate "~" as user.home directory in input paths.
+ *	17-Nov-2026 (rlwhitcomb)
+ *	    Add "-stdlib" option.
+ *	    #852: Search startup directory as last resort for library files.
  */
 package info.rlwhitcomb.calc;
 
@@ -1991,6 +1994,28 @@ public class Calc
 	}
 
 	/**
+	 * Try to find the given file in one of the supplied directories. If found read according to
+	 * the character set into the given buffer.
+	 *
+	 * @param name    Name of the file to be found.
+	 * @param buf     Buffer to hold the file contents.
+	 * @param charset Character set to use to decode the file.
+	 * @param dirs    List of directory descriptors (any of which we can be <code>null</code>) to use
+	 *                to search for the file.
+	 * @return <code>true</code> if the file was found anywhere among the listed directories and was read successfully.
+	 */
+	private static boolean tryDirectories(String name, StringBuilder buf, Charset charset, File... dirs)
+		throws IOException
+	{
+	    for (File dir : dirs) {
+		File f = dir != null ? new File(dir, name) : new File(name);
+		if (readFile(f, buf, charset))
+		    return true;
+	    }
+	    return false;
+	}
+
+	/**
 	 * Take the input as a delimited string of file names/paths and try to
 	 * read all of them in. If the path does not exist as given, then try to
 	 * find it using the latest {@link #inputDirectory} value. But, if any
@@ -2051,18 +2076,9 @@ public class Calc
 
 		if (initialLibraryLoad || throwError || treatAsFile || !treatAsText) {
 		    String newFile = FileUtilities.substituteHome(file);
-		    File f = new File(newFile);
-		    if (!readFile(f, inputBuf, charset)) {
-			if (inputDirectory != null) {
-			    f = new File(inputDirectory, newFile);
-			    if (!readFile(f, inputBuf, charset)) {
-				unableToRead = true;
-			    }
-			}
-			else {
-			    unableToRead = true;
-			}
-		    }
+		    File startupDir = Environment.startupDirectory();
+
+		    unableToRead = !tryDirectories(newFile, inputBuf, charset, null, inputDirectory, startupDir);
 		}
 
 		// If the "-text" option is given
@@ -2223,6 +2239,21 @@ public class Calc
 	    }
 
 	    return newArgs;
+	}
+
+	/**
+	 * Add one or more library names from the given argument.
+	 *
+	 * @param input A possible list of separated library names.
+	 */
+	private static void addLibraryNames(String input) {
+	    if (libraryNames == null)
+		libraryNames = new ArrayList<>();
+	    String[] names = input.split(ON_WINDOWS ? "[;,]" : "[,;:]");
+	    for (String name : names) {
+		if (!CharUtil.isNullOrEmpty(name))
+		    libraryNames.add(name);
+	    }
 	}
 
 	/**
@@ -2486,6 +2517,12 @@ public class Calc
 		case "lib":
 		case "lb":
 		    return Expecting.LIBRARY;
+		case "stdlibrary":
+		case "stdlib":
+		case "stdlb":
+		case "std":
+		    addLibraryNames("library.calc");
+		    break;
 		case "ignorelibraries":
 		case "nolibraries":
 		case "nolibrary":
@@ -2640,11 +2677,7 @@ public class Calc
 			    expecting = Expecting.DEFAULT;
 			    break;
 			case LIBRARY:
-			    if (libraryNames == null)
-				libraryNames = new ArrayList<>();
-			    String[] names = arg.split(ON_WINDOWS ? "[;,]" : "[,;:]");
-			    for (String name : names)
-				libraryNames.add(name);
+			    addLibraryNames(arg);
 			    expecting = Expecting.DEFAULT;
 			    break;
 			case ARGUMENTS:

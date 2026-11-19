@@ -1,7 +1,7 @@
 /**
  * The MIT License (MIT)
  *
- * Copyright (c) 2011-2017,2019-2025 Roger L. Whitcomb.
+ * Copyright (c) 2011-2017,2019-2026 Roger L. Whitcomb.
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -211,11 +211,14 @@
  *	14-Nov-2025 (rlwhitcomb)
  *	    #785: Move copyright notice to "build.properties" (so it can be accessed more easily
  *	    from PreProc code).
+ *	17-Nov-2026 (rlwhitcomb)
+ *	    #852: New method using Launcher information to get our startup directory.
  */
 package info.rlwhitcomb.util;
 
 import de.onyxbits.SemanticVersion;
 
+import info.rlwhitcomb.jarfile.Launcher;
 import info.rlwhitcomb.math.MaxInt;
 
 import java.awt.Dimension;
@@ -621,6 +624,20 @@ public final class Environment
 	    if (downDir.exists() && downDir.isDirectory())
 		return downDir;
 	    return userHomeDir();
+	}
+
+
+	/**
+	 * @return Either the directory of our .jar file, or the "user.dir" property.
+	 * @see #userDirectory
+	 */
+	public static File startupDirectory() {
+	    URL jarFileUrl = Launcher.getOurJarFile();
+	    File jarFilePath = Launcher.urlToPlainFile(jarFileUrl);
+	    if (jarFilePath != null) {
+		return jarFilePath.getParentFile();
+	    }
+	    return userDirectory();
 	}
 
 

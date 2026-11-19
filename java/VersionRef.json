@@ -3,7 +3,12 @@
 /*======================*/
 
 [
-    { version: '3.3.39', date: d'2026-11-26',
+    { version: '3.3.40', date: d'2026-11-18',
+      issues: [ 852 ],
+      comment: '''Add "-stdlib" option to load the "library.calc" standard library;
+\t search startup directory as last resort for library files.'''
+    },
+    { version: '3.3.39', date: d'2026-11-16',
       issues: [ ],
       comment: 'Allow EOL after opening and before closing parentheses.'
     },
